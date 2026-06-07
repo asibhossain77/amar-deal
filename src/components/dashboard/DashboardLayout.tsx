@@ -15,6 +15,7 @@ import {
   Shield,
   LogOut,
   Menu,
+  Wallet,
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import type { PageName } from '@/lib/types';
@@ -51,9 +52,9 @@ const navItems: NavItem[] = [
 const adminNavItems: NavItem[] = [
   { label: 'প্রশাসন ড্যাশবোর্ড', icon: Settings, page: 'admin-dashboard', adminOnly: true },
   { label: 'ব্যবহারকারী ব্যবস্থাপনা', icon: Users, page: 'admin-users', adminOnly: true },
-  { label: 'পেমেন্ট যাচাই', icon: CreditCard, page: 'admin-payments', adminOnly: true },
+  { label: 'পেমেন্ট গেটওয়ে', icon: CreditCard, page: 'admin-gateways', adminOnly: true },
+  { label: 'গেটওয়ে পেমেন্ট যাচাই', icon: CreditCard, page: 'admin-gateway-payments', adminOnly: true },
   { label: 'বিরোধ ব্যবস্থাপনা', icon: Scale, page: 'admin-disputes', adminOnly: true },
-  { label: 'পেমেন্ট সেটিংস', icon: CreditCard, page: 'admin-settings', adminOnly: true },
   { label: 'কার্যক্রম লগ', icon: FileText, page: 'admin-logs', adminOnly: true },
 ];
 

@@ -41,7 +41,9 @@ export type PageName =
   | 'admin-payments'
   | 'admin-disputes'
   | 'admin-logs'
-  | 'admin-settings';
+  | 'admin-settings'
+  | 'admin-gateways'
+  | 'admin-gateway-payments';
 
 export interface AppUser {
   id: string;
@@ -138,4 +140,39 @@ export interface DashboardStats {
   pendingTransactions: number;
   completedTransactions: number;
   disputedTransactions: number;
+}
+
+export interface PaymentGateway {
+  id: string;
+  name: string;
+  slug: string;
+  logo?: string;
+  accountType: string;
+  accountNumber: string;
+  accountName: string;
+  instructions?: string;
+  minDeposit: number;
+  maxDeposit: number;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GatewayTransaction {
+  id: string;
+  transactionId: string;
+  gatewayId: string;
+  userId: string;
+  transactionRef: string;
+  amount: number;
+  screenshot?: string;
+  note?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  adminNote?: string;
+  createdAt: string;
+  updatedAt: string;
+  gateway?: PaymentGateway;
+  user?: AppUser;
+  transaction?: Transaction;
 }

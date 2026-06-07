@@ -95,4 +95,26 @@ export const api = {
   toggleUserStatus: (id: string, isActive: boolean) => 
     fetchAPI('/admin/users', { method: 'PUT', body: JSON.stringify({ userId: id, isActive }) }),
   getAdminLogs: () => fetchAPI('/admin/logs'),
+  
+  // Payment Gateways (Public)
+  getActiveGateways: () => fetchAPI('/gateways'),
+  
+  // Payment Gateways (Admin)
+  getAdminGateways: () => fetchAPI('/gateways?admin=true'),
+  createGateway: (data: { name: string; slug: string; logo?: string; accountType: string; accountNumber: string; accountName: string; instructions?: string; minDeposit?: number; maxDeposit?: number; isActive?: boolean; sortOrder?: number }) =>
+    fetchAPI('/gateways', { method: 'POST', body: JSON.stringify(data) }),
+  updateGateway: (id: string, data: Record<string, unknown>) =>
+    fetchAPI(`/gateways/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteGateway: (id: string) =>
+    fetchAPI(`/gateways/${id}`, { method: 'DELETE' }),
+  reorderGateways: (orders: { id: string; sortOrder: number }[]) =>
+    fetchAPI('/gateways/reorder', { method: 'PUT', body: JSON.stringify({ orders }) }),
+  
+  // Gateway Transactions
+  getGatewayTransactions: (status?: string) => 
+    fetchAPI(`/gateway-transactions${status ? `?status=${status}` : ''}`),
+  submitGatewayTransaction: (data: { transactionId: string; gatewayId: string; transactionRef: string; amount: number; screenshot?: string; note?: string }) =>
+    fetchAPI('/gateway-transactions', { method: 'POST', body: JSON.stringify(data) }),
+  verifyGatewayTransaction: (id: string, data: { status: string; adminNote?: string }) =>
+    fetchAPI(`/gateway-transactions/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 };

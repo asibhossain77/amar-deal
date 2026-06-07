@@ -27,6 +27,7 @@ model User {
   sellerDisputes       Dispute[] @relation("SellerDisputes")
   disputeMessages      DisputeMessage[]
   adminLogs            AdminLog[]
+  gatewayTransactions  GatewayTransaction[]
 }
 
 model Transaction {
@@ -46,6 +47,7 @@ model Transaction {
   payments        Payment[]
   disputes        Dispute[]
   notifications   Notification[]
+  gatewayTransactions GatewayTransaction[]
 }
 
 model Payment {
@@ -121,4 +123,42 @@ model SiteSetting {
   key       String   @unique
   value     String
   updatedAt DateTime @updatedAt
+}
+
+model PaymentGateway {
+  id              String   @id @default(cuid())
+  name            String                         // e.g. "bKash Personal", "Nagad", "Bank Transfer"
+  slug            String   @unique               // e.g. "bkash-personal", "nagad"
+  logo            String?                        // URL or base64 of gateway logo
+  accountType     String                         // e.g. "personal", "merchant", "bank"
+  accountNumber   String                         // The number users send money to
+  accountName     String                         // Name on the account
+  instructions    String?                        // Payment instructions for users
+  minDeposit      Float    @default(0)           // Minimum deposit amount
+  maxDeposit      Float    @default(999999)      // Maximum deposit amount
+  isActive        Boolean  @default(true)        // ON/OFF toggle
+  sortOrder       Int      @default(0)           // Display order (lower = first)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  gatewayTransactions GatewayTransaction[]
+}
+
+model GatewayTransaction {
+  id              String   @id @default(cuid())
+  transactionId   String                         // The escrow transaction this payment is for
+  gatewayId       String                         // Which payment gateway was used
+  userId          String                         // Who submitted the payment
+  transactionRef  String                         // Transaction ID / Reference from user
+  amount          Float                          // Payment amount
+  screenshot      String?                        // Payment screenshot (base64 or URL)
+  note            String?                        // Optional user note
+  status          String   @default("pending")   // pending, approved, rejected
+  adminNote       String?                        // Admin's note on approval/rejection
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  transaction     Transaction @relation(fields: [transactionId], references: [id])
+  gateway         PaymentGateway @relation(fields: [gatewayId], references: [id])
+  user            User @relation(fields: [userId], references: [id])
 }

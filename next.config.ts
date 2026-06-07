@@ -7,9 +7,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
-  watchOptions: {
-    ignored: ['/home/z/my-project/dev*.log', '/tmp/**'],
-  },
+  allowedDevOrigins: ['localhost', '127.0.0.1', '21.0.10.34'],
 };
 
 export default nextConfig;

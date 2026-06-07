@@ -335,6 +335,90 @@ async function main() {
     });
   }
 
+  // Create default payment gateways
+  const gateways = [
+    {
+      name: "bKash পার্সোনাল",
+      slug: "bkash-personal",
+      accountType: "personal",
+      accountNumber: "01712345678",
+      accountName: "বাংলা এসক্রো সার্ভিস",
+      instructions: "bKash অ্যাপ থেকে Send Money করুন। ট্রানজেকশন আইডি কপি করে নিচে দিন।",
+      minDeposit: 100,
+      maxDeposit: 50000,
+      isActive: true,
+      sortOrder: 0,
+    },
+    {
+      name: "bKash মার্চেন্ট",
+      slug: "bkash-merchant",
+      accountType: "merchant",
+      accountNumber: "01712345679",
+      accountName: "বাংলা এসক্রো সার্ভিস (মার্চেন্ট)",
+      instructions: "bKash পেমেন্ট অপশন থেকে Payment করুন। রেফারেন্স নাম্বার নিচে দিন।",
+      minDeposit: 500,
+      maxDeposit: 200000,
+      isActive: true,
+      sortOrder: 1,
+    },
+    {
+      name: "Nagad",
+      slug: "nagad",
+      accountType: "personal",
+      accountNumber: "01812345678",
+      accountName: "বাংলা এসক্রো সার্ভিস",
+      instructions: "Nagad অ্যাপ থেকে Send Money করুন। ট্রানজেকশন আইডি নিচে দিন।",
+      minDeposit: 100,
+      maxDeposit: 50000,
+      isActive: true,
+      sortOrder: 2,
+    },
+    {
+      name: "Rocket",
+      slug: "rocket",
+      accountType: "personal",
+      accountNumber: "01912345678",
+      accountName: "বাংলা এসক্রো সার্ভিস",
+      instructions: "Rocket অ্যাপ থেকে Send Money করুন। ট্রানজেকশন আইডি নিচে দিন।",
+      minDeposit: 100,
+      maxDeposit: 50000,
+      isActive: true,
+      sortOrder: 3,
+    },
+    {
+      name: "Upay",
+      slug: "upay",
+      accountType: "personal",
+      accountNumber: "01612345678",
+      accountName: "বাংলা এসক্রো সার্ভিস",
+      instructions: "Upay অ্যাপ থেকে Send Money করুন। ট্রানজেকশন আইডি নিচে দিন।",
+      minDeposit: 100,
+      maxDeposit: 50000,
+      isActive: false,
+      sortOrder: 4,
+    },
+    {
+      name: "ব্যাংক ট্রান্সফার",
+      slug: "bank-transfer",
+      accountType: "bank",
+      accountNumber: "1234567890123",
+      accountName: "বাংলা এসক্রো সার্ভিস লিমিটেড",
+      instructions: "ডাচ বাংলা ব্যাংক লিমিটেড, ঢাকা মেইন ব্রাঞ্চ। রাউটিং নাম্বার: 090123456। ট্রান্সফার সম্পন্ন করে ব্যাংক স্লিপের রেফারেন্স নিচে দিন।",
+      minDeposit: 1000,
+      maxDeposit: 999999,
+      isActive: true,
+      sortOrder: 5,
+    },
+  ];
+
+  for (const gateway of gateways) {
+    await prisma.paymentGateway.upsert({
+      where: { slug: gateway.slug },
+      update: {},
+      create: gateway,
+    });
+  }
+
   console.log("✅ Seed completed successfully!");
   console.log("\n📋 Demo Accounts:");
   console.log("  Admin:  admin@banglaescrow.com / admin123");
