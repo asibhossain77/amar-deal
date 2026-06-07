@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String
+  password      String
+  phone         String?
+  role          String   @default("user") // "user" or "admin"
+  avatar        String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  buyerTransactions    Transaction[] @relation("BuyerTransactions")
+  sellerTransactions   Transaction[] @relation("SellerTransactions")
+  sentNotifications    Notification[] @relation("NotificationRecipient")
+  payments             Payment[]
+  buyerDisputes        Dispute[] @relation("BuyerDisputes")
+  sellerDisputes       Dispute[] @relation("SellerDisputes")
+  disputeMessages      DisputeMessage[]
+  adminLogs            AdminLog[]
+}
+
+model Transaction {
+  id              String   @id @default(cuid())
+  title           String
+  description     String
+  amount          Float
+  terms           String
+  status          String   @default("pending_payment") // pending_payment, pending_verification, paid, work_in_progress, delivered, completed, disputed, cancelled
+  buyerId         String
+  sellerId        String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  buyer           User     @relation("BuyerTransactions", fields: [buyerId], references: [id])
+  seller          User     @relation("SellerTransactions", fields: [sellerId], references: [id])
+  payments        Payment[]
+  disputes        Dispute[]
+  notifications   Notification[]
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  transactionId   String
+  userId          String
+  transactionRef  String   // Transaction ID from payment
+  paymentMethod   String   // bKash, Nagad, Rocket, Bank Transfer
+  screenshot      String?  // base64 or file path
+  status          String   @default("pending") // pending, approved, rejected
+  adminNote       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  transaction     Transaction @relation(fields: [transactionId], references: [id])
+  user            User @relation(fields: [userId], references: [id])
+}
+
+model Dispute {
+  id              String   @id @default(cuid())
+  transactionId   String
+  buyerId         String
+  sellerId        String
+  reason          String
+  status          String   @default("open") // open, under_review, resolved_buyer, resolved_seller, resolved_cancelled
+  resolution      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  transaction     Transaction @relation(fields: [transactionId], references: [id])
+  buyer           User @relation("BuyerDisputes", fields: [buyerId], references: [id])
+  seller          User @relation("SellerDisputes", fields: [sellerId], references: [id])
+  messages        DisputeMessage[]
+}
+
+model DisputeMessage {
+  id          String   @id @default(cuid())
+  disputeId   String
+  userId      String
+  message     String
+  createdAt   DateTime @default(now())
+
+  dispute     Dispute  @relation(fields: [disputeId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id              String   @id @default(cuid())
+  userId          String
+  transactionId   String?
+  title           String
+  message         String
+  type            String   // transaction, payment, dispute, system
+  isRead          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  user            User @relation("NotificationRecipient", fields: [userId], references: [id])
+  transaction     Transaction? @relation(fields: [transactionId], references: [id])
+}
+
+model AdminLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String
+  details     String
+  createdAt   DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id])
+}
