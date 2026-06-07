@@ -117,4 +117,9 @@ export const api = {
     fetchAPI('/gateway-transactions', { method: 'POST', body: JSON.stringify(data) }),
   verifyGatewayTransaction: (id: string, data: { status: string; adminNote?: string }) =>
     fetchAPI(`/gateway-transactions/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  // Gateway Theme
+  getGatewayTheme: () => fetchAPI('/gateway-theme'),
+  updateGatewayTheme: (data: { primaryColor?: string; buttonColor?: string; borderColor?: string; backgroundColor?: string }) =>
+    fetchAPI('/gateway-theme', { method: 'PUT', body: JSON.stringify(data) }),
 };

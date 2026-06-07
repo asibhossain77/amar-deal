@@ -1,0 +1,190 @@
+/* =============================================
+   Payment Gateway Module - Isolated Theme Styles
+   =============================================
+   These styles ONLY apply within .payment-gateway-module
+   They use CSS variables that are dynamically set from admin settings.
+   This does NOT affect the global website theme or dark/light mode.
+   ============================================= */
+
+.payment-gateway-module {
+  /* Default values — overridden by JS from database */
+  --gateway-primary-color: #6BBF59;
+  --gateway-button-color: #6BBF59;
+  --gateway-border-color: #6BBF59;
+  --gateway-bg-color: #f0f7ee;
+
+  /* Derived colors — computed from primary */
+  --gateway-primary-light: color-mix(in srgb, var(--gateway-primary-color) 15%, transparent);
+  --gateway-primary-dark: color-mix(in srgb, var(--gateway-primary-color) 70%, black);
+  --gateway-button-hover: color-mix(in srgb, var(--gateway-button-color) 85%, black);
+  --gateway-border-light: color-mix(in srgb, var(--gateway-border-color) 30%, transparent);
+  --gateway-bg-solid: color-mix(in srgb, var(--gateway-bg-color) 50%, white);
+}
+
+/* ─── Gateway Selection Cards ────────────────────────────── */
+.payment-gateway-module .gateway-card {
+  border: 2px solid var(--gateway-border-light);
+  background: var(--gateway-bg-color);
+  transition: all 0.2s ease;
+}
+
+.payment-gateway-module .gateway-card:hover {
+  border-color: var(--gateway-border-color);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--gateway-border-color) 20%, transparent);
+}
+
+.payment-gateway-module .gateway-card-selected {
+  border-color: var(--gateway-primary-color) !important;
+  background: var(--gateway-primary-light) !important;
+  box-shadow: 0 0 0 1px var(--gateway-primary-color), 0 2px 12px color-mix(in srgb, var(--gateway-primary-color) 25%, transparent);
+}
+
+/* ─── Gateway Detail Card ────────────────────────────────── */
+.payment-gateway-module .gateway-detail-card {
+  border: 2px solid var(--gateway-border-light);
+  background: var(--gateway-bg-color);
+}
+
+.payment-gateway-module .gateway-detail-card .gateway-detail-header {
+  color: var(--gateway-primary-dark);
+}
+
+.payment-gateway-module .gateway-detail-card .gateway-detail-inner {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+/* ─── Selected Gateway Highlight ─────────────────────────── */
+.payment-gateway-module .gateway-highlight {
+  background: var(--gateway-primary-light);
+  border: 1px solid var(--gateway-border-color);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+}
+
+/* ─── Transaction ID Input Box ───────────────────────────── */
+.payment-gateway-module .gateway-input {
+  border: 2px solid var(--gateway-border-light);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.payment-gateway-module .gateway-input:focus {
+  border-color: var(--gateway-primary-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gateway-primary-color) 20%, transparent);
+  outline: none;
+}
+
+/* ─── Payment Instructions Box ───────────────────────────── */
+.payment-gateway-module .gateway-instructions {
+  background: color-mix(in srgb, var(--gateway-bg-color) 80%, white);
+  border: 1px solid var(--gateway-border-light);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.payment-gateway-module .gateway-instructions .instructions-icon {
+  color: var(--gateway-primary-color);
+}
+
+.payment-gateway-module .gateway-instructions .instructions-text {
+  color: var(--gateway-primary-dark);
+}
+
+/* ─── Upload Screenshot Area ─────────────────────────────── */
+.payment-gateway-module .gateway-upload-area {
+  border: 2px dashed var(--gateway-border-light);
+  border-radius: 0.5rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.payment-gateway-module .gateway-upload-area:hover {
+  border-color: var(--gateway-primary-color);
+  background: var(--gateway-primary-light);
+}
+
+/* ─── Submit Payment Button ──────────────────────────────── */
+.payment-gateway-module .gateway-submit-btn {
+  background-color: var(--gateway-button-color);
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.payment-gateway-module .gateway-submit-btn:hover:not(:disabled) {
+  background-color: var(--gateway-button-hover);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--gateway-button-color) 30%, transparent);
+}
+
+.payment-gateway-module .gateway-submit-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.payment-gateway-module .gateway-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─── Payment Status Badges ──────────────────────────────── */
+.payment-gateway-module .gateway-badge-pending {
+  background: color-mix(in srgb, var(--gateway-primary-color) 15%, transparent);
+  color: var(--gateway-primary-dark);
+  border: 1px solid color-mix(in srgb, var(--gateway-primary-color) 30%, transparent);
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.payment-gateway-module .gateway-badge-verified {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.payment-gateway-module .gateway-badge-rejected {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* ─── Gateway Header Accent Line ─────────────────────────── */
+.payment-gateway-module .gateway-header-accent {
+  border-bottom: 3px solid var(--gateway-primary-color);
+  padding-bottom: 0.5rem;
+}
+
+/* ─── Gateway Section Title ──────────────────────────────── */
+.payment-gateway-module .gateway-section-title {
+  color: var(--gateway-primary-dark);
+  font-weight: 600;
+}
+
+/* ─── Copy Button Accent ─────────────────────────────────── */
+.payment-gateway-module .gateway-copy-btn {
+  border-color: var(--gateway-border-color);
+  color: var(--gateway-primary-color);
+}
+
+.payment-gateway-module .gateway-copy-btn:hover {
+  background: var(--gateway-primary-light);
+  border-color: var(--gateway-primary-color);
+}
+
+/* ─── Gateway Amount Display ─────────────────────────────── */
+.payment-gateway-module .gateway-amount-text {
+  color: var(--gateway-primary-color);
+  font-weight: 700;
+}

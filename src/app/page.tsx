@@ -27,6 +27,7 @@ import AdminLogsPage from '@/components/admin/AdminLogsPage';
 import AdminSettingsPage from '@/components/admin/AdminSettingsPage';
 import AdminGatewaysPage from '@/components/admin/AdminGatewaysPage';
 import AdminGatewayPaymentsPage from '@/components/admin/AdminGatewayPaymentsPage';
+import AdminGatewayThemePage from '@/components/admin/AdminGatewayThemePage';
 import AboutPage from '@/components/pages/AboutPage';
 import HowItWorksPage from '@/components/pages/HowItWorksPage';
 import { Loader2, AlertTriangle } from 'lucide-react';
@@ -216,6 +217,8 @@ function DashboardRouter() {
       return <ErrorBoundary><AdminGatewaysPage /></ErrorBoundary>;
     case 'admin-gateway-payments':
       return <ErrorBoundary><AdminGatewayPaymentsPage /></ErrorBoundary>;
+    case 'admin-gateway-theme':
+      return <ErrorBoundary><AdminGatewayThemePage /></ErrorBoundary>;
     default:
       return <ErrorBoundary><DashboardPage /></ErrorBoundary>;
   }

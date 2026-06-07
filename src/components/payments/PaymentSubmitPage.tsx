@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { ArrowLeft, CreditCard, Upload, Loader2, Copy, CheckCircle2, Phone, Building2, Wallet, Info, ImageIcon } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { api } from '@/lib/api';
-import type { Transaction, PaymentGateway } from '@/lib/types';
+import type { Transaction, PaymentGateway, PaymentGatewayTheme } from '@/lib/types';
 import { formatBDT } from '@/lib/helpers';
 import {
   Card,
@@ -30,15 +30,6 @@ function getGatewayIcon(accountType: string) {
   return Wallet;
 }
 
-// Helper: get color theme based on accountType
-function getGatewayColors(accountType: string) {
-  const type = accountType.toLowerCase();
-  if (type === 'personal') return { text: 'text-pink-700', activeColor: 'border-pink-500 bg-pink-50', cardBorder: 'border-pink-200', cardBg: 'bg-pink-50/50', titleColor: 'text-pink-800' };
-  if (type === 'merchant') return { text: 'text-orange-700', activeColor: 'border-orange-500 bg-orange-50', cardBorder: 'border-orange-200', cardBg: 'bg-orange-50/50', titleColor: 'text-orange-800' };
-  if (type === 'bank') return { text: 'text-green-700', activeColor: 'border-green-500 bg-green-50', cardBorder: 'border-green-200', cardBg: 'bg-green-50/50', titleColor: 'text-green-800' };
-  return { text: 'text-purple-700', activeColor: 'border-purple-500 bg-purple-50', cardBorder: 'border-purple-200', cardBg: 'bg-purple-50/50', titleColor: 'text-purple-800' };
-}
-
 // Helper: get account type label in Bengali
 function getAccountTypeLabel(accountType: string): string {
   const type = accountType.toLowerCase();
@@ -61,6 +52,9 @@ export default function PaymentSubmitPage() {
   const [gateways, setGateways] = useState<PaymentGateway[]>([]);
   const [gatewaysLoading, setGatewaysLoading] = useState(true);
   const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null);
+
+  // Theme state
+  const [theme, setTheme] = useState<PaymentGatewayTheme | null>(null);
 
   // Form state
   const [amount, setAmount] = useState('');
@@ -109,6 +103,29 @@ export default function PaymentSubmitPage() {
     }
     fetchGateways();
   }, []);
+
+  // Fetch gateway theme
+  useEffect(() => {
+    async function fetchTheme() {
+      try {
+        const data = await api.getGatewayTheme();
+        setTheme(data.theme || data);
+      } catch {
+        // Use defaults - CSS variables have fallback defaults
+      }
+    }
+    fetchTheme();
+  }, []);
+
+  // Compute CSS variables object for the theme
+  const themeVars: React.CSSProperties = theme
+    ? ({
+        '--gateway-primary-color': theme.primaryColor,
+        '--gateway-button-color': theme.buttonColor,
+        '--gateway-border-color': theme.borderColor,
+        '--gateway-bg-color': theme.backgroundColor,
+      } as React.CSSProperties)
+    : {};
 
   const handleCopy = (text: string, field: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -233,23 +250,22 @@ export default function PaymentSubmitPage() {
   const renderGatewayDetails = () => {
     if (!selectedGateway) return null;
 
-    const colors = getGatewayColors(selectedGateway.accountType);
     const GatewayIcon = getGatewayIcon(selectedGateway.accountType);
 
     return (
-      <Card className={`${colors.cardBorder} ${colors.cardBg} shadow-sm`}>
-        <CardHeader className="pb-2">
-          <CardTitle className={`text-sm font-semibold ${colors.titleColor} flex items-center gap-2`}>
+      <div className="gateway-detail-card rounded-lg shadow-sm">
+        <div className="p-4 pb-2">
+          <h3 className="gateway-detail-header text-sm font-semibold flex items-center gap-2">
             {selectedGateway.logo ? (
               <img src={selectedGateway.logo} alt={selectedGateway.name} className="h-5 w-5 object-contain rounded" />
             ) : (
               <GatewayIcon className="h-4 w-4" />
             )}
             {selectedGateway.name} পেমেন্টের তথ্য
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="bg-white rounded-lg p-4 space-y-3">
+          </h3>
+        </div>
+        <div className="px-4 pb-4 space-y-3">
+          <div className="gateway-detail-inner space-y-3">
             {/* Account Number with copy */}
             <div className="flex items-center justify-between">
               <div>
@@ -260,7 +276,7 @@ export default function PaymentSubmitPage() {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="gap-1 shrink-0"
+                className="gateway-copy-btn gap-1 shrink-0"
                 onClick={() => handleCopy(selectedGateway.accountNumber, `gateway-${selectedGateway.id}-number`)}
               >
                 {copiedField === `gateway-${selectedGateway.id}-number` ? (
@@ -299,31 +315,28 @@ export default function PaymentSubmitPage() {
           </div>
 
           {/* Payment Instructions */}
-          {selectedGateway.instructions && (
-            <div className="bg-amber-50 rounded-lg p-3 border border-amber-200 flex items-start gap-2">
-              <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-              <p className="text-xs text-amber-800">{selectedGateway.instructions}</p>
+          {selectedGateway.instructions ? (
+            <div className="gateway-instructions flex items-start gap-2">
+              <Info className="instructions-icon h-4 w-4 shrink-0 mt-0.5" />
+              <p className="instructions-text text-xs">{selectedGateway.instructions}</p>
             </div>
-          )}
-
-          {/* Default instruction if no custom instructions */}
-          {!selectedGateway.instructions && (
-            <div className="bg-amber-50 rounded-lg p-3 border border-amber-200 flex items-start gap-2">
-              <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-              <p className="text-xs text-amber-800">
+          ) : (
+            <div className="gateway-instructions flex items-start gap-2">
+              <Info className="instructions-icon h-4 w-4 shrink-0 mt-0.5" />
+              <p className="instructions-text text-xs">
                 উপরের নাম্বারে <strong>Send Money</strong> করুন এবং ট্রানজেকশন আইডি নিচে দিন।
               </p>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   };
 
   // Success state
   if (success) {
     return (
-      <div className="p-4 md:p-6 lg:p-8">
+      <div className="payment-gateway-module p-4 md:p-6 lg:p-8" style={themeVars}>
         <div className="max-w-lg mx-auto text-center py-12">
           <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 className="w-8 h-8 text-green-600" />
@@ -341,9 +354,9 @@ export default function PaymentSubmitPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="payment-gateway-module p-4 md:p-6 lg:p-8 space-y-6" style={themeVars}>
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="gateway-header-accent flex items-center gap-3">
         <Button
           variant="ghost"
           size="icon"
@@ -353,7 +366,7 @@ export default function PaymentSubmitPage() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-foreground">পেমেন্ট জমা দিন</h1>
+          <h1 className="gateway-section-title text-xl md:text-2xl font-bold">পেমেন্ট জমা দিন</h1>
           <p className="text-sm text-muted-foreground mt-0.5">আপনার পেমেন্টের বিবরণ পূরণ করুন</p>
         </div>
       </div>
@@ -379,7 +392,7 @@ export default function PaymentSubmitPage() {
               <Separator />
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">পরিমাণ</span>
-                <span className="text-lg font-bold text-primary">{formatBDT(transaction.amount)}</span>
+                <span className="gateway-amount-text text-lg">{formatBDT(transaction.amount)}</span>
               </div>
               <Separator />
               <div className="flex justify-between items-center">
@@ -413,7 +426,7 @@ export default function PaymentSubmitPage() {
                 {gatewaysLoading ? (
                   <div className="grid grid-cols-2 gap-3">
                     {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="rounded-lg border-2 p-3">
+                      <div key={i} className="gateway-card rounded-lg p-3">
                         <div className="flex items-center gap-3">
                           <Skeleton className="h-4 w-4 rounded" />
                           <Skeleton className="h-4 w-20" />
@@ -422,15 +435,13 @@ export default function PaymentSubmitPage() {
                     ))}
                   </div>
                 ) : gateways.length === 0 ? (
-                  <Card className="border-amber-200 bg-amber-50/50">
-                    <CardContent className="p-4 flex items-start gap-2">
-                      <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium text-amber-800">কোনো পেমেন্ট গেটওয়ে সক্রিয় নেই</p>
-                        <p className="text-xs text-amber-700 mt-1">অ্যাডমিন এখনো কোনো পেমেন্ট গেটওয়ে সক্রিয় করেননি। অ্যাডমিনের সাথে যোগাযোগ করুন।</p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <div className="gateway-card rounded-lg p-4 flex items-start gap-2">
+                    <Info className="instructions-icon h-4 w-4 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium">কোনো পেমেন্ট গেটওয়ে সক্রিয় নেই</p>
+                      <p className="text-xs text-muted-foreground mt-1">অ্যাডমিন এখনো কোনো পেমেন্ট গেটওয়ে সক্রিয় করেননি। অ্যাডমিনের সাথে যোগাযোগ করুন।</p>
+                    </div>
+                  </div>
                 ) : (
                   <RadioGroup
                     value={selectedGateway?.id || ''}
@@ -441,24 +452,19 @@ export default function PaymentSubmitPage() {
                     className="grid grid-cols-2 gap-3"
                   >
                     {gateways.map((gateway) => {
-                      const colors = getGatewayColors(gateway.accountType);
                       const GatewayIcon = getGatewayIcon(gateway.accountType);
                       const isSelected = selectedGateway?.id === gateway.id;
 
                       return (
                         <label
                           key={gateway.id}
-                          className={`flex items-center gap-3 rounded-lg border-2 p-3 cursor-pointer transition-all hover:shadow-sm ${
-                            isSelected
-                              ? colors.activeColor
-                              : 'border-border bg-card hover:border-primary/30'
-                          }`}
+                          className={`gateway-card ${isSelected ? 'gateway-card-selected' : ''} rounded-lg p-3 cursor-pointer transition-all hover:shadow-sm flex items-center gap-3`}
                         >
                           <RadioGroupItem value={gateway.id} id={`gateway-${gateway.id}`} />
                           {gateway.logo ? (
                             <img src={gateway.logo} alt={gateway.name} className="h-4 w-4 object-contain rounded" />
                           ) : (
-                            <GatewayIcon className={`h-4 w-4 ${colors.text}`} />
+                            <GatewayIcon className="h-4 w-4" />
                           )}
                           <div className="flex-1 min-w-0">
                             <Label htmlFor={`gateway-${gateway.id}`} className="cursor-pointer font-medium text-sm block truncate">
@@ -494,6 +500,7 @@ export default function PaymentSubmitPage() {
                   min={selectedGateway?.minDeposit || undefined}
                   max={selectedGateway?.maxDeposit || undefined}
                   step="any"
+                  className="gateway-input"
                 />
                 {amountError && (
                   <p className="text-xs text-red-500">{amountError}</p>
@@ -520,6 +527,7 @@ export default function PaymentSubmitPage() {
                     setTransactionRef(e.target.value);
                     setError('');
                   }}
+                  className="gateway-input"
                   required
                 />
                 <p className="text-xs text-muted-foreground">আপনার পেমেন্ট প্রদানের ট্রানজেকশন আইডি দিন</p>
@@ -530,14 +538,14 @@ export default function PaymentSubmitPage() {
                 <Label htmlFor="screenshot" className="text-sm font-medium">
                   পেমেন্টের স্ক্রিনশট
                 </Label>
-                <div className="flex items-center gap-3">
+                <div className="gateway-upload-area flex items-center gap-3 p-3">
                   <div className="flex-1 relative">
                     <Input
                       id="screenshot"
                       type="file"
                       accept="image/*"
                       onChange={handleFileChange}
-                      className="cursor-pointer"
+                      className="cursor-pointer border-0 bg-transparent p-0 file:bg-transparent file:border-0"
                     />
                   </div>
                 </div>
@@ -561,6 +569,7 @@ export default function PaymentSubmitPage() {
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   rows={3}
+                  className="gateway-input"
                 />
               </div>
 
@@ -572,23 +581,23 @@ export default function PaymentSubmitPage() {
               )}
 
               {/* Submit */}
-              <Button
+              <button
                 type="submit"
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3"
+                className="gateway-submit-btn w-full py-3 rounded-md flex items-center justify-center gap-2"
                 disabled={submitting || !selectedGateway || !transactionRef.trim() || !amount || !!amountError}
               >
                 {submitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                     জমা হচ্ছে...
                   </>
                 ) : (
                   <>
-                    <CreditCard className="w-4 h-4 mr-2" />
+                    <CreditCard className="w-4 h-4" />
                     পেমেন্ট জমা দিন
                   </>
                 )}
-              </Button>
+              </button>
 
               {/* Help text when button is disabled */}
               {!selectedGateway && (

@@ -162,3 +162,12 @@ model GatewayTransaction {
   gateway         PaymentGateway @relation(fields: [gatewayId], references: [id])
   user            User @relation(fields: [userId], references: [id])
 }
+
+model PaymentGatewayTheme {
+  id              String   @id @default("gateway-theme-singleton")
+  primaryColor    String   @default("#6BBF59")    // Gateway primary/accent color
+  buttonColor     String   @default("#6BBF59")    // Submit payment button color
+  borderColor     String   @default("#6BBF59")    // Card border/accent color
+  backgroundColor String   @default("#f0f7ee")    // Payment box background highlight
+  updatedAt       DateTime @updatedAt
+}

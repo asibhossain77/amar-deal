@@ -43,7 +43,8 @@ export type PageName =
   | 'admin-logs'
   | 'admin-settings'
   | 'admin-gateways'
-  | 'admin-gateway-payments';
+  | 'admin-gateway-payments'
+  | 'admin-gateway-theme';
 
 export interface AppUser {
   id: string;
@@ -175,4 +176,12 @@ export interface GatewayTransaction {
   gateway?: PaymentGateway;
   user?: AppUser;
   transaction?: Transaction;
+}
+
+export interface PaymentGatewayTheme {
+  primaryColor: string;
+  buttonColor: string;
+  borderColor: string;
+  backgroundColor: string;
+  updatedAt?: string;
 }
