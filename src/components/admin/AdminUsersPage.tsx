@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Users, Search, UserCog } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PageHeader from '@/components/shared/PageHeader';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
@@ -84,17 +85,12 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <UserCog className="h-5 w-5 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">ব্যবহারকারী ব্যবস্থাপনা</h1>
-          <p className="text-sm text-muted-foreground">সকল নিবন্ধিত ব্যবহারকারীদের ব্যবস্থাপনা</p>
-        </div>
-      </div>
+    <div className="page-container space-y-6">
+      <PageHeader
+        title="ব্যবহারকারী ব্যবস্থাপনা"
+        subtitle="সকল নিবন্ধিত ব্যবহারকারীদের ব্যবস্থাপনা"
+        icon={<UserCog className="h-5 w-5 text-primary" />}
+      />
 
       {/* Search */}
       <div className="relative">
@@ -109,7 +105,7 @@ export default function AdminUsersPage() {
 
       {/* Users Table */}
       {loading ? (
-        <Card>
+        <Card className="card-modern">
           <CardContent className="p-6">
             <div className="space-y-4">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -125,20 +121,20 @@ export default function AdminUsersPage() {
           </CardContent>
         </Card>
       ) : error ? (
-        <Card>
+        <Card className="card-modern">
           <CardContent className="p-6 text-center">
             <p className="text-red-600">{error}</p>
           </CardContent>
         </Card>
       ) : filteredUsers.length === 0 ? (
-        <Card>
+        <Card className="card-modern">
           <CardContent className="p-6 text-center">
             <Users className="mx-auto mb-2 h-10 w-10 text-muted-foreground" />
             <p className="text-muted-foreground">কোনো ব্যবহারকারী পাওয়া যায়নি</p>
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="card-modern">
           <CardHeader>
             <CardTitle className="text-base">
               মোট ব্যবহারকারী: {filteredUsers.length}

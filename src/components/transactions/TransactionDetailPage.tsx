@@ -170,12 +170,12 @@ export default function TransactionDetailPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="page-container space-y-6">
         <div className="flex items-center gap-3">
           <Skeleton className="h-10 w-10" />
           <Skeleton className="h-8 w-64" />
         </div>
-        <Card>
+        <Card className="card-modern">
           <CardContent className="p-6 space-y-4">
             <Skeleton className="h-6 w-3/4" />
             <Skeleton className="h-4 w-1/2" />
@@ -186,7 +186,7 @@ export default function TransactionDetailPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="card-modern">
           <CardContent className="p-6">
             <div className="flex gap-4">
               {[1, 2, 3, 4, 5].map((i) => (
@@ -201,14 +201,14 @@ export default function TransactionDetailPage() {
 
   if (!transaction) {
     return (
-      <div className="space-y-6">
+      <div className="page-container space-y-6">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => setPage('transactions')}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-2xl font-bold">লেনদেন পাওয়া যায়নি</h1>
         </div>
-        <Card>
+        <Card className="card-modern">
           <CardContent className="py-16 text-center">
             <p className="text-muted-foreground">এই লেনদেনের তথ্য লোড করা যায়নি</p>
             <Button variant="outline" onClick={() => setPage('transactions')} className="mt-4">
@@ -221,7 +221,7 @@ export default function TransactionDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-container space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -242,7 +242,7 @@ export default function TransactionDetailPage() {
       </div>
 
       {/* Transaction Info Card */}
-      <Card>
+      <Card className="card-modern">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <FileText className="h-5 w-5 text-primary" />
@@ -319,7 +319,7 @@ export default function TransactionDetailPage() {
       </Card>
 
       {/* Status Timeline */}
-      <Card>
+      <Card className="card-modern">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Shield className="h-5 w-5 text-primary" />
@@ -459,7 +459,7 @@ export default function TransactionDetailPage() {
 
       {/* Admin Status Change */}
       {isAdmin && transaction && !isTerminalStatus(transaction.status) && (
-        <Card>
+        <Card className="card-modern">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Shield className="h-5 w-5 text-primary" />
@@ -525,7 +525,7 @@ export default function TransactionDetailPage() {
 
       {/* Action Buttons for Buyer/Seller */}
       {!isTerminalStatus(transaction.status) && (isBuyer || isSeller) && (
-        <Card>
+        <Card className="card-modern">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               পদক্ষেপ গ্রহণ
@@ -640,7 +640,7 @@ export default function TransactionDetailPage() {
 
       {/* Payments Section */}
       {transaction.payments && transaction.payments.length > 0 && (
-        <Card>
+        <Card className="card-modern">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <CreditCard className="h-5 w-5 text-primary" />
@@ -683,7 +683,7 @@ export default function TransactionDetailPage() {
 
       {/* Disputes Section */}
       {transaction.disputes && transaction.disputes.length > 0 && (
-        <Card>
+        <Card className="card-modern">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <AlertTriangle className="h-5 w-5 text-red-500" />

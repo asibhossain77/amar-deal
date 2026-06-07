@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Settings, Phone, Building2, Wallet, Loader2, Save, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import PageHeader from '@/components/shared/PageHeader';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -108,19 +109,15 @@ export default function AdminSettingsPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <Settings className="h-5 w-5 text-primary animate-spin" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">পেমেন্ট সেটিংস</h1>
-            <p className="text-sm text-muted-foreground">লোড হচ্ছে...</p>
-          </div>
-        </div>
+      <div className="page-container space-y-6">
+        <PageHeader
+          title="পেমেন্ট সেটিংস"
+          subtitle="লোড হচ্ছে..."
+          icon={<Settings className="h-5 w-5 text-primary animate-spin" />}
+        />
         <div className="space-y-4">
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="animate-pulse">
+            <Card key={i} className="card-modern animate-pulse">
               <CardContent className="p-6">
                 <div className="space-y-3">
                   <div className="h-5 w-32 rounded bg-muted" />
@@ -135,20 +132,15 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <Settings className="h-5 w-5 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">পেমেন্ট সেটিংস</h1>
-          <p className="text-sm text-muted-foreground">পেমেন্ট অ্যাকাউন্ট নাম্বার ও তথ্য কনফিগার করুন</p>
-        </div>
-      </div>
+    <div className="page-container space-y-6">
+      <PageHeader
+        title="পেমেন্ট সেটিংস"
+        subtitle="পেমেন্ট অ্যাকাউন্ট নাম্বার ও তথ্য কনফিগার করুন"
+        icon={<Settings className="h-5 w-5 text-primary" />}
+      />
 
       {/* bKash Settings */}
-      <Card>
+      <Card className="card-modern">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Phone className="h-5 w-5 text-pink-600" />
@@ -181,7 +173,7 @@ export default function AdminSettingsPage() {
       </Card>
 
       {/* Nagad Settings */}
-      <Card>
+      <Card className="card-modern">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Phone className="h-5 w-5 text-orange-600" />
@@ -214,7 +206,7 @@ export default function AdminSettingsPage() {
       </Card>
 
       {/* Rocket Settings */}
-      <Card>
+      <Card className="card-modern">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Wallet className="h-5 w-5 text-purple-600" />
@@ -247,7 +239,7 @@ export default function AdminSettingsPage() {
       </Card>
 
       {/* Bank Settings */}
-      <Card>
+      <Card className="card-modern">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Building2 className="h-5 w-5 text-green-600" />

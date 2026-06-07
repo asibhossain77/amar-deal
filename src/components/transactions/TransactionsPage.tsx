@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, FileText, Inbox } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
 
 type FilterTab = 'all' | 'active' | 'completed' | 'disputed' | 'cancelled';
 
@@ -94,7 +95,7 @@ export default function TransactionsPage() {
   // Loading skeletons
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="page-container space-y-6">
         <div className="flex items-center justify-between">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-10 w-40" />
@@ -102,7 +103,7 @@ export default function TransactionsPage() {
         <Skeleton className="h-10 w-full max-w-md" />
         {/* Desktop table skeleton */}
         <div className="hidden md:block">
-          <Card>
+          <Card className="card-modern">
             <CardContent className="p-0">
               <div className="space-y-0">
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -121,7 +122,7 @@ export default function TransactionsPage() {
         {/* Mobile card skeleton */}
         <div className="md:hidden space-y-3">
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i}>
+            <Card key={i} className="card-modern">
               <CardContent className="p-4 space-y-3">
                 <Skeleton className="h-5 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
@@ -138,18 +139,19 @@ export default function TransactionsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-container space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FileText className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">লেনদেনসমূহ</h1>
-        </div>
-        <Button onClick={handleCreateClick} className="gap-2">
-          <Plus className="h-4 w-4" />
-          নতুন লেনদেন
-        </Button>
-      </div>
+      <PageHeader
+        title="লেনদেনসমূহ"
+        subtitle="আপনার সকল লেনদেন দেখুন ও পরিচালনা করুন"
+        icon={<FileText className="h-5 w-5 text-primary" />}
+        actions={
+          <Button onClick={handleCreateClick} className="gap-2">
+            <Plus className="h-4 w-4" />
+            নতুন লেনদেন
+          </Button>
+        }
+      />
 
       {/* Filter Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FilterTab)}>
@@ -164,7 +166,7 @@ export default function TransactionsPage() {
         {filterTabs.map((tab) => (
           <TabsContent key={tab.value} value={tab.value}>
             {filteredTransactions.length === 0 ? (
-              <Card>
+              <Card className="card-modern">
                 <CardContent className="py-16 flex flex-col items-center justify-center text-center">
                   <Inbox className="h-12 w-12 text-muted-foreground mb-4" />
                   <p className="text-muted-foreground text-lg font-medium">কোনো লেনদেন পাওয়া যায়নি</p>
@@ -183,7 +185,7 @@ export default function TransactionsPage() {
               <>
                 {/* Desktop Table */}
                 <div className="hidden md:block">
-                  <Card>
+                  <Card className="card-modern">
                     <CardContent className="p-0">
                       <Table>
                         <TableHeader>
@@ -237,7 +239,7 @@ export default function TransactionsPage() {
                   {filteredTransactions.map((transaction) => (
                     <Card
                       key={transaction.id}
-                      className="cursor-pointer hover:shadow-md transition-shadow"
+                      className="card-modern cursor-pointer hover:shadow-md transition-shadow"
                       onClick={() => handleRowClick(transaction.id)}
                     >
                       <CardContent className="p-4 space-y-3">

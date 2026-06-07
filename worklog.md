@@ -85,3 +85,61 @@ Stage Summary:
 - Reset to Default button restores #6BBF59 palette
 - Database stores theme in PaymentGatewayTheme singleton row
 - No impact on global website theme, dashboard, or admin panel
+
+---
+Task ID: 3
+Agent: Main Agent
+Task: Modern Clean User-Friendly Web Application Design Overhaul
+
+Work Log:
+- Updated `globals.css` with comprehensive modern design tokens:
+  - Enhanced border-radius (0.625rem base, --radius-xl)
+  - `.card-modern` class with soft shadows and hover elevation
+  - `.card-interactive` class with lift effect on hover
+  - Dark mode shadow adjustments for better contrast
+  - `.transition-theme` class for smooth color transitions
+  - `.page-container` class with responsive padding (1.5rem/2rem/2.5rem)
+  - `.btn-lift` class with shadow elevation on hover
+  - `.focus-ring` class for accessible focus indicators
+  - Enhanced dark mode colors (darker backgrounds #0f160f, #182418)
+- Created `PageHeader` reusable component at `/src/components/shared/PageHeader.tsx`
+  - Title, subtitle, icon, backTo (page name), onBack (callback), actions (custom buttons)
+  - Back button with ArrowLeft icon
+  - Icon container with rounded-xl bg-primary/10 styling
+- Updated `DashboardLayout.tsx` with:
+  - Dark/Light mode toggle (ThemeToggle using next-themes) in sidebar + mobile top bar
+  - Modern sidebar design with rounded-xl nav items and shadow-sm active state
+  - Sidebar width increased to 260px for better readability
+  - Mobile top bar with theme toggle + menu button
+  - Sticky header with backdrop-blur
+- Updated all dashboard pages (8 files):
+  - DashboardPage, ProfilePage, NotificationsPage, TransactionsPage, CreateTransactionPage, TransactionDetailPage, DisputesPage, DisputeDetailPage
+  - Added `page-container` class for consistent padding
+  - Added `card-modern` class to all Card components
+  - Replaced custom headers with PageHeader component (with appropriate backTo)
+  - ProfilePage has backTo="dashboard", NotificationsPage has backTo="dashboard"
+  - CreateTransactionPage has backTo="transactions", DisputeDetailPage has backTo="disputes"
+  - TransactionDetailPage kept existing ArrowLeft back button + added page-container
+- Updated all admin pages (9 files):
+  - AdminDashboardPage, AdminUsersPage, AdminPaymentsPage, AdminDisputesPage, AdminLogsPage, AdminSettingsPage, AdminGatewaysPage, AdminGatewayPaymentsPage, AdminGatewayThemePage
+  - All have `page-container` class, `card-modern` on Cards, PageHeader with icons
+  - Action buttons moved to PageHeader `actions` prop where applicable
+- Updated public pages:
+  - Header: backdrop-blur sticky header, rounded buttons, modern nav with rounded-lg
+  - Footer: added transition-theme class
+  - HomePage: card-modern/card-interactive on benefit cards, card-modern on FAQ/Contact
+  - LoginPage: Added back button ("হোমে ফিরে যান"), card-modern, rounded-xl icon
+- Updated PaymentSubmitPage: PageHeader with onBack callback, page-container, card-modern
+- Lint passes clean
+- Browser tested: homepage, dark mode toggle, login, dashboard, admin pages all working
+
+Stage Summary:
+- Complete modern UI design overhaul implemented
+- Dark/Light mode toggle added to header AND dashboard sidebar (both desktop & mobile)
+- Theme preference saved via next-themes + localStorage
+- All pages have proper padding (page-container) — content never touches edges
+- Back buttons on all sub-pages via PageHeader component
+- Soft shadows, smooth transitions, rounded corners throughout
+- Card hover effects with elevation animations
+- Clean, minimal, professional Bangla business design
+- Fully responsive for mobile and desktop

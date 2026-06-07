@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Bell, ArrowLeftRight, CreditCard, AlertTriangle, Settings, CheckCheck } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
 import { useAppStore } from '@/lib/store';
 import { api } from '@/lib/api';
 import type { Notification as AppNotification } from '@/lib/types';
@@ -124,18 +125,14 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-3xl">
+    <div className="page-container max-w-3xl space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-bold text-foreground">বিজ্ঞপ্তিসমূহ</h2>
-          {unreadCount > 0 && (
-            <Badge className="bg-primary text-primary-foreground border-0 text-xs">
-              {unreadCount} নতুন
-            </Badge>
-          )}
-        </div>
-        {unreadCount > 0 && (
+      <PageHeader
+        title="বিজ্ঞপ্তিসমূহ"
+        subtitle={unreadCount > 0 ? `${unreadCount}টি নতুন বিজ্ঞপ্তি` : 'সকল বিজ্ঞপ্তি পড়া হয়েছে'}
+        icon={<Bell className="h-5 w-5 text-primary" />}
+        backTo="dashboard"
+        actions={unreadCount > 0 ? (
           <Button
             variant="outline"
             size="sm"
@@ -146,14 +143,14 @@ export default function NotificationsPage() {
             <CheckCheck className="w-4 h-4 mr-1" />
             {markingAll ? 'চিহ্নিত হচ্ছে...' : 'সকল পড়া হয়েছে'}
           </Button>
-        )}
-      </div>
+        ) : undefined}
+      />
 
       {/* Notifications List */}
       {loading ? (
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Card key={i}>
+            <Card key={i} className="card-modern">
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
                   <Skeleton className="h-10 w-10 rounded-full shrink-0" />
@@ -168,7 +165,7 @@ export default function NotificationsPage() {
           ))}
         </div>
       ) : notifications.length === 0 ? (
-        <Card>
+        <Card className="card-modern">
           <CardContent className="p-12 text-center">
             <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
             <h3 className="text-lg font-medium text-muted-foreground mb-1">কোনো বিজ্ঞপ্তি নেই</h3>
@@ -184,7 +181,7 @@ export default function NotificationsPage() {
             return (
               <Card
                 key={notif.id}
-                className={`cursor-pointer transition-colors hover:bg-accent ${
+                className={`card-modern cursor-pointer transition-colors hover:bg-accent ${
                   !notif.isRead ? 'border-l-4 border-l-primary' : ''
                 }`}
                 onClick={() => handleNotifClick(notif)}

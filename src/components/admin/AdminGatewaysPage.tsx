@@ -17,6 +17,7 @@ import {
   CreditCard,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PageHeader from '@/components/shared/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -357,29 +358,24 @@ export default function AdminGatewaysPage() {
   // ─── Render ────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <Wallet className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">পেমেন্ট গেটওয়ে ব্যবস্থাপনা</h1>
-            <p className="text-sm text-muted-foreground">পেমেন্ট পদ্ধতি যোগ করুন, সম্পাদনা করুন এবং পরিচালনা করুন</p>
-          </div>
-        </div>
-        <Button onClick={openAddDialog} className="shrink-0">
-          <Plus className="mr-2 h-4 w-4" />
-          নতুন গেটওয়ে যোগ করুন
-        </Button>
-      </div>
+    <div className="page-container space-y-6">
+      <PageHeader
+        title="পেমেন্ট গেটওয়ে ব্যবস্থাপনা"
+        subtitle="পেমেন্ট পদ্ধতি যোগ করুন, সম্পাদনা করুন এবং পরিচালনা করুন"
+        icon={<Wallet className="h-5 w-5 text-primary" />}
+        actions={
+          <Button onClick={openAddDialog} className="shrink-0">
+            <Plus className="mr-2 h-4 w-4" />
+            নতুন গেটওয়ে যোগ করুন
+          </Button>
+        }
+      />
 
       {/* Gateway List */}
       {loading ? (
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="animate-pulse">
+            <Card key={i} className="card-modern animate-pulse">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
                   <Skeleton className="h-14 w-14 rounded-lg" />
@@ -394,7 +390,7 @@ export default function AdminGatewaysPage() {
           ))}
         </div>
       ) : error ? (
-        <Card>
+        <Card className="card-modern">
           <CardContent className="p-6 text-center">
             <p className="text-red-600">{error}</p>
             <Button variant="outline" className="mt-4" onClick={fetchGateways}>
@@ -403,7 +399,7 @@ export default function AdminGatewaysPage() {
           </CardContent>
         </Card>
       ) : gateways.length === 0 ? (
-        <Card>
+        <Card className="card-modern">
           <CardContent className="p-6 text-center">
             <Wallet className="mx-auto mb-2 h-10 w-10 text-muted-foreground" />
             <p className="text-muted-foreground">কোনো পেমেন্ট গেটওয়ে পাওয়া যায়নি</p>
@@ -418,7 +414,7 @@ export default function AdminGatewaysPage() {
           {gateways
             .sort((a, b) => a.sortOrder - b.sortOrder)
             .map((gateway, idx, arr) => (
-              <Card key={gateway.id} className={`overflow-hidden ${!gateway.isActive ? 'opacity-70' : ''}`}>
+              <Card key={gateway.id} className={`card-modern overflow-hidden ${!gateway.isActive ? 'opacity-70' : ''}`}>
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     {/* Left: Logo + Info */}

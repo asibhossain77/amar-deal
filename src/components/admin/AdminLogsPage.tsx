@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ScrollText, Clock, User, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PageHeader from '@/components/shared/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -71,21 +72,16 @@ export default function AdminLogsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <ScrollText className="h-5 w-5 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">কার্যক্রম লগ</h1>
-          <p className="text-sm text-muted-foreground">প্রশাসকদের সকল কার্যক্রমের রেকর্ড</p>
-        </div>
-      </div>
+    <div className="page-container space-y-6">
+      <PageHeader
+        title="কার্যক্রম লগ"
+        subtitle="প্রশাসকদের সকল কার্যক্রমের রেকর্ড"
+        icon={<ScrollText className="h-5 w-5 text-primary" />}
+      />
 
       {/* Logs */}
       {loading ? (
-        <Card>
+        <Card className="card-modern">
           <CardContent className="p-6">
             <div className="space-y-4">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -101,20 +97,20 @@ export default function AdminLogsPage() {
           </CardContent>
         </Card>
       ) : error ? (
-        <Card>
+        <Card className="card-modern">
           <CardContent className="p-6 text-center">
             <p className="text-red-600">{error}</p>
           </CardContent>
         </Card>
       ) : logs.length === 0 ? (
-        <Card>
+        <Card className="card-modern">
           <CardContent className="p-6 text-center">
             <ScrollText className="mx-auto mb-2 h-10 w-10 text-muted-foreground" />
             <p className="text-muted-foreground">কোনো লগ পাওয়া যায়নি</p>
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="card-modern">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Clock className="h-4 w-4 text-muted-foreground" />

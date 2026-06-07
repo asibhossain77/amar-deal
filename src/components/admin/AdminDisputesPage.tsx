@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Scale, AlertTriangle, Eye } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PageHeader from '@/components/shared/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -78,17 +79,12 @@ export default function AdminDisputesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100">
-          <Scale className="h-5 w-5 text-red-600" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">বিরোধ ব্যবস্থাপনা</h1>
-          <p className="text-sm text-muted-foreground">সকল বিরোধের ব্যবস্থাপনা ও নিষ্পত্তি</p>
-        </div>
-      </div>
+    <div className="page-container space-y-6">
+      <PageHeader
+        title="বিরোধ ব্যবস্থাপনা"
+        subtitle="সকল বিরোধের ব্যবস্থাপনা ও নিষ্পত্তি"
+        icon={<Scale className="h-5 w-5 text-red-600" />}
+      />
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -103,7 +99,7 @@ export default function AdminDisputesPage() {
           {loading ? (
             <div className="space-y-4">
               {Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i} className="animate-pulse">
+                <Card key={i} className="card-modern animate-pulse">
                   <CardContent className="p-4">
                     <div className="space-y-3">
                       <div className="h-4 w-48 rounded bg-muted" />
@@ -115,13 +111,13 @@ export default function AdminDisputesPage() {
               ))}
             </div>
           ) : error ? (
-            <Card>
+            <Card className="card-modern">
               <CardContent className="p-6 text-center">
                 <p className="text-red-600">{error}</p>
               </CardContent>
             </Card>
           ) : filteredDisputes.length === 0 ? (
-            <Card>
+            <Card className="card-modern">
               <CardContent className="p-6 text-center">
                 <Scale className="mx-auto mb-2 h-10 w-10 text-muted-foreground" />
                 <p className="text-muted-foreground">কোনো বিরোধ পাওয়া যায়নি</p>
@@ -132,7 +128,7 @@ export default function AdminDisputesPage() {
               {filteredDisputes.map((dispute) => (
                 <Card
                   key={dispute.id}
-                  className="cursor-pointer transition-shadow hover:shadow-md"
+                  className="card-modern cursor-pointer transition-shadow hover:shadow-md"
                   onClick={() => handleViewDispute(dispute.id)}
                 >
                   <CardContent className="p-4">

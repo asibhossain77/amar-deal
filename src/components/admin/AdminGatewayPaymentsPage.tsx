@@ -14,6 +14,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PageHeader from '@/components/shared/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -174,21 +175,12 @@ export default function AdminGatewayPaymentsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <ShieldCheck className="h-5 w-5 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            গেটওয়ে পেমেন্ট যাচাইকরণ
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            ব্যবহারকারীদের পেমেন্ট যাচাই ও অনুমোদন
-          </p>
-        </div>
-      </div>
+    <div className="page-container space-y-6">
+      <PageHeader
+        title="গেটওয়ে পেমেন্ট যাচাইকরণ"
+        subtitle="ব্যবহারকারীদের পেমেন্ট যাচাই ও অনুমোদন"
+        icon={<ShieldCheck className="h-5 w-5 text-primary" />}
+      />
 
       {/* Tabs & Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -203,7 +195,7 @@ export default function AdminGatewayPaymentsPage() {
           {loading ? (
             <div className="space-y-4">
               {Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i}>
+                <Card key={i} className="card-modern">
                   <CardContent className="p-4">
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
@@ -222,13 +214,13 @@ export default function AdminGatewayPaymentsPage() {
               ))}
             </div>
           ) : error ? (
-            <Card>
+            <Card className="card-modern">
               <CardContent className="p-6 text-center">
                 <p className="text-red-600">{error}</p>
               </CardContent>
             </Card>
           ) : filteredTransactions.length === 0 ? (
-            <Card>
+            <Card className="card-modern">
               <CardContent className="p-6 text-center">
                 <ShieldCheck className="mx-auto mb-2 h-10 w-10 text-muted-foreground" />
                 <p className="text-muted-foreground">কোনো গেটওয়ে পেমেন্ট পাওয়া যায়নি</p>
@@ -237,7 +229,7 @@ export default function AdminGatewayPaymentsPage() {
           ) : (
             <div className="space-y-4">
               {filteredTransactions.map((txn) => (
-                <Card key={txn.id} className="overflow-hidden">
+                <Card key={txn.id} className="card-modern overflow-hidden">
                   <CardContent className="p-4">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       {/* Transaction Info */}

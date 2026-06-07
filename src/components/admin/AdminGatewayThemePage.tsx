@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Palette, RotateCcw, Save, Loader2, Eye, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import PageHeader from '@/components/shared/PageHeader';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -144,19 +145,15 @@ export default function AdminGatewayThemePage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <Palette className="h-5 w-5 text-primary animate-spin" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">গেটওয়ে থিম সেটিংস</h1>
-            <p className="text-sm text-muted-foreground">লোড হচ্ছে...</p>
-          </div>
-        </div>
+      <div className="page-container space-y-6">
+        <PageHeader
+          title="গেটওয়ে থিম সেটিংস"
+          subtitle="লোড হচ্ছে..."
+          icon={<Palette className="h-5 w-5 text-primary animate-spin" />}
+        />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {[1, 2].map((i) => (
-            <Card key={i} className="animate-pulse">
+            <Card key={i} className="card-modern animate-pulse">
               <CardContent className="p-6">
                 <div className="space-y-4">
                   <div className="h-6 w-40 rounded bg-muted" />
@@ -172,50 +169,45 @@ export default function AdminGatewayThemePage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <Palette className="h-5 w-5 text-primary" />
+    <div className="page-container space-y-6">
+      <PageHeader
+        title="পেমেন্ট গেটওয়ে থিম সেটিংস"
+        subtitle="শুধুমাত্র পেমেন্ট গেটওয়ে পেজের রঙ পরিবর্তন করুন"
+        icon={<Palette className="h-5 w-5 text-primary" />}
+        actions={
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={handleReset}
+              disabled={saving}
+              className="gap-2"
+            >
+              <RotateCcw className="h-4 w-4" />
+              ডিফল্টে ফিরুন
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={saving || !hasChanges}
+              className="gap-2"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  সংরক্ষণ হচ্ছে...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  সংরক্ষণ করুন
+                </>
+              )}
+            </Button>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">পেমেন্ট গেটওয়ে থিম সেটিংস</h1>
-            <p className="text-sm text-muted-foreground">শুধুমাত্র পেমেন্ট গেটওয়ে পেজের রঙ পরিবর্তন করুন</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleReset}
-            disabled={saving}
-            className="gap-2"
-          >
-            <RotateCcw className="h-4 w-4" />
-            ডিফল্টে ফিরুন
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={saving || !hasChanges}
-            className="gap-2"
-          >
-            {saving ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                সংরক্ষণ হচ্ছে...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4" />
-                সংরক্ষণ করুন
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Info Notice */}
-      <Card className="border-amber-200 bg-amber-50/50">
+      <Card className="card-modern border-amber-200 bg-amber-50/50">
         <CardContent className="p-4 flex items-start gap-3">
           <Info className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
           <div>
@@ -231,7 +223,7 @@ export default function AdminGatewayThemePage() {
         {/* Left Column: Color Pickers */}
         <div className="space-y-4">
           {/* Primary Color */}
-          <Card>
+          <Card className="card-modern">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">প্রাথমিক রং (Primary Color)</CardTitle>
               <CardDescription>গেটওয়ে কার্ড সিলেকশন, হাইলাইট ও অ্যাকসেন্ট রং</CardDescription>
@@ -275,7 +267,7 @@ export default function AdminGatewayThemePage() {
           </Card>
 
           {/* Button Color */}
-          <Card>
+          <Card className="card-modern">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">বাটন রং (Button Color)</CardTitle>
               <CardDescription>&quot;পেমেন্ট জমা দিন&quot; বাটনের রং</CardDescription>
@@ -317,7 +309,7 @@ export default function AdminGatewayThemePage() {
           </Card>
 
           {/* Border/Accent Color */}
-          <Card>
+          <Card className="card-modern">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">বর্ডার/অ্যাকসেন্ট রং</CardTitle>
               <CardDescription>গেটওয়ে কার্ডের বর্ডার ও অ্যাকসেন্ট লাইন</CardDescription>
@@ -359,7 +351,7 @@ export default function AdminGatewayThemePage() {
           </Card>
 
           {/* Background Highlight Color */}
-          <Card>
+          <Card className="card-modern">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">ব্যাকগ্রাউন্ড হাইলাইট রং</CardTitle>
               <CardDescription>পেমেন্ট বক্সের ব্যাকগ্রাউন্ড হাইলাইট</CardDescription>
@@ -398,7 +390,7 @@ export default function AdminGatewayThemePage() {
 
         {/* Right Column: Live Preview */}
         <div className="space-y-4">
-          <Card className="border-primary/20">
+          <Card className="card-modern border-primary/20">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <Eye className="h-4 w-4" />
@@ -500,7 +492,7 @@ export default function AdminGatewayThemePage() {
           </Card>
 
           {/* Color Summary */}
-          <Card>
+          <Card className="card-modern">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">রং সারাংশ</CardTitle>
             </CardHeader>

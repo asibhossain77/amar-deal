@@ -7,7 +7,7 @@ export default function Footer() {
   const { setPage } = useAppStore();
 
   return (
-    <footer className="bg-muted border-t border-border mt-auto">
+    <footer className="bg-muted border-t border-border mt-auto transition-theme">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Logo & Description */}

@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { ArrowLeftRight, CheckCircle, Clock, AlertTriangle, Bell, ArrowRight } from 'lucide-react';
+import { ArrowLeftRight, CheckCircle, Clock, AlertTriangle, Bell, ArrowRight, LayoutDashboard } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
 import { useAppStore } from '@/lib/store';
 import { api } from '@/lib/api';
 import type { Transaction, Notification as AppNotification } from '@/lib/types';
@@ -122,20 +123,19 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="page-container space-y-6">
       {/* Welcome */}
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">
-          স্বাগতম, {user?.name || 'ব্যবহারকারী'}!
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">আপনার ড্যাশবোর্ড ওভারভিউ</p>
-      </div>
+      <PageHeader
+        title={`স্বাগতম, ${user?.name || 'ব্যবহারকারী'}!`}
+        subtitle="আপনার ড্যাশবোর্ড ওভারভিউ"
+        icon={<LayoutDashboard className="h-5 w-5 text-primary" />}
+      />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => (
-              <Card key={i} className="border">
+              <Card key={i} className="card-modern border">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
                     <Skeleton className="h-10 w-10 rounded-lg" />
@@ -150,7 +150,7 @@ export default function DashboardPage() {
           : statCards.map((stat) => {
               const Icon = stat.icon;
               return (
-                <Card key={stat.title} className={`border ${stat.borderColor}`}>
+                <Card key={stat.title} className={`card-modern border ${stat.borderColor}`}>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3">
                       <div className={`flex items-center justify-center h-10 w-10 rounded-lg ${stat.bgColor}`}>
@@ -168,7 +168,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Transactions */}
-      <Card>
+      <Card className="card-modern">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base font-semibold">সাম্প্রতিক লেনদেন</CardTitle>
@@ -249,7 +249,7 @@ export default function DashboardPage() {
       </Card>
 
       {/* Recent Notifications */}
-      <Card>
+      <Card className="card-modern">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base font-semibold">সাম্প্রতিক বিজ্ঞপ্তি</CardTitle>

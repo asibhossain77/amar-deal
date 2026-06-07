@@ -207,7 +207,7 @@ function BenefitsSection() {
             return (
               <Card
                 key={benefit.title}
-                className="bg-card border-border hover:shadow-md transition-shadow"
+                className="card-modern card-interactive bg-card border-border"
               >
                 <CardContent className="p-6 text-center">
                   <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -349,7 +349,7 @@ function FAQSection() {
           </p>
         </div>
 
-        <div className="bg-card rounded-xl border border-border overflow-hidden">
+        <div className="bg-card card-modern rounded-xl border border-border overflow-hidden">
           <Accordion type="single" collapsible className="w-full">
             {faqs.map((faq, index) => (
               <AccordionItem key={index} value={`faq-${index}`}>
@@ -447,7 +447,7 @@ function ContactSection() {
           </div>
 
           {/* Contact Form */}
-          <Card className="bg-card border-border">
+          <Card className="card-modern bg-card border-border">
             <CardContent className="p-6">
               {submitted ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">

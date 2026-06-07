@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { User, Mail, Phone, Calendar, Shield } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
 import { useAppStore } from '@/lib/store';
 import { api } from '@/lib/api';
 import {
@@ -66,8 +67,8 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="p-6">
-        <Card>
+      <div className="page-container">
+        <Card className="card-modern">
           <CardContent className="p-8 text-center">
             <p className="text-muted-foreground">ব্যবহারকারীর তথ্য পাওয়া যায়নি</p>
           </CardContent>
@@ -77,11 +78,16 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-2xl">
-      <h2 className="text-2xl font-bold text-foreground mb-6">প্রোফাইল পরিচালনা</h2>
+    <div className="page-container max-w-2xl space-y-6">
+      <PageHeader
+        title="প্রোফাইল পরিচালনা"
+        subtitle="আপনার ব্যক্তিগত তথ্য পরিচালনা করুন"
+        icon={<User className="h-5 w-5 text-primary" />}
+        backTo="dashboard"
+      />
 
       {/* Avatar & Basic Info */}
-      <Card className="mb-6">
+      <Card className="card-modern mb-6">
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
@@ -104,7 +110,7 @@ export default function ProfilePage() {
       </Card>
 
       {/* Editable Fields */}
-      <Card>
+      <Card className="card-modern">
         <CardHeader>
           <CardTitle className="text-base font-semibold">তথ্য সম্পাদনা</CardTitle>
         </CardHeader>

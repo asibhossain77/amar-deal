@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, CreditCard, Upload, Loader2, Copy, CheckCircle2, Phone, Building2, Wallet, Info, ImageIcon } from 'lucide-react';
+import { CreditCard, Loader2, Copy, CheckCircle2, Phone, Building2, Wallet, Info, ImageIcon } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { api } from '@/lib/api';
 import type { Transaction, PaymentGateway, PaymentGatewayTheme } from '@/lib/types';
@@ -21,6 +21,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import PageHeader from '@/components/shared/PageHeader';
 
 // Helper: get icon based on accountType
 function getGatewayIcon(accountType: string) {
@@ -336,16 +337,16 @@ export default function PaymentSubmitPage() {
   // Success state
   if (success) {
     return (
-      <div className="payment-gateway-module p-4 md:p-6 lg:p-8" style={themeVars}>
+      <div className="payment-gateway-module page-container" style={themeVars}>
         <div className="max-w-lg mx-auto text-center py-12">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle2 className="w-8 h-8 text-green-600" />
+          <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-4">
+            <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
           </div>
           <h2 className="text-xl font-bold text-foreground mb-2">পেমেন্ট সফলভাবে জমা হয়েছে!</h2>
           <p className="text-sm text-muted-foreground mb-6">
             আপনার পেমেন্ট যাচাইয়ের জন্য অপেক্ষমাণ রয়েছে। অ্যাডমিন যাচাই করার পর আপনাকে জানানো হবে।
           </p>
-          <Button onClick={handleGoToTransaction} className="bg-primary hover:bg-primary/90">
+          <Button onClick={handleGoToTransaction} className="bg-primary hover:bg-primary/90 btn-lift">
             লেনদেনের বিবরণ দেখুন
           </Button>
         </div>
@@ -354,25 +355,17 @@ export default function PaymentSubmitPage() {
   }
 
   return (
-    <div className="payment-gateway-module p-4 md:p-6 lg:p-8 space-y-6" style={themeVars}>
+    <div className="payment-gateway-module page-container space-y-6" style={themeVars}>
       {/* Header */}
-      <div className="gateway-header-accent flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleGoBack}
-          className="shrink-0"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div>
-          <h1 className="gateway-section-title text-xl md:text-2xl font-bold">পেমেন্ট জমা দিন</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">আপনার পেমেন্টের বিবরণ পূরণ করুন</p>
-        </div>
-      </div>
+      <PageHeader
+        title="পেমেন্ট জমা দিন"
+        subtitle="আপনার পেমেন্টের বিবরণ পূরণ করুন"
+        icon={<CreditCard className="h-5 w-5 text-primary" />}
+        onBack={handleGoBack}
+      />
 
       {/* Transaction Info Summary */}
-      <Card>
+      <Card className="card-modern">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium text-muted-foreground">লেনদেনের তথ্য</CardTitle>
         </CardHeader>
@@ -413,7 +406,7 @@ export default function PaymentSubmitPage() {
 
       {/* Payment Form */}
       {transaction && (
-        <Card>
+        <Card className="card-modern">
           <CardHeader>
             <CardTitle className="text-base">পেমেন্টের বিবরণ</CardTitle>
           </CardHeader>

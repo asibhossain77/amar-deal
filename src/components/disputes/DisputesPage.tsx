@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Scale, Plus, Loader2, AlertTriangle, Filter } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
 import { useAppStore } from '@/lib/store';
 import { api } from '@/lib/api';
 import type { Dispute, Transaction } from '@/lib/types';
@@ -150,26 +151,21 @@ export default function DisputesPage() {
   );
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="page-container space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Scale className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-xl md:text-2xl font-bold text-foreground">বিরোধসমূহ</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">আপনার সকল বিরোধ দেখুন ও পরিচালনা করুন</p>
-          </div>
-        </div>
+      <PageHeader
+        title="বিরোধসমূহ"
+        subtitle="আপনার সকল বিরোধ দেখুন ও পরিচালনা করুন"
+        icon={<Scale className="h-5 w-5 text-primary" />}
+        actions={
+          <Button className="bg-primary hover:bg-primary/90" onClick={() => setDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            নতুন বিরোধ খুলুন
+          </Button>
+        }
+      />
 
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90">
-              <Plus className="w-4 h-4 mr-2" />
-              নতুন বিরোধ খুলুন
-            </Button>
-          </DialogTrigger>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>নতুন বিরোধ খুলুন</DialogTitle>
@@ -242,7 +238,6 @@ export default function DisputesPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
 
       {/* Filter */}
       <div className="flex items-center gap-2">
@@ -268,7 +263,7 @@ export default function DisputesPage() {
       {loading ? (
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i}>
+            <Card key={i} className="card-modern">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-2 flex-1">
@@ -283,7 +278,7 @@ export default function DisputesPage() {
           ))}
         </div>
       ) : filteredDisputes.length === 0 ? (
-        <Card>
+        <Card className="card-modern">
           <CardContent className="py-12">
             <div className="text-center">
               <AlertTriangle className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
@@ -311,7 +306,7 @@ export default function DisputesPage() {
           {filteredDisputes.map((dispute) => (
             <Card
               key={dispute.id}
-              className="cursor-pointer hover:shadow-md transition-shadow border-l-4 hover:border-l-primary"
+              className="card-modern cursor-pointer hover:shadow-md transition-shadow border-l-4 hover:border-l-primary"
               style={{
                 borderLeftColor:
                   dispute.status === 'open'

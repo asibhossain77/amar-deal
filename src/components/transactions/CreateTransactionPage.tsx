@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ArrowLeft, Loader2, FileText } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
 import { useToast } from '@/hooks/use-toast';
 
 export default function CreateTransactionPage() {
@@ -89,22 +90,17 @@ export default function CreateTransactionPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="page-container space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => setPage('transactions')}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <FileText className="h-6 w-6 text-primary" />
-            নতুন লেনদেন তৈরি করুন
-          </h1>
-        </div>
-      </div>
+      <PageHeader
+        title="নতুন লেনদেন তৈরি করুন"
+        subtitle="এসক্রো লেনদেনের তথ্য পূরণ করুন"
+        icon={<FileText className="h-5 w-5 text-primary" />}
+        backTo="transactions"
+      />
 
       {/* Form */}
-      <Card className="max-w-2xl">
+      <Card className="card-modern max-w-2xl">
         <CardHeader>
           <CardTitle>লেনদেনের তথ্য</CardTitle>
           <CardDescription>

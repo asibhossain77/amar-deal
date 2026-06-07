@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { ShieldCheck, Check, X, Eye, Image as ImageIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PageHeader from '@/components/shared/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -134,17 +135,12 @@ export default function AdminPaymentsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <ShieldCheck className="h-5 w-5 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">পেমেন্ট যাচাইকরণ</h1>
-          <p className="text-sm text-muted-foreground">ব্যবহারকারীদের পেমেন্ট যাচাই ও অনুমোদন</p>
-        </div>
-      </div>
+    <div className="page-container space-y-6">
+      <PageHeader
+        title="পেমেন্ট যাচাইকরণ"
+        subtitle="ব্যবহারকারীদের পেমেন্ট যাচাই ও অনুমোদন"
+        icon={<ShieldCheck className="h-5 w-5 text-primary" />}
+      />
 
       {/* Tabs & Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -159,7 +155,7 @@ export default function AdminPaymentsPage() {
           {loading ? (
             <div className="space-y-4">
               {Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i} className="animate-pulse">
+                <Card key={i} className="card-modern animate-pulse">
                   <CardContent className="p-4">
                     <div className="space-y-3">
                       <div className="h-4 w-48 rounded bg-muted" />
@@ -171,13 +167,13 @@ export default function AdminPaymentsPage() {
               ))}
             </div>
           ) : error ? (
-            <Card>
+            <Card className="card-modern">
               <CardContent className="p-6 text-center">
                 <p className="text-red-600">{error}</p>
               </CardContent>
             </Card>
           ) : filteredPayments.length === 0 ? (
-            <Card>
+            <Card className="card-modern">
               <CardContent className="p-6 text-center">
                 <ShieldCheck className="mx-auto mb-2 h-10 w-10 text-muted-foreground" />
                 <p className="text-muted-foreground">কোনো পেমেন্ট পাওয়া যায়নি</p>
@@ -186,7 +182,7 @@ export default function AdminPaymentsPage() {
           ) : (
             <div className="space-y-4">
               {filteredPayments.map((payment) => (
-                <Card key={payment.id} className="overflow-hidden">
+                <Card key={payment.id} className="card-modern overflow-hidden">
                   <CardContent className="p-4">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       {/* Payment Info */}

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
   const { setUser, setPage } = useAppStore();
@@ -65,9 +65,18 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
       <div className="w-full max-w-md">
-        <Card className="shadow-lg border-border">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setPage('home')}
+          className="mb-4 gap-2 text-muted-foreground hover:text-foreground rounded-lg"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          হোমে ফিরে যান
+        </Button>
+        <Card className="card-modern shadow-lg border-border">
           <CardHeader className="text-center pb-2">
-            <div className="mx-auto mb-4 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+            <div className="mx-auto mb-4 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
               <Lock className="w-6 h-6 text-primary" />
             </div>
             <CardTitle className="text-2xl font-bold text-foreground">

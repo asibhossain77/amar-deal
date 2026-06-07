@@ -23,10 +23,10 @@ function ThemeToggle() {
       size="icon"
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       aria-label={theme === 'dark' ? 'লাইট মোড' : 'ডার্ক মোড'}
-      className="shrink-0"
+      className="shrink-0 h-9 w-9 rounded-lg hover:bg-accent transition-colors"
     >
-      <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+      <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
     </Button>
   );
 }
@@ -47,15 +47,15 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-background border-b border-border">
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-theme">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <button
             onClick={() => handleNavClick('home')}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
           >
-            <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
+            <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-sm">
               <Shield className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="text-lg font-bold text-foreground">
@@ -69,7 +69,7 @@ export default function Header() {
               <button
                 key={link.label}
                 onClick={() => handleNavClick(link.page)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
                   currentPage === link.page
                     ? 'bg-primary/10 text-primary'
                     : 'text-muted-foreground hover:text-primary hover:bg-accent'
@@ -89,7 +89,7 @@ export default function Header() {
                   variant="outline"
                   size="sm"
                   onClick={() => handleNavClick('dashboard')}
-                  className="gap-2"
+                  className="gap-2 rounded-lg"
                 >
                   <LayoutDashboard className="w-4 h-4" />
                   ড্যাশবোর্ড
@@ -101,7 +101,7 @@ export default function Header() {
                   variant="ghost"
                   size="sm"
                   onClick={handleLogout}
-                  className="gap-2 text-muted-foreground hover:text-destructive"
+                  className="gap-2 text-muted-foreground hover:text-destructive rounded-lg"
                 >
                   <LogOut className="w-4 h-4" />
                   লগআউট
@@ -113,14 +113,14 @@ export default function Header() {
                   variant="ghost"
                   size="sm"
                   onClick={() => handleNavClick('login')}
-                  className="text-muted-foreground"
+                  className="text-muted-foreground rounded-lg"
                 >
                   লগইন
                 </Button>
                 <Button
                   size="sm"
                   onClick={() => handleNavClick('register')}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg btn-lift"
                 >
                   নিবন্ধন
                 </Button>
@@ -133,7 +133,7 @@ export default function Header() {
             <ThemeToggle />
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg">
                   <Menu className="w-5 h-5" />
                   <span className="sr-only">মেনু খুলুন</span>
                 </Button>
@@ -154,7 +154,7 @@ export default function Header() {
                     <button
                       key={link.label}
                       onClick={() => handleNavClick(link.page)}
-                      className={`px-4 py-3 rounded-md text-sm font-medium text-right transition-colors ${
+                      className={`px-4 py-3 rounded-lg text-sm font-medium text-right transition-all duration-150 ${
                         currentPage === link.page
                           ? 'bg-primary/10 text-primary'
                           : 'text-muted-foreground hover:text-primary hover:bg-accent'
@@ -175,7 +175,7 @@ export default function Header() {
                         onClick={() => {
                           handleNavClick('dashboard');
                         }}
-                        className="gap-2 justify-start"
+                        className="gap-2 justify-start rounded-lg"
                       >
                         <LayoutDashboard className="w-4 h-4" />
                         ড্যাশবোর্ড
@@ -183,7 +183,7 @@ export default function Header() {
                       <Button
                         variant="ghost"
                         onClick={handleLogout}
-                        className="gap-2 justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                        className="gap-2 justify-start text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg"
                       >
                         <LogOut className="w-4 h-4" />
                         লগআউট
@@ -196,7 +196,7 @@ export default function Header() {
                         onClick={() => {
                           handleNavClick('login');
                         }}
-                        className="w-full"
+                        className="w-full rounded-lg"
                       >
                         লগইন
                       </Button>
@@ -204,7 +204,7 @@ export default function Header() {
                         onClick={() => {
                           handleNavClick('register');
                         }}
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg"
                       >
                         নিবন্ধন
                       </Button>

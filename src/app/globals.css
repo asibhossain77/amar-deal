@@ -44,7 +44,7 @@
 }
 
 :root {
-  --radius: 0.5rem;
+  --radius: 0.625rem;
   --background: #ffffff;
   --foreground: #1a2e1a;
   --card: #ffffff;
@@ -79,36 +79,36 @@
 }
 
 .dark {
-  --background: #141c14;
+  --background: #0f160f;
   --foreground: #e2ede0;
-  --card: #1c2a1c;
+  --card: #182418;
   --card-foreground: #e2ede0;
-  --popover: #1c2a1c;
+  --popover: #182418;
   --popover-foreground: #e2ede0;
   --primary: #6BBF59;
   --primary-foreground: #ffffff;
-  --secondary: #243024;
+  --secondary: #1e2c1e;
   --secondary-foreground: #a8d4a0;
-  --muted: #1f2b1f;
+  --muted: #162016;
   --muted-foreground: #8fa889;
-  --accent: #243024;
+  --accent: #1e2c1e;
   --accent-foreground: #a8d4a0;
   --destructive: #b91c1c;
-  --border: #2e422e;
-  --input: #2e422e;
+  --border: #263626;
+  --input: #263626;
   --ring: #6BBF59;
   --chart-1: #6BBF59;
   --chart-2: #a8d4a0;
   --chart-3: #fbbf24;
   --chart-4: #a78bfa;
   --chart-5: #f87171;
-  --sidebar: #1a251a;
+  --sidebar: #141e14;
   --sidebar-foreground: #e2ede0;
   --sidebar-primary: #6BBF59;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #243024;
+  --sidebar-accent: #1e2c1e;
   --sidebar-accent-foreground: #a8d4a0;
-  --sidebar-border: #2e422e;
+  --sidebar-border: #263626;
   --sidebar-ring: #6BBF59;
 }
 
@@ -119,15 +119,76 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-hind-siliguri), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-/* Custom scrollbar */
+/* ─── Modern Card Styles ────────────────────────────────── */
+.card-modern {
+  border-radius: var(--radius-xl);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.card-modern:hover {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+.card-interactive {
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+}
+
+.card-interactive:hover {
+  box-shadow: 0 8px 24px -4px rgba(107, 191, 89, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+.card-interactive:active {
+  transform: translateY(0);
+}
+
+.dark .card-modern {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px -1px rgba(0, 0, 0, 0.15);
+}
+
+.dark .card-modern:hover {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.35), 0 2px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+.dark .card-interactive:hover {
+  box-shadow: 0 8px 24px -4px rgba(107, 191, 89, 0.08), 0 4px 8px -2px rgba(0, 0, 0, 0.25);
+}
+
+/* ─── Smooth Transitions ────────────────────────────────── */
+.transition-theme {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ─── Page Layout ───────────────────────────────────────── */
+.page-container {
+  padding: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .page-container {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-container {
+    padding: 2.5rem;
+  }
+}
+
+/* ─── Custom Scrollbar ──────────────────────────────────── */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: var(--muted);
+  background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--border);
@@ -135,4 +196,27 @@
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--muted-foreground);
+}
+
+/* ─── Button hover animations ──────────────────────────── */
+.btn-lift {
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.btn-lift:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -2px rgba(107, 191, 89, 0.25);
+}
+.btn-lift:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.dark .btn-lift:hover:not(:disabled) {
+  box-shadow: 0 4px 12px -2px rgba(107, 191, 89, 0.15);
+}
+
+/* ─── Focus Ring ────────────────────────────────────────── */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius);
 }

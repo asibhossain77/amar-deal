@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Users, ArrowLeftRight, Clock, Hourglass, CheckCircle, AlertTriangle, TrendingUp, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PageHeader from '@/components/shared/PageHeader';
 import { api } from '@/lib/api';
 import { toBanglaNumber } from '@/lib/helpers';
 import type { DashboardStats } from '@/lib/types';
@@ -80,23 +81,18 @@ export default function AdminDashboardPage() {
   }, []);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <TrendingUp className="h-5 w-5 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">প্রশাসন ড্যাশবোর্ড</h1>
-          <p className="text-sm text-muted-foreground">প্ল্যাটফর্মের সামগ্রিক পরিসংখ্যান</p>
-        </div>
-      </div>
+    <div className="page-container space-y-6">
+      <PageHeader
+        title="প্রশাসন ড্যাশবোর্ড"
+        subtitle="প্ল্যাটফর্মের সামগ্রিক পরিসংখ্যান"
+        icon={<TrendingUp className="h-5 w-5 text-primary" />}
+      />
 
       {/* Stats Grid */}
       {loading ? (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="animate-pulse">
+            <Card key={i} className="card-modern animate-pulse">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-lg bg-muted" />
@@ -110,7 +106,7 @@ export default function AdminDashboardPage() {
           ))}
         </div>
       ) : error ? (
-        <Card>
+        <Card className="card-modern">
           <CardContent className="p-6 text-center">
             <AlertTriangle className="mx-auto mb-2 h-8 w-8 text-red-500" />
             <p className="text-red-600">{error}</p>
@@ -122,7 +118,7 @@ export default function AdminDashboardPage() {
             const Icon = card.icon;
             const value = stats ? stats[card.key] : 0;
             return (
-              <Card key={card.key} className={`border ${card.colorClass}`}>
+              <Card key={card.key} className={`card-modern border ${card.colorClass}`}>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
                     <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${card.iconBg}`}>
@@ -143,7 +139,7 @@ export default function AdminDashboardPage() {
       )}
 
       {/* Recent Activity Summary */}
-      <Card>
+      <Card className="card-modern">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Activity className="h-5 w-5 text-primary" />

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { ArrowLeft, Send, Loader2, Shield, User, Store, MessageSquare } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
 import { useAppStore } from '@/lib/store';
 import { api } from '@/lib/api';
 import type { Dispute, DisputeMessage } from '@/lib/types';
@@ -132,7 +133,7 @@ export default function DisputeDetailPage() {
 
   if (loading) {
     return (
-      <div className="p-4 md:p-6 lg:p-8 space-y-6">
+      <div className="page-container space-y-6">
         <div className="flex items-center gap-3">
           <Skeleton className="h-10 w-10 rounded-md" />
           <div className="space-y-2">
@@ -148,7 +149,7 @@ export default function DisputeDetailPage() {
 
   if (error || !dispute) {
     return (
-      <div className="p-4 md:p-6 lg:p-8">
+      <div className="page-container">
         <div className="text-center py-12">
           <p className="text-muted-foreground">{error || 'বিরোধের তথ্য পাওয়া যায়নি'}</p>
           <Button variant="outline" className="mt-3" onClick={() => setPage('disputes')}>
@@ -160,33 +161,25 @@ export default function DisputeDetailPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="page-container space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setPage('disputes')}
-          className="shrink-0"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div className="flex-1 min-w-0">
-          <h1 className="text-xl md:text-2xl font-bold text-foreground">বিরোধের বিবরণ</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {dispute.transaction?.title || 'লেনদেন'} - {formatDate(dispute.createdAt)}
-          </p>
-        </div>
-        <Badge
-          variant="secondary"
-          className={`text-xs border-0 ${getDisputeStatusColor(dispute.status)}`}
-        >
-          {disputeStatusLabels[dispute.status] || dispute.status}
-        </Badge>
-      </div>
+      <PageHeader
+        title="বিরোধের বিবরণ"
+        subtitle={`${dispute.transaction?.title || 'লেনদেন'} - ${formatDate(dispute.createdAt)}`}
+        icon={<Shield className="h-5 w-5 text-primary" />}
+        backTo="disputes"
+        actions={
+          <Badge
+            variant="secondary"
+            className={`text-xs border-0 ${getDisputeStatusColor(dispute.status)}`}
+          >
+            {disputeStatusLabels[dispute.status] || dispute.status}
+          </Badge>
+        }
+      />
 
       {/* Dispute Info Card */}
-      <Card>
+      <Card className="card-modern">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium text-muted-foreground">বিরোধের তথ্য</CardTitle>
         </CardHeader>
@@ -245,7 +238,7 @@ export default function DisputeDetailPage() {
       </Card>
 
       {/* Messages Section */}
-      <Card>
+      <Card className="card-modern">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4 text-primary" />
@@ -358,7 +351,7 @@ export default function DisputeDetailPage() {
 
       {/* Admin Resolution Section */}
       {user?.role === 'admin' && !isResolved && (
-        <Card className="border-amber-200 bg-amber-50/30">
+        <Card className="card-modern border-amber-200 bg-amber-50/30">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -424,7 +417,7 @@ export default function DisputeDetailPage() {
       )}
 
       {/* Participants Quick Info */}
-      <Card>
+      <Card className="card-modern">
         <CardContent className="p-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3">
