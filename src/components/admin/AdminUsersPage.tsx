@@ -17,6 +17,7 @@ import {
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/helpers';
 import type { AppUser } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -24,6 +25,7 @@ export default function AdminUsersPage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     async function fetchUsers() {
@@ -53,16 +55,29 @@ export default function AdminUsersPage() {
   }, [users, search]);
 
   async function handleToggleStatus(user: AppUser) {
+    const newStatus = !user.isActive;
     try {
       setTogglingId(user.id);
-      await api.toggleUserStatus(user.id, !user.isActive);
+      await api.toggleUserStatus(user.id, newStatus);
       setUsers((prev) =>
         prev.map((u) =>
-          u.id === user.id ? { ...u, isActive: !u.isActive } : u
+          u.id === user.id ? { ...u, isActive: newStatus } : u
         )
       );
-    } catch (err) {
+      toast({
+        title: 'সফল!',
+        description: newStatus
+          ? `${user.name} সক্রিয় করা হয়েছে`
+          : `${user.name} নিষ্ক্রিয় করা হয়েছে`,
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'স্ট্যাটাস পরিবর্তন করতে সমস্যা হয়েছে';
       console.error('Failed to toggle user status:', err);
+      toast({
+        title: 'ত্রুটি',
+        description: message,
+        variant: 'destructive',
+      });
     } finally {
       setTogglingId(null);
     }

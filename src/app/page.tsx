@@ -76,7 +76,7 @@ class ErrorBoundary extends Component<
 
 function PageRouter() {
   const { currentPage, isAuthenticated, user } = useAppStore();
-  const [checking, setChecking] = useState(true);
+  const [checking, setChecking] = useState(!isAuthenticated || !user);
 
   useEffect(() => {
     async function checkSession() {
@@ -87,13 +87,17 @@ function PageRouter() {
           if (data.user) {
             useAppStore.getState().setUser(data.user);
           } else {
+            // Only clear user if we get a definitive "no session" response
             useAppStore.getState().setUser(null);
           }
-        } else {
+        } else if (res.status === 401) {
+          // Session expired - clear user
           useAppStore.getState().setUser(null);
         }
+        // For other errors (500, network), keep the persisted user state
       } catch {
-        useAppStore.getState().setUser(null);
+        // Network error - don't logout, keep persisted state
+        // The user might just have a temporary connection issue
       } finally {
         setChecking(false);
       }
@@ -101,7 +105,8 @@ function PageRouter() {
     checkSession();
   }, []);
 
-  if (checking) {
+  // If we have persisted auth, show the app immediately while verifying in background
+  if (checking && (!isAuthenticated || !user)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">

@@ -67,6 +67,7 @@ async function main() {
   });
 
   // Create sample transactions
+  // t1: pending_payment - NO existing payment, so buyer can submit payment
   const t1 = await prisma.transaction.create({
     data: {
       title: "ওয়েবসাইট ডিজাইন",
@@ -79,19 +80,32 @@ async function main() {
     },
   });
 
+  // t2: pending_verification - has a pending payment
   const t2 = await prisma.transaction.create({
+    data: {
+      title: "গ্রাফিক ডিজাইন",
+      description: "সোশ্যাল মিডিয়া পোস্ট ও ব্যানার ডিজাইন",
+      amount: 12000,
+      terms: "১৫ দিনের মধ্যে কাজ সম্পন্ন। ২টি রিভিশন।",
+      buyerId: buyer.id,
+      sellerId: user2.id,
+      status: "pending_verification",
+    },
+  });
+
+  const t3 = await prisma.transaction.create({
     data: {
       title: "লোগো ডিজাইন",
       description: "কোম্পানির লোগো ডিজাইন",
       amount: 5000,
       terms: "৫টি কনসেপ্ট, ৩টি রিভিশন পর্যন্ত।",
       buyerId: buyer.id,
-      sellerId: user2.id,
+      sellerId: seller.id,
       status: "paid",
     },
   });
 
-  const t3 = await prisma.transaction.create({
+  const t4 = await prisma.transaction.create({
     data: {
       title: "মোবাইল অ্যাপ ডেভেলপমেন্ট",
       description: "অ্যান্ড্রয়েড ও আইওএস মোবাইল অ্যাপ",
@@ -103,7 +117,7 @@ async function main() {
     },
   });
 
-  const t4 = await prisma.transaction.create({
+  const t5 = await prisma.transaction.create({
     data: {
       title: "কনটেন্ট রাইটিং",
       description: "ব্লগ পোস্ট এবং সোশ্যাল মিডিয়া কনটেন্ট",
@@ -115,7 +129,7 @@ async function main() {
     },
   });
 
-  const t5 = await prisma.transaction.create({
+  const t6 = await prisma.transaction.create({
     data: {
       title: "ডিজিটাল মার্কেটিং",
       description: "৩ মাসের ডিজিটাল মার্কেটিং সার্ভিস",
@@ -127,10 +141,21 @@ async function main() {
     },
   });
 
-  // Create payments for the paid transaction
+  // Create payments for the pending_verification transaction (t2)
   await prisma.payment.create({
     data: {
       transactionId: t2.id,
+      userId: buyer.id,
+      transactionRef: "BKASH-8X5K9P2",
+      paymentMethod: "bKash",
+      status: "pending",
+    },
+  });
+
+  // Create payments for the paid transaction (t3)
+  await prisma.payment.create({
+    data: {
+      transactionId: t3.id,
       userId: buyer.id,
       transactionRef: "BKASH-78X5K9",
       paymentMethod: "bKash",
@@ -139,10 +164,10 @@ async function main() {
     },
   });
 
-  // Create payment for work_in_progress transaction
+  // Create payment for work_in_progress transaction (t4)
   await prisma.payment.create({
     data: {
-      transactionId: t3.id,
+      transactionId: t4.id,
       userId: user2.id,
       transactionRef: "NAGAD-45T2M7",
       paymentMethod: "Nagad",
@@ -150,10 +175,10 @@ async function main() {
     },
   });
 
-  // Create payment for completed transaction
+  // Create payment for completed transaction (t5)
   await prisma.payment.create({
     data: {
-      transactionId: t4.id,
+      transactionId: t5.id,
       userId: buyer.id,
       transactionRef: "ROCKET-89R3P1",
       paymentMethod: "Rocket",
@@ -161,10 +186,10 @@ async function main() {
     },
   });
 
-  // Create payment for disputed transaction
+  // Create payment for disputed transaction (t6)
   await prisma.payment.create({
     data: {
-      transactionId: t5.id,
+      transactionId: t6.id,
       userId: user2.id,
       transactionRef: "BANK-12Q8W4",
       paymentMethod: "ব্যাংক ট্রান্সফার",
@@ -172,21 +197,10 @@ async function main() {
     },
   });
 
-  // Create a pending payment for the first transaction
-  await prisma.payment.create({
-    data: {
-      transactionId: t1.id,
-      userId: buyer.id,
-      transactionRef: "BKASH-PENDING-1",
-      paymentMethod: "bKash",
-      status: "pending",
-    },
-  });
-
   // Create dispute for the disputed transaction
   const dispute = await prisma.dispute.create({
     data: {
-      transactionId: t5.id,
+      transactionId: t6.id,
       buyerId: user2.id,
       sellerId: seller.id,
       reason: "বিক্রেতা প্রতিশ্রুত সময়ে কাজ সম্পন্ন করেননি। মার্কেটিং ক্যাম্পেইনের ফলাফল সন্তোষজনক নয়।",
@@ -231,8 +245,16 @@ async function main() {
         isRead: false,
       },
       {
-        userId: seller.id,
+        userId: buyer.id,
         transactionId: t2.id,
+        title: "পেমেন্ট জমা দেওয়া হয়েছে",
+        message: "গ্রাফিক ডিজাইন লেনদেনের পেমেন্ট জমা দেওয়া হয়েছে, যাচাইয়ের অপেক্ষায় আছে।",
+        type: "payment",
+        isRead: false,
+      },
+      {
+        userId: seller.id,
+        transactionId: t3.id,
         title: "পেমেন্ট অনুমোদিত",
         message: "লোগো ডিজাইন লেনদেনের পেমেন্ট অনুমোদিত হয়েছে।",
         type: "payment",
@@ -240,7 +262,7 @@ async function main() {
       },
       {
         userId: seller.id,
-        transactionId: t3.id,
+        transactionId: t4.id,
         title: "কাজ শুরু হয়েছে",
         message: "মোবাইল অ্যাপ ডেভেলপমেন্ট লেনদেনের কাজ শুরু হয়েছে।",
         type: "transaction",
@@ -248,7 +270,7 @@ async function main() {
       },
       {
         userId: buyer.id,
-        transactionId: t4.id,
+        transactionId: t5.id,
         title: "লেনদেন সম্পন্ন",
         message: "কনটেন্ট রাইটিং লেনদেন সফলভাবে সম্পন্ন হয়েছে।",
         type: "transaction",
@@ -256,7 +278,7 @@ async function main() {
       },
       {
         userId: seller.id,
-        transactionId: t5.id,
+        transactionId: t6.id,
         title: "বিরোধ খোলা হয়েছে",
         message: "ডিজিটাল মার্কেটিং লেনদেনে একটি বিরোধ খোলা হয়েছে।",
         type: "dispute",
@@ -264,7 +286,7 @@ async function main() {
       },
       {
         userId: admin.id,
-        transactionId: t5.id,
+        transactionId: t6.id,
         title: "নতুন বিরোধ",
         message: "ডিজিটাল মার্কেটিং লেনদেনে একটি বিরোধ খোলা হয়েছে। পর্যালোচনা করুন।",
         type: "dispute",
@@ -273,7 +295,7 @@ async function main() {
     ],
   });
 
-  // Create admin log
+  // Create admin logs
   await prisma.adminLog.create({
     data: {
       userId: admin.id,
@@ -289,6 +311,29 @@ async function main() {
       details: "মোবাইল অ্যাপ ডেভেলপমেন্ট লেনদেনের পেমেন্ট অনুমোদন করা হয়েছে",
     },
   });
+
+  // Create payment account settings (SiteSetting)
+  const paymentSettings = [
+    { key: "bkash_account", value: "01712345678" },
+    { key: "bkash_account_name", value: "বাংলা এসক্রো সার্ভিস" },
+    { key: "nagad_account", value: "01812345678" },
+    { key: "nagad_account_name", value: "বাংলা এসক্রো সার্ভিস" },
+    { key: "rocket_account", value: "01912345678" },
+    { key: "rocket_account_name", value: "বাংলা এসক্রো সার্ভিস" },
+    { key: "bank_name", value: "ডাচ বাংলা ব্যাংক লিমিটেড" },
+    { key: "bank_account", value: "1234567890123" },
+    { key: "bank_account_name", value: "বাংলা এসক্রো সার্ভিস লিমিটেড" },
+    { key: "bank_branch", value: "ঢাকা মেইন ব্রাঞ্চ" },
+    { key: "bank_routing", value: "090123456" },
+  ];
+
+  for (const setting of paymentSettings) {
+    await prisma.siteSetting.upsert({
+      where: { key: setting.key },
+      update: { value: setting.value },
+      create: { key: setting.key, value: setting.value },
+    });
+  }
 
   console.log("✅ Seed completed successfully!");
   console.log("\n📋 Demo Accounts:");

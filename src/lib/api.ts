@@ -17,7 +17,7 @@ async function fetchAPI(endpoint: string, options?: RequestInit) {
         if (typeof window !== 'undefined') {
           const { useAppStore } = await import('./store');
           useAppStore.getState().setUser(null);
-          useAppStore.getState().setPage('login');
+          // Don't force redirect - let the page router handle it naturally
         }
       }
       throw new Error('সেশন মেয়াদোত্তীর্ণ হয়েছে। দয়া করে আবার লগইন করুন।');

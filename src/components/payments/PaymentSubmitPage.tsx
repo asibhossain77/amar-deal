@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, CreditCard, Upload, Loader2, Copy, CheckCircle2, Phone, Building2, Wallet } from 'lucide-react';
+import { ArrowLeft, CreditCard, Upload, Loader2, Copy, CheckCircle2, Phone, Building2, Wallet, Info } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { api } from '@/lib/api';
 import type { Transaction } from '@/lib/types';
@@ -19,6 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 
 interface PaymentAccountInfo {
   bkash: { number: string; name: string };
@@ -34,14 +35,15 @@ interface PaymentAccountInfo {
 }
 
 const paymentMethods = [
-  { value: 'bkash', label: 'bKash', icon: Phone, color: 'bg-pink-50 text-pink-700 border-pink-200', activeColor: 'border-pink-500 bg-pink-50' },
-  { value: 'nagad', label: 'Nagad', icon: Phone, color: 'bg-orange-50 text-orange-700 border-orange-200', activeColor: 'border-orange-500 bg-orange-50' },
-  { value: 'rocket', label: 'Rocket', icon: Wallet, color: 'bg-purple-50 text-purple-700 border-purple-200', activeColor: 'border-purple-500 bg-purple-50' },
-  { value: 'bank_transfer', label: 'ব্যাংক ট্রান্সফার', icon: Building2, color: 'bg-green-50 text-green-700 border-green-200', activeColor: 'border-green-500 bg-green-50' },
+  { value: 'bkash', label: 'bKash', icon: Phone, color: 'text-pink-700', activeColor: 'border-pink-500 bg-pink-50' },
+  { value: 'nagad', label: 'Nagad', icon: Phone, color: 'text-orange-700', activeColor: 'border-orange-500 bg-orange-50' },
+  { value: 'rocket', label: 'Rocket', icon: Wallet, color: 'text-purple-700', activeColor: 'border-purple-500 bg-purple-50' },
+  { value: 'bank_transfer', label: 'ব্যাংক ট্রান্সফার', icon: Building2, color: 'text-green-700', activeColor: 'border-green-500 bg-green-50' },
 ];
 
 export default function PaymentSubmitPage() {
   const { selectedPaymentTransactionId, setPage, setSelectedTransactionId } = useAppStore();
+  const { toast } = useToast();
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -54,6 +56,7 @@ export default function PaymentSubmitPage() {
   const [note, setNote] = useState('');
 
   const [accountInfo, setAccountInfo] = useState<PaymentAccountInfo | null>(null);
+  const [accountLoading, setAccountLoading] = useState(true);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   useEffect(() => {
@@ -79,6 +82,7 @@ export default function PaymentSubmitPage() {
   useEffect(() => {
     async function fetchAccountInfo() {
       try {
+        setAccountLoading(true);
         const res = await fetch('/api/settings?category=payment_accounts');
         if (res.ok) {
           const data = await res.json();
@@ -86,6 +90,8 @@ export default function PaymentSubmitPage() {
         }
       } catch {
         // Silently fail - account info is optional
+      } finally {
+        setAccountLoading(false);
       }
     }
     fetchAccountInfo();
@@ -94,6 +100,10 @@ export default function PaymentSubmitPage() {
   const handleCopy = (text: string, field: string) => {
     navigator.clipboard.writeText(text).then(() => {
       setCopiedField(field);
+      toast({
+        title: 'কপি হয়েছে!',
+        description: `${text} ক্লিপবোর্ডে কপি হয়েছে`,
+      });
       setTimeout(() => setCopiedField(null), 2000);
     });
   };
@@ -120,9 +130,18 @@ export default function PaymentSubmitPage() {
         screenshot: screenshotDesc.trim() || undefined,
       });
       setSuccess(true);
+      toast({
+        title: 'সফল!',
+        description: 'পেমেন্ট সফলভাবে জমা হয়েছে। অ্যাডমিন যাচাই করবেন।',
+      });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'পেমেন্ট জমা দিতে সমস্যা হয়েছে';
       setError(message);
+      toast({
+        title: 'ত্রুটি',
+        description: message,
+        variant: 'destructive',
+      });
     } finally {
       setSubmitting(false);
     }
@@ -146,11 +165,29 @@ export default function PaymentSubmitPage() {
 
   // Render account info based on selected payment method
   const renderAccountInfo = () => {
-    if (!paymentMethod || !accountInfo) return null;
+    if (!paymentMethod) return null;
+
+    if (accountLoading) {
+      return (
+        <Card className="border-dashed">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+              <p className="text-sm text-gray-500">অ্যাকাউন্ট তথ্য লোড হচ্ছে...</p>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    if (!accountInfo) return null;
+
+    const methodConfig = paymentMethods.find(m => m.value === paymentMethod);
+    const methodLabel = methodConfig?.label || '';
 
     if (paymentMethod === 'bkash' && accountInfo.bkash.number) {
       return (
-        <Card className="border-pink-200 bg-pink-50/50">
+        <Card className="border-pink-200 bg-pink-50/50 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold text-pink-800 flex items-center gap-2">
               <Phone className="h-4 w-4" />
@@ -158,17 +195,17 @@ export default function PaymentSubmitPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="bg-white rounded-lg p-3 space-y-2">
+            <div className="bg-white rounded-lg p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-500">অ্যাকাউন্ট নাম্বার</p>
-                  <p className="text-lg font-bold text-gray-900 font-mono">{accountInfo.bkash.number}</p>
+                  <p className="text-xs text-gray-500 mb-1">অ্যাকাউন্ট নাম্বার</p>
+                  <p className="text-xl font-bold text-gray-900 font-mono tracking-wide">{accountInfo.bkash.number}</p>
                 </div>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="gap-1"
+                  className="gap-1 shrink-0"
                   onClick={() => handleCopy(accountInfo.bkash.number, 'bkash-number')}
                 >
                   {copiedField === 'bkash-number' ? (
@@ -179,15 +216,16 @@ export default function PaymentSubmitPage() {
                 </Button>
               </div>
               {accountInfo.bkash.name && (
-                <div>
+                <div className="pt-2 border-t">
                   <p className="text-xs text-gray-500">অ্যাকাউন্টের নাম</p>
                   <p className="text-sm font-medium text-gray-700">{accountInfo.bkash.name}</p>
                 </div>
               )}
             </div>
-            <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
+            <div className="bg-amber-50 rounded-lg p-3 border border-amber-200 flex items-start gap-2">
+              <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
               <p className="text-xs text-amber-800">
-                ⚠️ উপরের নাম্বারে <strong>Send Money</strong> করুন এবং ট্রানজেকশন আইডি নিচে দিন।
+                উপরের নাম্বারে <strong>Send Money</strong> করুন এবং ট্রানজেকশন আইডি নিচে দিন।
               </p>
             </div>
           </CardContent>
@@ -197,7 +235,7 @@ export default function PaymentSubmitPage() {
 
     if (paymentMethod === 'nagad' && accountInfo.nagad.number) {
       return (
-        <Card className="border-orange-200 bg-orange-50/50">
+        <Card className="border-orange-200 bg-orange-50/50 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold text-orange-800 flex items-center gap-2">
               <Phone className="h-4 w-4" />
@@ -205,17 +243,17 @@ export default function PaymentSubmitPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="bg-white rounded-lg p-3 space-y-2">
+            <div className="bg-white rounded-lg p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-500">অ্যাকাউন্ট নাম্বার</p>
-                  <p className="text-lg font-bold text-gray-900 font-mono">{accountInfo.nagad.number}</p>
+                  <p className="text-xs text-gray-500 mb-1">অ্যাকাউন্ট নাম্বার</p>
+                  <p className="text-xl font-bold text-gray-900 font-mono tracking-wide">{accountInfo.nagad.number}</p>
                 </div>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="gap-1"
+                  className="gap-1 shrink-0"
                   onClick={() => handleCopy(accountInfo.nagad.number, 'nagad-number')}
                 >
                   {copiedField === 'nagad-number' ? (
@@ -226,15 +264,16 @@ export default function PaymentSubmitPage() {
                 </Button>
               </div>
               {accountInfo.nagad.name && (
-                <div>
+                <div className="pt-2 border-t">
                   <p className="text-xs text-gray-500">অ্যাকাউন্টের নাম</p>
                   <p className="text-sm font-medium text-gray-700">{accountInfo.nagad.name}</p>
                 </div>
               )}
             </div>
-            <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
+            <div className="bg-amber-50 rounded-lg p-3 border border-amber-200 flex items-start gap-2">
+              <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
               <p className="text-xs text-amber-800">
-                ⚠️ উপরের নাম্বারে <strong>Send Money</strong> করুন এবং ট্রানজেকশন আইডি নিচে দিন।
+                উপরের নাম্বারে <strong>Send Money</strong> করুন এবং ট্রানজেকশন আইডি নিচে দিন।
               </p>
             </div>
           </CardContent>
@@ -244,7 +283,7 @@ export default function PaymentSubmitPage() {
 
     if (paymentMethod === 'rocket' && accountInfo.rocket.number) {
       return (
-        <Card className="border-purple-200 bg-purple-50/50">
+        <Card className="border-purple-200 bg-purple-50/50 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold text-purple-800 flex items-center gap-2">
               <Wallet className="h-4 w-4" />
@@ -252,17 +291,17 @@ export default function PaymentSubmitPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="bg-white rounded-lg p-3 space-y-2">
+            <div className="bg-white rounded-lg p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-500">অ্যাকাউন্ট নাম্বার</p>
-                  <p className="text-lg font-bold text-gray-900 font-mono">{accountInfo.rocket.number}</p>
+                  <p className="text-xs text-gray-500 mb-1">অ্যাকাউন্ট নাম্বার</p>
+                  <p className="text-xl font-bold text-gray-900 font-mono tracking-wide">{accountInfo.rocket.number}</p>
                 </div>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="gap-1"
+                  className="gap-1 shrink-0"
                   onClick={() => handleCopy(accountInfo.rocket.number, 'rocket-number')}
                 >
                   {copiedField === 'rocket-number' ? (
@@ -273,15 +312,16 @@ export default function PaymentSubmitPage() {
                 </Button>
               </div>
               {accountInfo.rocket.name && (
-                <div>
+                <div className="pt-2 border-t">
                   <p className="text-xs text-gray-500">অ্যাকাউন্টের নাম</p>
                   <p className="text-sm font-medium text-gray-700">{accountInfo.rocket.name}</p>
                 </div>
               )}
             </div>
-            <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
+            <div className="bg-amber-50 rounded-lg p-3 border border-amber-200 flex items-start gap-2">
+              <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
               <p className="text-xs text-amber-800">
-                ⚠️ উপরের নাম্বারে <strong>Send Money</strong> করুন এবং ট্রানজেকশন আইডি নিচে দিন।
+                উপরের নাম্বারে <strong>Send Money</strong> করুন এবং ট্রানজেকশন আইডি নিচে দিন।
               </p>
             </div>
           </CardContent>
@@ -291,7 +331,7 @@ export default function PaymentSubmitPage() {
 
     if (paymentMethod === 'bank_transfer' && accountInfo.bank.accountNumber) {
       return (
-        <Card className="border-green-200 bg-green-50/50">
+        <Card className="border-green-200 bg-green-50/50 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold text-green-800 flex items-center gap-2">
               <Building2 className="h-4 w-4" />
@@ -299,25 +339,23 @@ export default function PaymentSubmitPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="bg-white rounded-lg p-3 space-y-3">
+            <div className="bg-white rounded-lg p-4 space-y-3">
               {accountInfo.bank.bankName && (
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500">ব্যাংকের নাম</p>
-                    <p className="text-sm font-medium text-gray-900">{accountInfo.bank.bankName}</p>
-                  </div>
+                <div>
+                  <p className="text-xs text-gray-500">ব্যাংকের নাম</p>
+                  <p className="text-sm font-semibold text-gray-900">{accountInfo.bank.bankName}</p>
                 </div>
               )}
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-500">অ্যাকাউন্ট নাম্বার</p>
-                  <p className="text-lg font-bold text-gray-900 font-mono">{accountInfo.bank.accountNumber}</p>
+                  <p className="text-xs text-gray-500 mb-1">অ্যাকাউন্ট নাম্বার</p>
+                  <p className="text-xl font-bold text-gray-900 font-mono tracking-wide">{accountInfo.bank.accountNumber}</p>
                 </div>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="gap-1"
+                  className="gap-1 shrink-0"
                   onClick={() => handleCopy(accountInfo.bank.accountNumber, 'bank-account')}
                 >
                   {copiedField === 'bank-account' ? (
@@ -328,7 +366,7 @@ export default function PaymentSubmitPage() {
                 </Button>
               </div>
               {accountInfo.bank.accountName && (
-                <div>
+                <div className="pt-2 border-t">
                   <p className="text-xs text-gray-500">অ্যাকাউন্টের নাম</p>
                   <p className="text-sm font-medium text-gray-700">{accountInfo.bank.accountName}</p>
                 </div>
@@ -349,7 +387,7 @@ export default function PaymentSubmitPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="gap-1"
+                    className="gap-1 shrink-0"
                     onClick={() => handleCopy(accountInfo.bank.routing, 'bank-routing')}
                   >
                     {copiedField === 'bank-routing' ? (
@@ -361,9 +399,10 @@ export default function PaymentSubmitPage() {
                 </div>
               )}
             </div>
-            <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
+            <div className="bg-amber-50 rounded-lg p-3 border border-amber-200 flex items-start gap-2">
+              <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
               <p className="text-xs text-amber-800">
-                ⚠️ উপরের অ্যাকাউন্টে টাকা পাঠান এবং ট্রানজেকশন আইডি নিচে দিন।
+                উপরের অ্যাকাউন্টে টাকা পাঠান এবং ট্রানজেকশন আইডি নিচে দিন।
               </p>
             </div>
           </CardContent>
@@ -371,7 +410,18 @@ export default function PaymentSubmitPage() {
       );
     }
 
-    return null;
+    // Account info not configured for this method
+    return (
+      <Card className="border-amber-200 bg-amber-50/50">
+        <CardContent className="p-4 flex items-start gap-2">
+          <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-amber-800">{methodLabel} অ্যাকাউন্ট তথ্য সেট করা হয়নি</p>
+            <p className="text-xs text-amber-700 mt-1">অ্যাডমিন এখনো {methodLabel} পেমেন্ট অ্যাকাউন্ট তথ্য যোগ করেননি। অ্যাডমিনের সাথে যোগাযোগ করুন।</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
   };
 
   if (success) {
@@ -379,7 +429,7 @@ export default function PaymentSubmitPage() {
       <div className="p-4 md:p-6 lg:p-8">
         <div className="max-w-lg mx-auto text-center py-12">
           <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-            <CreditCard className="w-8 h-8 text-green-600" />
+            <CheckCircle2 className="w-8 h-8 text-green-600" />
           </div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">পেমেন্ট সফলভাবে জমা হয়েছে!</h2>
           <p className="text-sm text-gray-500 mb-6">
@@ -464,7 +514,10 @@ export default function PaymentSubmitPage() {
                 <Label className="text-sm font-medium">পেমেন্ট পদ্ধতি <span className="text-red-500">*</span></Label>
                 <RadioGroup
                   value={paymentMethod}
-                  onValueChange={setPaymentMethod}
+                  onValueChange={(value) => {
+                    setPaymentMethod(value);
+                    setError('');
+                  }}
                   className="grid grid-cols-2 gap-3"
                 >
                   {paymentMethods.map((method) => {
@@ -503,7 +556,10 @@ export default function PaymentSubmitPage() {
                   id="transactionRef"
                   placeholder="যেমন: TXN123456789"
                   value={transactionRef}
-                  onChange={(e) => setTransactionRef(e.target.value)}
+                  onChange={(e) => {
+                    setTransactionRef(e.target.value);
+                    setError('');
+                  }}
                   required
                 />
                 <p className="text-xs text-gray-400">আপনার পেমেন্ট প্রদানের ট্রানজেকশন আইডি দিন</p>
@@ -563,9 +619,20 @@ export default function PaymentSubmitPage() {
                     জমা হচ্ছে...
                   </>
                 ) : (
-                  'পেমেন্ট জমা দিন'
+                  <>
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    পেমেন্ট জমা দিন
+                  </>
                 )}
               </Button>
+
+              {/* Help text when button is disabled */}
+              {!paymentMethod && (
+                <p className="text-xs text-center text-gray-400">পেমেন্ট পদ্ধতি নির্বাচন করুন</p>
+              )}
+              {paymentMethod && !transactionRef.trim() && (
+                <p className="text-xs text-center text-gray-400">ট্রানজেকশন আইডি দিন</p>
+              )}
             </form>
           </CardContent>
         </Card>
