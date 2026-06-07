@@ -120,8 +120,9 @@ export async function PUT(
 
     const isBuyer = transaction.buyerId === userId;
     const isSeller = transaction.sellerId === userId;
+    const isAdmin = (session.user as { role: string }).role === "admin";
 
-    if (!isBuyer && !isSeller) {
+    if (!isBuyer && !isSeller && !isAdmin) {
       return NextResponse.json(
         { error: "আপনার এই লেনদেন আপডেট করার অনুমতি নেই" },
         { status: 403 }
@@ -134,52 +135,68 @@ export async function PUT(
     let notificationTitle = "";
     let notificationMessage = "";
 
-    // Status workflow validation
-    switch (newStatus) {
-      case "work_in_progress":
-        // Buyer can mark as work_in_progress when status is "paid"
-        if (isBuyer && currentStatus === "paid") {
-          isValidTransition = true;
-          notificationTargetIds = [transaction.sellerId];
-          notificationTitle = "কাজ শুরু হয়েছে";
-          notificationMessage = `লেনদেন "${transaction.title}" এর কাজ শুরু হয়েছে`;
-        }
-        break;
+    // Admin can change to any valid status
+    if (isAdmin) {
+      const allValidStatuses = [
+        "pending_payment",
+        "pending_verification",
+        "paid",
+        "work_in_progress",
+        "delivered",
+        "completed",
+        "disputed",
+        "cancelled",
+      ];
+      if (allValidStatuses.includes(newStatus) && newStatus !== currentStatus) {
+        isValidTransition = true;
+        notificationTargetIds = [transaction.buyerId, transaction.sellerId];
+        notificationTitle = "লেনদেনের অবস্থা পরিবর্তন হয়েছে";
+        notificationMessage = `প্রশাসক লেনদেন "${transaction.title}" এর অবস্থা পরিবর্তন করেছেন`;
+      }
+    } else {
+      // Status workflow validation for regular users
+      switch (newStatus) {
+        case "work_in_progress":
+          if (isBuyer && currentStatus === "paid") {
+            isValidTransition = true;
+            notificationTargetIds = [transaction.sellerId];
+            notificationTitle = "কাজ শুরু হয়েছে";
+            notificationMessage = `লেনদেন "${transaction.title}" এর কাজ শুরু হয়েছে`;
+          }
+          break;
 
-      case "delivered":
-        // Seller can mark as delivered when status is "work_in_progress"
-        if (isSeller && currentStatus === "work_in_progress") {
-          isValidTransition = true;
-          notificationTargetIds = [transaction.buyerId];
-          notificationTitle = "কাজ সরবরাহ করা হয়েছে";
-          notificationMessage = `লেনদেন "${transaction.title}" এর কাজ সরবরাহ করা হয়েছে, অনুগ্রহ করে যাচাই করুন`;
-        }
-        break;
+        case "delivered":
+          if (isSeller && currentStatus === "work_in_progress") {
+            isValidTransition = true;
+            notificationTargetIds = [transaction.buyerId];
+            notificationTitle = "কাজ সরবরাহ করা হয়েছে";
+            notificationMessage = `লেনদেন "${transaction.title}" এর কাজ সরবরাহ করা হয়েছে, অনুগ্রহ করে যাচাই করুন`;
+          }
+          break;
 
-      case "completed":
-        // Buyer can mark as completed when status is "delivered"
-        if (isBuyer && currentStatus === "delivered") {
-          isValidTransition = true;
-          notificationTargetIds = [transaction.sellerId];
-          notificationTitle = "লেনদেন সম্পন্ন হয়েছে";
-          notificationMessage = `লেনদেন "${transaction.title}" সফলভাবে সম্পন্ন হয়েছে`;
-        }
-        break;
+        case "completed":
+          if (isBuyer && currentStatus === "delivered") {
+            isValidTransition = true;
+            notificationTargetIds = [transaction.sellerId];
+            notificationTitle = "লেনদেন সম্পন্ন হয়েছে";
+            notificationMessage = `লেনদেন "${transaction.title}" সফলভাবে সম্পন্ন হয়েছে`;
+          }
+          break;
 
-      case "cancelled":
-        // Both can cancel when status is "pending_payment"
-        if ((isBuyer || isSeller) && currentStatus === "pending_payment") {
-          isValidTransition = true;
-          notificationTargetIds = isBuyer
-            ? [transaction.sellerId]
-            : [transaction.buyerId];
-          notificationTitle = "লেনদেন বাতিল হয়েছে";
-          notificationMessage = `লেনদেন "${transaction.title}" বাতিল করা হয়েছে`;
-        }
-        break;
+        case "cancelled":
+          if ((isBuyer || isSeller) && currentStatus === "pending_payment") {
+            isValidTransition = true;
+            notificationTargetIds = isBuyer
+              ? [transaction.sellerId]
+              : [transaction.buyerId];
+            notificationTitle = "লেনদেন বাতিল হয়েছে";
+            notificationMessage = `লেনদেন "${transaction.title}" বাতিল করা হয়েছে`;
+          }
+          break;
 
-      default:
-        isValidTransition = false;
+        default:
+          isValidTransition = false;
+      }
     }
 
     if (!isValidTransition) {
@@ -189,6 +206,17 @@ export async function PUT(
         },
         { status: 400 }
       );
+    }
+
+    // Log admin action
+    if (isAdmin) {
+      await db.adminLog.create({
+        data: {
+          userId,
+          action: "transaction_status_changed",
+          details: `Transaction "${transaction.title}" status changed from "${currentStatus}" to "${newStatus}"`,
+        },
+      });
     }
 
     // Update transaction status

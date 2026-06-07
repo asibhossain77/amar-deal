@@ -96,18 +96,13 @@ export default function TransactionDetailPage() {
     try {
       setLoading(true);
       const data = await api.getTransaction(selectedTransactionId);
-      setTransaction(data.transaction);
+      setTransaction(data.transaction || data);
     } catch (error) {
       console.error('লেনদেন লোড করতে ত্রুটি:', error);
-      toast({
-        title: 'ত্রুটি',
-        description: 'লেনদেনের তথ্য লোড করতে সমস্যা হয়েছে',
-        variant: 'destructive',
-      });
     } finally {
       setLoading(false);
     }
-  }, [selectedTransactionId, toast]);
+  }, [selectedTransactionId]);
 
   useEffect(() => {
     fetchTransaction();
@@ -118,7 +113,7 @@ export default function TransactionDetailPage() {
     try {
       setUpdating(true);
       const data = await api.updateTransactionStatus(transaction.id, newStatus);
-      setTransaction(data.transaction);
+      setTransaction(data.transaction || data);
       toast({
         title: 'সফল!',
         description: data.message || 'লেনদেনের অবস্থা আপডেট হয়েছে',
@@ -168,6 +163,7 @@ export default function TransactionDetailPage() {
 
   const isBuyer = transaction && user ? transaction.buyerId === user.id : false;
   const isSeller = transaction && user ? transaction.sellerId === user.id : false;
+  const isAdmin = user?.role === 'admin';
 
   // Loading state
   if (loading) {
@@ -461,7 +457,73 @@ export default function TransactionDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Action Buttons */}
+      {/* Admin Status Change */}
+      {isAdmin && transaction && !isTerminalStatus(transaction.status) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Shield className="h-5 w-5 text-primary" />
+              প্রশাসক পদক্ষেপ
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                প্রশাসক হিসেবে আপনি এই লেনদেনের অবস্থা পরিবর্তন করতে পারেন।
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {statusTimeline
+                  .filter((s) => s !== transaction.status)
+                  .map((status) => (
+                    <AlertDialog key={status}>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={updating}
+                          className={`gap-1 ${
+                            status === 'cancelled'
+                              ? 'border-red-300 text-red-700 hover:bg-red-50'
+                              : status === 'disputed'
+                              ? 'border-orange-300 text-orange-700 hover:bg-orange-50'
+                              : status === 'completed'
+                              ? 'border-green-300 text-green-700 hover:bg-green-50'
+                              : 'border-blue-300 text-blue-700 hover:bg-blue-50'
+                          }`}
+                        >
+                          {transactionStatusLabels[status]}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>অবস্থা পরিবর্তন করুন</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            আপনি কি নিশ্চিত যে লেনদেনের অবস্থা &quot;{transactionStatusLabels[transaction.status]}&quot; থেকে &quot;{transactionStatusLabels[status]}&quot; এ পরিবর্তন করতে চান?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>না, ফিরে যান</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleStatusUpdate(status)}
+                            className={
+                              status === 'cancelled'
+                                ? 'bg-destructive text-white hover:bg-destructive/90'
+                                : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            }
+                          >
+                            হ্যাঁ, পরিবর্তন করুন
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Action Buttons for Buyer/Seller */}
       {!isTerminalStatus(transaction.status) && (isBuyer || isSeller) && (
         <Card>
           <CardHeader>
