@@ -23,7 +23,7 @@ export default function AdminDisputesPage() {
       try {
         setLoading(true);
         const data = await api.getDisputes();
-        setDisputes(data);
+        setDisputes(data.disputes || data);
       } catch (err) {
         setError('বিরোধ তালিকা লোড করতে সমস্যা হয়েছে');
         console.error(err);

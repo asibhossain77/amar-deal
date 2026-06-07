@@ -26,7 +26,7 @@ export default function AdminLogsPage() {
       try {
         setLoading(true);
         const data = await api.getAdminLogs();
-        setLogs(data);
+        setLogs(data.logs || data);
       } catch (err) {
         setError('লগ লোড করতে সমস্যা হয়েছে');
         console.error(err);

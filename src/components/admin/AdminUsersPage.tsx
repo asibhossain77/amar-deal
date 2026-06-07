@@ -30,7 +30,7 @@ export default function AdminUsersPage() {
       try {
         setLoading(true);
         const data = await api.getAdminUsers();
-        setUsers(data);
+        setUsers(data.users || data);
       } catch (err) {
         setError('ব্যবহারকারী তালিকা লোড করতে সমস্যা হয়েছে');
         console.error(err);

@@ -58,6 +58,6 @@ export const api = {
   getAdminStats: () => fetchAPI('/admin'),
   getAdminUsers: () => fetchAPI('/admin/users'),
   toggleUserStatus: (id: string, isActive: boolean) => 
-    fetchAPI('/admin/users', { method: 'PUT', body: JSON.stringify({ id, isActive }) }),
+    fetchAPI('/admin/users', { method: 'PUT', body: JSON.stringify({ userId: id, isActive }) }),
   getAdminLogs: () => fetchAPI('/admin/logs'),
 };
