@@ -87,18 +87,18 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-          <UserCog className="h-5 w-5 text-blue-600" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+          <UserCog className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">ব্যবহারকারী ব্যবস্থাপনা</h1>
-          <p className="text-sm text-gray-500">সকল নিবন্ধিত ব্যবহারকারীদের ব্যবস্থাপনা</p>
+          <h1 className="text-2xl font-bold text-foreground">ব্যবহারকারী ব্যবস্থাপনা</h1>
+          <p className="text-sm text-muted-foreground">সকল নিবন্ধিত ব্যবহারকারীদের ব্যবস্থাপনা</p>
         </div>
       </div>
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="নাম, ইমেইল বা ভূমিকা দিয়ে খুঁজুন..."
           value={search}
@@ -114,10 +114,10 @@ export default function AdminUsersPage() {
             <div className="space-y-4">
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-full bg-gray-200 animate-pulse" />
+                  <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 w-40 rounded bg-gray-200 animate-pulse" />
-                    <div className="h-3 w-56 rounded bg-gray-200 animate-pulse" />
+                    <div className="h-4 w-40 rounded bg-muted animate-pulse" />
+                    <div className="h-3 w-56 rounded bg-muted animate-pulse" />
                   </div>
                 </div>
               ))}
@@ -133,8 +133,8 @@ export default function AdminUsersPage() {
       ) : filteredUsers.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-center">
-            <Users className="mx-auto mb-2 h-10 w-10 text-gray-300" />
-            <p className="text-gray-500">কোনো ব্যবহারকারী পাওয়া যায়নি</p>
+            <Users className="mx-auto mb-2 h-10 w-10 text-muted-foreground" />
+            <p className="text-muted-foreground">কোনো ব্যবহারকারী পাওয়া যায়নি</p>
           </CardContent>
         </Card>
       ) : (
@@ -160,11 +160,11 @@ export default function AdminUsersPage() {
                   {filteredUsers.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">{user.name}</TableCell>
-                      <TableCell className="text-gray-600">{user.email}</TableCell>
+                      <TableCell className="text-muted-foreground">{user.email}</TableCell>
                       <TableCell>
                         <Badge
                           variant={user.role === 'admin' ? 'default' : 'secondary'}
-                          className={user.role === 'admin' ? 'bg-blue-600' : ''}
+                          className={user.role === 'admin' ? 'bg-primary' : ''}
                         >
                           {user.role === 'admin' ? 'প্রশাসক' : 'ব্যবহারকারী'}
                         </Badge>
@@ -188,7 +188,7 @@ export default function AdminUsersPage() {
                           </Badge>
                         </div>
                       </TableCell>
-                      <TableCell className="text-gray-600">
+                      <TableCell className="text-muted-foreground">
                         {formatDate(user.createdAt)}
                       </TableCell>
                     </TableRow>

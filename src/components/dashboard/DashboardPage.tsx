@@ -91,9 +91,9 @@ export default function DashboardPage() {
       title: 'মোট লেনদেন',
       value: stats.total,
       icon: ArrowLeftRight,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-100',
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
+      borderColor: 'border-primary/10',
     },
     {
       title: 'চলমান লেনদেন',
@@ -125,10 +125,10 @@ export default function DashboardPage() {
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
       {/* Welcome */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">
+        <h2 className="text-2xl font-bold text-foreground">
           স্বাগতম, {user?.name || 'ব্যবহারকারী'}!
         </h2>
-        <p className="text-sm text-gray-500 mt-1">আপনার ড্যাশবোর্ড ওভারভিউ</p>
+        <p className="text-sm text-muted-foreground mt-1">আপনার ড্যাশবোর্ড ওভারভিউ</p>
       </div>
 
       {/* Stats Grid */}
@@ -157,8 +157,8 @@ export default function DashboardPage() {
                         <Icon className={`h-5 w-5 ${stat.color}`} />
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 font-medium">{stat.title}</p>
-                        <p className="text-xl font-bold text-gray-900">{stat.value}</p>
+                        <p className="text-xs text-muted-foreground font-medium">{stat.title}</p>
+                        <p className="text-xl font-bold text-foreground">{stat.value}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -175,7 +175,7 @@ export default function DashboardPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-blue-600 hover:text-blue-700"
+              className="text-primary hover:text-primary/80"
               onClick={() => setPage('transactions')}
             >
               সকল দেখুন
@@ -197,8 +197,8 @@ export default function DashboardPage() {
             </div>
           ) : recentTransactions.length === 0 ? (
             <div className="text-center py-8">
-              <ArrowLeftRight className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">কোনো লেনদেন নেই</p>
+              <ArrowLeftRight className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">কোনো লেনদেন নেই</p>
               <Button
                 variant="outline"
                 size="sm"
@@ -225,10 +225,10 @@ export default function DashboardPage() {
                     className="cursor-pointer"
                     onClick={() => handleRowClick(tx.id)}
                   >
-                    <TableCell className="font-medium text-gray-900 max-w-[150px] truncate">
+                    <TableCell className="font-medium text-foreground max-w-[150px] truncate">
                       {tx.title}
                     </TableCell>
-                    <TableCell className="text-gray-700">{formatBDT(tx.amount)}</TableCell>
+                    <TableCell className="text-foreground">{formatBDT(tx.amount)}</TableCell>
                     <TableCell>
                       <Badge
                         variant="secondary"
@@ -237,7 +237,7 @@ export default function DashboardPage() {
                         {transactionStatusLabels[tx.status] || tx.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="hidden sm:table-cell text-gray-500 text-sm">
+                    <TableCell className="hidden sm:table-cell text-muted-foreground text-sm">
                       {formatDate(tx.createdAt)}
                     </TableCell>
                   </TableRow>
@@ -256,7 +256,7 @@ export default function DashboardPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-blue-600 hover:text-blue-700"
+              className="text-primary hover:text-primary/80"
               onClick={() => setPage('notifications')}
             >
               সকল বিজ্ঞপ্তি দেখুন
@@ -279,15 +279,15 @@ export default function DashboardPage() {
             </div>
           ) : recentNotifications.length === 0 ? (
             <div className="text-center py-8">
-              <Bell className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">কোনো বিজ্ঞপ্তি নেই</p>
+              <Bell className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">কোনো বিজ্ঞপ্তি নেই</p>
             </div>
           ) : (
             <div className="space-y-1">
               {recentNotifications.map((notif, index) => (
                 <React.Fragment key={notif.id}>
                   <div
-                    className="flex items-start gap-3 py-3 cursor-pointer hover:bg-gray-50 -mx-2 px-2 rounded-lg transition-colors"
+                    className="flex items-start gap-3 py-3 cursor-pointer hover:bg-accent -mx-2 px-2 rounded-lg transition-colors"
                     onClick={async () => {
                       if (!notif.isRead) {
                         try {
@@ -301,19 +301,19 @@ export default function DashboardPage() {
                       }
                     }}
                   >
-                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-50 shrink-0 mt-0.5">
-                      <Bell className="w-4 h-4 text-blue-600" />
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 shrink-0 mt-0.5">
+                      <Bell className="w-4 h-4 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className={`text-sm truncate ${notif.isRead ? 'text-gray-600' : 'text-gray-900 font-medium'}`}>
+                        <p className={`text-sm truncate ${notif.isRead ? 'text-muted-foreground' : 'text-foreground font-medium'}`}>
                           {notif.title}
                         </p>
                         {!notif.isRead && (
-                          <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0" />
+                          <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
                         )}
                       </div>
-                      <p className="text-xs text-gray-500 mt-0.5">{timeAgo(notif.createdAt)}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{timeAgo(notif.createdAt)}</p>
                     </div>
                   </div>
                   {index < recentNotifications.length - 1 && <Separator />}

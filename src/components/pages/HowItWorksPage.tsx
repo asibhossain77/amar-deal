@@ -22,9 +22,9 @@ const steps = [
     title: 'চুক্তি তৈরি',
     description:
       'ক্রেতা ও বিক্রেতা একসাথে একটি এসক্রো চুক্তি তৈরি করেন। চুক্তিতে লেনদেনের বিবরণ, পরিমাণ এবং শর্তাবলী উল্লেখ থাকে।',
-    color: 'bg-blue-600',
-    lightBg: 'bg-blue-50',
-    borderColor: 'border-blue-200',
+    color: 'bg-primary',
+    lightBg: 'bg-primary/10',
+    borderColor: 'border-primary/20',
   },
   {
     number: 2,
@@ -106,13 +106,13 @@ export default function HowItWorksPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-600 to-blue-800 px-4 py-16 text-white sm:py-20">
+      <section className="bg-gradient-to-br from-primary to-primary/80 px-4 py-16 text-white sm:py-20">
         <div className="mx-auto max-w-4xl text-center">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
             <Scale className="h-9 w-9 text-white" />
           </div>
           <h1 className="mb-4 text-3xl font-bold sm:text-4xl">কিভাবে কাজ করে</h1>
-          <p className="mx-auto max-w-2xl text-lg leading-relaxed text-blue-100">
+          <p className="mx-auto max-w-2xl text-lg leading-relaxed text-primary-foreground/80">
             বাংলা এসক্রোতে লেনদেনের সম্পূর্ণ প্রক্রিয়া জানুন। আমাদের সহজ ও নিরাপদ
             পদ্ধতিতে ক্রেতা ও বিক্রেতা উভয়েই সুরক্ষিত থাকেন।
           </p>
@@ -123,13 +123,13 @@ export default function HowItWorksPage() {
       <section className="px-4 py-12 sm:py-16">
         <div className="mx-auto max-w-3xl">
           <div className="mb-10 text-center">
-            <h2 className="mb-2 text-2xl font-bold text-gray-900">লেনদেনের ধাপসমূহ</h2>
-            <p className="text-gray-500">এসক্রো লেনদেনের ৬টি সহজ ধাপ</p>
+            <h2 className="mb-2 text-2xl font-bold text-foreground">লেনদেনের ধাপসমূহ</h2>
+            <p className="text-muted-foreground">এসক্রো লেনদেনের ৬টি সহজ ধাপ</p>
           </div>
 
           <div className="relative">
             {/* Vertical line */}
-            <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200 sm:left-8" />
+            <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-muted sm:left-8" />
 
             <div className="space-y-8">
               {steps.map((step, index) => {
@@ -152,9 +152,9 @@ export default function HowItWorksPage() {
                           <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white ${step.color}`}>
                             {step.number}
                           </span>
-                          <h3 className="text-lg font-bold text-gray-900">{step.title}</h3>
+                          <h3 className="text-lg font-bold text-foreground">{step.title}</h3>
                         </div>
-                        <p className="leading-relaxed text-gray-600">{step.description}</p>
+                        <p className="leading-relaxed text-muted-foreground">{step.description}</p>
                       </CardContent>
                     </Card>
                   </div>
@@ -166,14 +166,14 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Dispute Resolution */}
-      <section className="bg-gray-50 px-4 py-12 sm:py-16">
+      <section className="bg-muted px-4 py-12 sm:py-16">
         <div className="mx-auto max-w-4xl">
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-100">
               <Scale className="h-7 w-7 text-red-600" />
             </div>
-            <h2 className="mb-2 text-2xl font-bold text-gray-900">বিরোধ নিষ্পত্তি</h2>
-            <p className="mx-auto max-w-2xl text-gray-500">
+            <h2 className="mb-2 text-2xl font-bold text-foreground">বিরোধ নিষ্পত্তি</h2>
+            <p className="mx-auto max-w-2xl text-muted-foreground">
               লেনদেনে কোনো সমস্যা হলে, আমাদের বিরোধ নিষ্পত্তি প্রক্রিয়া আপনাকে
               নিরপেক্ষ সমাধান প্রদান করবে।
             </p>
@@ -190,18 +190,18 @@ export default function HowItWorksPage() {
                     >
                       <Icon className={`h-7 w-7 ${step.color}`} />
                     </div>
-                    <h3 className="mb-2 text-lg font-bold text-gray-900">{step.title}</h3>
-                    <p className="text-sm leading-relaxed text-gray-600">{step.description}</p>
+                    <h3 className="mb-2 text-lg font-bold text-foreground">{step.title}</h3>
+                    <p className="text-sm leading-relaxed text-muted-foreground">{step.description}</p>
                   </CardContent>
                 </Card>
               );
             })}
           </div>
 
-          <div className="mt-8 rounded-xl border border-blue-100 bg-blue-50/50 p-6 text-center">
-            <ShieldCheck className="mx-auto mb-3 h-8 w-8 text-blue-600" />
-            <h3 className="mb-2 font-semibold text-gray-900">আপনার অর্থ সুরক্ষিত</h3>
-            <p className="text-sm text-gray-600">
+          <div className="mt-8 rounded-xl border border-primary/20 bg-primary/5 p-6 text-center">
+            <ShieldCheck className="mx-auto mb-3 h-8 w-8 text-primary" />
+            <h3 className="mb-2 font-semibold text-foreground">আপনার অর্থ সুরক্ষিত</h3>
+            <p className="text-sm text-muted-foreground">
               বিরোধের সময় আপনার অর্থ এসক্রোতে নিরাপদে রাখা হয়। প্রশাসকের সিদ্ধান্তের
               পর যথাযথ পক্ষকে অর্থ প্রদান করা হয়।
             </p>
@@ -212,12 +212,12 @@ export default function HowItWorksPage() {
       {/* CTA Section */}
       <section className="px-4 py-12 sm:py-16">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="mb-3 text-2xl font-bold text-gray-900">এখনই শুরু করুন</h2>
-          <p className="mb-6 text-gray-600">
+          <h2 className="mb-3 text-2xl font-bold text-foreground">এখনই শুরু করুন</h2>
+          <p className="mb-6 text-muted-foreground">
             নিরাপদ লেনদেনের জন্য আজই বাংলা এসক্রোতে যোগ দিন এবং নির্ভরযোগ্য
             এসক্রো পরিষেবা উপভোগ করুন।
           </p>
-          <div className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg">
+          <div className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-lg">
             <CheckCircle2 className="h-5 w-5" />
             নিরাপদ লেনদেন শুরু করুন
           </div>

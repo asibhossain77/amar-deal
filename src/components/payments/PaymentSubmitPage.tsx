@@ -172,8 +172,8 @@ export default function PaymentSubmitPage() {
         <Card className="border-dashed">
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-              <p className="text-sm text-gray-500">অ্যাকাউন্ট তথ্য লোড হচ্ছে...</p>
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">অ্যাকাউন্ট তথ্য লোড হচ্ছে...</p>
             </div>
           </CardContent>
         </Card>
@@ -198,8 +198,8 @@ export default function PaymentSubmitPage() {
             <div className="bg-white rounded-lg p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">অ্যাকাউন্ট নাম্বার</p>
-                  <p className="text-xl font-bold text-gray-900 font-mono tracking-wide">{accountInfo.bkash.number}</p>
+                  <p className="text-xs text-muted-foreground mb-1">অ্যাকাউন্ট নাম্বার</p>
+                  <p className="text-xl font-bold text-foreground font-mono tracking-wide">{accountInfo.bkash.number}</p>
                 </div>
                 <Button
                   type="button"
@@ -217,8 +217,8 @@ export default function PaymentSubmitPage() {
               </div>
               {accountInfo.bkash.name && (
                 <div className="pt-2 border-t">
-                  <p className="text-xs text-gray-500">অ্যাকাউন্টের নাম</p>
-                  <p className="text-sm font-medium text-gray-700">{accountInfo.bkash.name}</p>
+                  <p className="text-xs text-muted-foreground">অ্যাকাউন্টের নাম</p>
+                  <p className="text-sm font-medium text-foreground">{accountInfo.bkash.name}</p>
                 </div>
               )}
             </div>
@@ -246,8 +246,8 @@ export default function PaymentSubmitPage() {
             <div className="bg-white rounded-lg p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">অ্যাকাউন্ট নাম্বার</p>
-                  <p className="text-xl font-bold text-gray-900 font-mono tracking-wide">{accountInfo.nagad.number}</p>
+                  <p className="text-xs text-muted-foreground mb-1">অ্যাকাউন্ট নাম্বার</p>
+                  <p className="text-xl font-bold text-foreground font-mono tracking-wide">{accountInfo.nagad.number}</p>
                 </div>
                 <Button
                   type="button"
@@ -265,8 +265,8 @@ export default function PaymentSubmitPage() {
               </div>
               {accountInfo.nagad.name && (
                 <div className="pt-2 border-t">
-                  <p className="text-xs text-gray-500">অ্যাকাউন্টের নাম</p>
-                  <p className="text-sm font-medium text-gray-700">{accountInfo.nagad.name}</p>
+                  <p className="text-xs text-muted-foreground">অ্যাকাউন্টের নাম</p>
+                  <p className="text-sm font-medium text-foreground">{accountInfo.nagad.name}</p>
                 </div>
               )}
             </div>
@@ -294,8 +294,8 @@ export default function PaymentSubmitPage() {
             <div className="bg-white rounded-lg p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">অ্যাকাউন্ট নাম্বার</p>
-                  <p className="text-xl font-bold text-gray-900 font-mono tracking-wide">{accountInfo.rocket.number}</p>
+                  <p className="text-xs text-muted-foreground mb-1">অ্যাকাউন্ট নাম্বার</p>
+                  <p className="text-xl font-bold text-foreground font-mono tracking-wide">{accountInfo.rocket.number}</p>
                 </div>
                 <Button
                   type="button"
@@ -313,8 +313,8 @@ export default function PaymentSubmitPage() {
               </div>
               {accountInfo.rocket.name && (
                 <div className="pt-2 border-t">
-                  <p className="text-xs text-gray-500">অ্যাকাউন্টের নাম</p>
-                  <p className="text-sm font-medium text-gray-700">{accountInfo.rocket.name}</p>
+                  <p className="text-xs text-muted-foreground">অ্যাকাউন্টের নাম</p>
+                  <p className="text-sm font-medium text-foreground">{accountInfo.rocket.name}</p>
                 </div>
               )}
             </div>
@@ -342,14 +342,14 @@ export default function PaymentSubmitPage() {
             <div className="bg-white rounded-lg p-4 space-y-3">
               {accountInfo.bank.bankName && (
                 <div>
-                  <p className="text-xs text-gray-500">ব্যাংকের নাম</p>
-                  <p className="text-sm font-semibold text-gray-900">{accountInfo.bank.bankName}</p>
+                  <p className="text-xs text-muted-foreground">ব্যাংকের নাম</p>
+                  <p className="text-sm font-semibold text-foreground">{accountInfo.bank.bankName}</p>
                 </div>
               )}
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">অ্যাকাউন্ট নাম্বার</p>
-                  <p className="text-xl font-bold text-gray-900 font-mono tracking-wide">{accountInfo.bank.accountNumber}</p>
+                  <p className="text-xs text-muted-foreground mb-1">অ্যাকাউন্ট নাম্বার</p>
+                  <p className="text-xl font-bold text-foreground font-mono tracking-wide">{accountInfo.bank.accountNumber}</p>
                 </div>
                 <Button
                   type="button"
@@ -367,21 +367,21 @@ export default function PaymentSubmitPage() {
               </div>
               {accountInfo.bank.accountName && (
                 <div className="pt-2 border-t">
-                  <p className="text-xs text-gray-500">অ্যাকাউন্টের নাম</p>
-                  <p className="text-sm font-medium text-gray-700">{accountInfo.bank.accountName}</p>
+                  <p className="text-xs text-muted-foreground">অ্যাকাউন্টের নাম</p>
+                  <p className="text-sm font-medium text-foreground">{accountInfo.bank.accountName}</p>
                 </div>
               )}
               {accountInfo.bank.branch && (
                 <div>
-                  <p className="text-xs text-gray-500">শাখা</p>
-                  <p className="text-sm font-medium text-gray-700">{accountInfo.bank.branch}</p>
+                  <p className="text-xs text-muted-foreground">শাখা</p>
+                  <p className="text-sm font-medium text-foreground">{accountInfo.bank.branch}</p>
                 </div>
               )}
               {accountInfo.bank.routing && (
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-500">রাউটিং নাম্বার</p>
-                    <p className="text-sm font-medium text-gray-700 font-mono">{accountInfo.bank.routing}</p>
+                    <p className="text-xs text-muted-foreground">রাউটিং নাম্বার</p>
+                    <p className="text-sm font-medium text-foreground font-mono">{accountInfo.bank.routing}</p>
                   </div>
                   <Button
                     type="button"
@@ -431,11 +431,11 @@ export default function PaymentSubmitPage() {
           <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 className="w-8 h-8 text-green-600" />
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">পেমেন্ট সফলভাবে জমা হয়েছে!</h2>
-          <p className="text-sm text-gray-500 mb-6">
+          <h2 className="text-xl font-bold text-foreground mb-2">পেমেন্ট সফলভাবে জমা হয়েছে!</h2>
+          <p className="text-sm text-muted-foreground mb-6">
             আপনার পেমেন্ট যাচাইয়ের জন্য অপেক্ষমাণ রয়েছে। অ্যাডমিন যাচাই করার পর আপনাকে জানানো হবে।
           </p>
-          <Button onClick={handleGoToTransaction} className="bg-[#2563eb] hover:bg-[#1d4ed8]">
+          <Button onClick={handleGoToTransaction} className="bg-primary hover:bg-primary/90">
             লেনদেনের বিবরণ দেখুন
           </Button>
         </div>
@@ -456,15 +456,15 @@ export default function PaymentSubmitPage() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900">পেমেন্ট জমা দিন</h1>
-          <p className="text-sm text-gray-500 mt-0.5">আপনার পেমেন্টের বিবরণ পূরণ করুন</p>
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">পেমেন্ট জমা দিন</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">আপনার পেমেন্টের বিবরণ পূরণ করুন</p>
         </div>
       </div>
 
       {/* Transaction Info Summary */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium text-gray-500">লেনদেনের তথ্য</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">লেনদেনের তথ্য</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -476,23 +476,23 @@ export default function PaymentSubmitPage() {
           ) : transaction ? (
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">শিরোনাম</span>
-                <span className="text-sm font-semibold text-gray-900">{transaction.title}</span>
+                <span className="text-sm text-muted-foreground">শিরোনাম</span>
+                <span className="text-sm font-semibold text-foreground">{transaction.title}</span>
               </div>
               <Separator />
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">পরিমাণ</span>
-                <span className="text-lg font-bold text-[#2563eb]">{formatBDT(transaction.amount)}</span>
+                <span className="text-sm text-muted-foreground">পরিমাণ</span>
+                <span className="text-lg font-bold text-primary">{formatBDT(transaction.amount)}</span>
               </div>
               <Separator />
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">বিক্রেতা</span>
-                <span className="text-sm font-medium text-gray-900">{transaction.seller?.name || 'বিক্রেতা'}</span>
+                <span className="text-sm text-muted-foreground">বিক্রেতা</span>
+                <span className="text-sm font-medium text-foreground">{transaction.seller?.name || 'বিক্রেতা'}</span>
               </div>
             </div>
           ) : (
             <div className="text-center py-4">
-              <p className="text-sm text-gray-500">লেনদেনের তথ্য পাওয়া যায়নি</p>
+              <p className="text-sm text-muted-foreground">লেনদেনের তথ্য পাওয়া যায়নি</p>
               <Button variant="outline" size="sm" className="mt-2" onClick={() => setPage('transactions')}>
                 লেনদেন তালিকায় যান
               </Button>
@@ -528,7 +528,7 @@ export default function PaymentSubmitPage() {
                         className={`flex items-center gap-3 rounded-lg border-2 p-3 cursor-pointer transition-all hover:shadow-sm ${
                           paymentMethod === method.value
                             ? method.activeColor
-                            : 'border-gray-200 bg-white hover:border-gray-300'
+                            : 'border-border bg-card hover:border-primary/30'
                         }`}
                       >
                         <RadioGroupItem value={method.value} id={method.value} />
@@ -562,7 +562,7 @@ export default function PaymentSubmitPage() {
                   }}
                   required
                 />
-                <p className="text-xs text-gray-400">আপনার পেমেন্ট প্রদানের ট্রানজেকশন আইডি দিন</p>
+                <p className="text-xs text-muted-foreground">আপনার পেমেন্ট প্রদানের ট্রানজেকশন আইডি দিন</p>
               </div>
 
               {/* Screenshot */}
@@ -583,7 +583,7 @@ export default function PaymentSubmitPage() {
                     <Upload className="w-4 h-4" />
                   </Button>
                 </div>
-                <p className="text-xs text-gray-400">স্ক্রিনশট আপলোড করুন অথবা বিবরণ লিখুন</p>
+                <p className="text-xs text-muted-foreground">স্ক্রিনশট আপলোড করুন অথবা বিবরণ লিখুন</p>
               </div>
 
               {/* Note */}
@@ -610,7 +610,7 @@ export default function PaymentSubmitPage() {
               {/* Submit */}
               <Button
                 type="submit"
-                className="w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold py-3"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3"
                 disabled={submitting || !paymentMethod || !transactionRef.trim()}
               >
                 {submitting ? (
@@ -628,10 +628,10 @@ export default function PaymentSubmitPage() {
 
               {/* Help text when button is disabled */}
               {!paymentMethod && (
-                <p className="text-xs text-center text-gray-400">পেমেন্ট পদ্ধতি নির্বাচন করুন</p>
+                <p className="text-xs text-center text-muted-foreground">পেমেন্ট পদ্ধতি নির্বাচন করুন</p>
               )}
               {paymentMethod && !transactionRef.trim() && (
-                <p className="text-xs text-center text-gray-400">ট্রানজেকশন আইডি দিন</p>
+                <p className="text-xs text-center text-muted-foreground">ট্রানজেকশন আইডি দিন</p>
               )}
             </form>
           </CardContent>

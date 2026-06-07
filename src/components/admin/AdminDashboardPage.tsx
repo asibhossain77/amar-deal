@@ -12,9 +12,9 @@ const statCards = [
     key: 'totalUsers' as const,
     label: 'মোট ব্যবহারকারী',
     icon: Users,
-    colorClass: 'bg-blue-50 text-blue-600 border-blue-200',
-    iconBg: 'bg-blue-100',
-    valueColor: 'text-blue-700',
+    colorClass: 'bg-primary/10 text-primary border-primary/20',
+    iconBg: 'bg-primary/10',
+    valueColor: 'text-primary',
   },
   {
     key: 'totalTransactions' as const,
@@ -83,12 +83,12 @@ export default function AdminDashboardPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-          <TrendingUp className="h-5 w-5 text-blue-600" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+          <TrendingUp className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">প্রশাসন ড্যাশবোর্ড</h1>
-          <p className="text-sm text-gray-500">প্ল্যাটফর্মের সামগ্রিক পরিসংখ্যান</p>
+          <h1 className="text-2xl font-bold text-foreground">প্রশাসন ড্যাশবোর্ড</h1>
+          <p className="text-sm text-muted-foreground">প্ল্যাটফর্মের সামগ্রিক পরিসংখ্যান</p>
         </div>
       </div>
 
@@ -99,10 +99,10 @@ export default function AdminDashboardPage() {
             <Card key={i} className="animate-pulse">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-gray-200" />
+                  <div className="h-10 w-10 rounded-lg bg-muted" />
                   <div className="space-y-2">
-                    <div className="h-3 w-20 rounded bg-gray-200" />
-                    <div className="h-5 w-12 rounded bg-gray-200" />
+                    <div className="h-3 w-20 rounded bg-muted" />
+                    <div className="h-5 w-12 rounded bg-muted" />
                   </div>
                 </div>
               </CardContent>
@@ -146,32 +146,32 @@ export default function AdminDashboardPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Activity className="h-5 w-5 text-blue-600" />
+            <Activity className="h-5 w-5 text-primary" />
             সাম্প্রতিক কার্যক্রম
           </CardTitle>
         </CardHeader>
         <CardContent>
           {stats ? (
             <div className="space-y-4">
-              <div className="flex items-center justify-between rounded-lg bg-blue-50 p-3">
-                <span className="text-sm text-gray-700">মোট ব্যবহারকারী</span>
-                <span className="font-semibold text-blue-700">{toBanglaNumber(stats.totalUsers)}</span>
+              <div className="flex items-center justify-between rounded-lg bg-primary/10 p-3">
+                <span className="text-sm text-foreground">মোট ব্যবহারকারী</span>
+                <span className="font-semibold text-primary">{toBanglaNumber(stats.totalUsers)}</span>
               </div>
               <div className="flex items-center justify-between rounded-lg bg-green-50 p-3">
-                <span className="text-sm text-gray-700">সম্পন্ন লেনদেন</span>
+                <span className="text-sm text-foreground">সম্পন্ন লেনদেন</span>
                 <span className="font-semibold text-green-700">{toBanglaNumber(stats.completedTransactions)}</span>
               </div>
               <div className="flex items-center justify-between rounded-lg bg-amber-50 p-3">
-                <span className="text-sm text-gray-700">চলমান লেনদেন</span>
+                <span className="text-sm text-foreground">চলমান লেনদেন</span>
                 <span className="font-semibold text-amber-700">{toBanglaNumber(stats.activeTransactions)}</span>
               </div>
               <div className="flex items-center justify-between rounded-lg bg-red-50 p-3">
-                <span className="text-sm text-gray-700">বিরোধিত লেনদেন</span>
+                <span className="text-sm text-foreground">বিরোধিত লেনদেন</span>
                 <span className="font-semibold text-red-700">{toBanglaNumber(stats.disputedTransactions)}</span>
               </div>
             </div>
           ) : (
-            <p className="text-center text-sm text-gray-500">কোনো তথ্য পাওয়া যায়নি</p>
+            <p className="text-center text-sm text-muted-foreground">কোনো তথ্য পাওয়া যায়নি</p>
           )}
         </CardContent>
       </Card>

@@ -279,8 +279,8 @@ export default function TransactionDetailPage() {
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">ক্রেতা</p>
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                  <User className="h-4 w-4 text-blue-700" />
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="h-4 w-4 text-primary" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">{transaction.buyer?.name || 'ক্রেতা'}</p>
@@ -345,7 +345,7 @@ export default function TransactionDetailPage() {
                       {index > 0 && (
                         <div
                           className={`absolute top-4 right-1/2 w-full h-0.5 ${
-                            reached ? 'bg-green-500' : 'bg-gray-200'
+                            reached ? 'bg-green-500' : 'bg-muted'
                           }`}
                         />
                       )}
@@ -356,7 +356,7 @@ export default function TransactionDetailPage() {
                             ? 'bg-primary text-white ring-4 ring-primary/20'
                             : reached
                             ? 'bg-green-500 text-white'
-                            : 'bg-gray-200 text-gray-400'
+                            : 'bg-muted text-muted-foreground'
                         }`}
                       >
                         {reached && !isCurrent ? (
@@ -423,7 +423,7 @@ export default function TransactionDetailPage() {
                           ? 'bg-primary text-white ring-2 ring-primary/20'
                           : reached
                           ? 'bg-green-500 text-white'
-                          : 'bg-gray-200 text-gray-400'
+                          : 'bg-muted text-muted-foreground'
                       }`}
                     >
                       {reached && !isCurrent ? (
@@ -434,7 +434,7 @@ export default function TransactionDetailPage() {
                     </div>
                     <div
                       className={`w-0.5 h-8 ${
-                        reached && !isTerminalStatus(transaction.status) ? 'bg-green-500' : 'bg-gray-200'
+                        reached && !isTerminalStatus(transaction.status) ? 'bg-green-500' : 'bg-muted'
                       }`}
                     />
                   </div>
@@ -488,7 +488,7 @@ export default function TransactionDetailPage() {
                               ? 'border-orange-300 text-orange-700 hover:bg-orange-50'
                               : status === 'completed'
                               ? 'border-green-300 text-green-700 hover:bg-green-50'
-                              : 'border-blue-300 text-blue-700 hover:bg-blue-50'
+                              : 'border-primary/30 text-primary hover:bg-primary/10'
                           }`}
                         >
                           {transactionStatusLabels[status]}

@@ -10,14 +10,14 @@ async function fetchAPI(endpoint: string, options?: RequestInit) {
   });
   
   if (!res.ok) {
-    // Handle session expiration - auto logout on 401 only for auth-dependent endpoints
+    // Handle session expiration - auto logout on 401 only for non-admin endpoints
+    // Admin endpoints properly return 401 when not authenticated
     if (res.status === 401) {
-      // Only auto-logout if it's not a settings or public endpoint
-      if (!endpoint.startsWith('/settings')) {
+      // Only auto-logout for user endpoints, not admin or settings
+      if (!endpoint.startsWith('/settings') && !endpoint.startsWith('/admin')) {
         if (typeof window !== 'undefined') {
           const { useAppStore } = await import('./store');
           useAppStore.getState().setUser(null);
-          // Don't force redirect - let the page router handle it naturally
         }
       }
       throw new Error('সেশন মেয়াদোত্তীর্ণ হয়েছে। দয়া করে আবার লগইন করুন।');

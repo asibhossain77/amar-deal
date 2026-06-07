@@ -110,12 +110,12 @@ export default function AdminSettingsPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-            <Settings className="h-5 w-5 text-blue-600 animate-spin" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <Settings className="h-5 w-5 text-primary animate-spin" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">পেমেন্ট সেটিংস</h1>
-            <p className="text-sm text-gray-500">লোড হচ্ছে...</p>
+            <h1 className="text-2xl font-bold text-foreground">পেমেন্ট সেটিংস</h1>
+            <p className="text-sm text-muted-foreground">লোড হচ্ছে...</p>
           </div>
         </div>
         <div className="space-y-4">
@@ -123,8 +123,8 @@ export default function AdminSettingsPage() {
             <Card key={i} className="animate-pulse">
               <CardContent className="p-6">
                 <div className="space-y-3">
-                  <div className="h-5 w-32 rounded bg-gray-200" />
-                  <div className="h-10 w-full rounded bg-gray-200" />
+                  <div className="h-5 w-32 rounded bg-muted" />
+                  <div className="h-10 w-full rounded bg-muted" />
                 </div>
               </CardContent>
             </Card>
@@ -138,12 +138,12 @@ export default function AdminSettingsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-          <Settings className="h-5 w-5 text-blue-600" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+          <Settings className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">পেমেন্ট সেটিংস</h1>
-          <p className="text-sm text-gray-500">পেমেন্ট অ্যাকাউন্ট নাম্বার ও তথ্য কনফিগার করুন</p>
+          <h1 className="text-2xl font-bold text-foreground">পেমেন্ট সেটিংস</h1>
+          <p className="text-sm text-muted-foreground">পেমেন্ট অ্যাকাউন্ট নাম্বার ও তথ্য কনফিগার করুন</p>
         </div>
       </div>
 
@@ -313,7 +313,7 @@ export default function AdminSettingsPage() {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] min-w-[160px]"
+          className="gap-2 bg-primary hover:bg-primary/90 min-w-[160px]"
         >
           {saving ? (
             <>

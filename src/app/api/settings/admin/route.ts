@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { requireAdmin } from "@/lib/auth-helper";
+import { requireAdmin, requireAuth } from "@/lib/auth-helper";
 
 // PUT /api/settings/admin - Update payment account settings (admin only)
 export async function PUT(request: NextRequest) {
   try {
+    const authSession = await requireAuth();
+    if (!authSession) {
+      return NextResponse.json(
+        { error: "প্রমাণীকরণ আবশ্যক" },
+        { status: 401 }
+      );
+    }
+
     const session = await requireAdmin();
     if (!session) {
       return NextResponse.json(

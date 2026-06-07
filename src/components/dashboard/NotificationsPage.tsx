@@ -34,7 +34,7 @@ function getNotifIcon(type: string) {
 function getNotifIconBg(type: string) {
   switch (type) {
     case 'transaction':
-      return 'bg-blue-50 text-blue-600';
+      return 'bg-primary/10 text-primary';
     case 'payment':
       return 'bg-green-50 text-green-600';
     case 'dispute':
@@ -42,7 +42,7 @@ function getNotifIconBg(type: string) {
     case 'system':
       return 'bg-purple-50 text-purple-600';
     default:
-      return 'bg-gray-50 text-gray-600';
+      return 'bg-muted text-muted-foreground';
   }
 }
 
@@ -128,9 +128,9 @@ export default function NotificationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-bold text-gray-900">বিজ্ঞপ্তিসমূহ</h2>
+          <h2 className="text-2xl font-bold text-foreground">বিজ্ঞপ্তিসমূহ</h2>
           {unreadCount > 0 && (
-            <Badge className="bg-blue-600 text-white border-0 text-xs">
+            <Badge className="bg-primary text-primary-foreground border-0 text-xs">
               {unreadCount} নতুন
             </Badge>
           )}
@@ -141,7 +141,7 @@ export default function NotificationsPage() {
             size="sm"
             onClick={handleMarkAllRead}
             disabled={markingAll}
-            className="text-blue-600 border-blue-200 hover:bg-blue-50"
+            className="text-primary border-primary/20 hover:bg-primary/10"
           >
             <CheckCheck className="w-4 h-4 mr-1" />
             {markingAll ? 'চিহ্নিত হচ্ছে...' : 'সকল পড়া হয়েছে'}
@@ -170,9 +170,9 @@ export default function NotificationsPage() {
       ) : notifications.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center">
-            <Bell className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <h3 className="text-lg font-medium text-gray-600 mb-1">কোনো বিজ্ঞপ্তি নেই</h3>
-            <p className="text-sm text-gray-400">নতুন বিজ্ঞপ্তি এলে এখানে দেখা যাবে</p>
+            <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <h3 className="text-lg font-medium text-muted-foreground mb-1">কোনো বিজ্ঞপ্তি নেই</h3>
+            <p className="text-sm text-muted-foreground">নতুন বিজ্ঞপ্তি এলে এখানে দেখা যাবে</p>
           </CardContent>
         </Card>
       ) : (
@@ -184,8 +184,8 @@ export default function NotificationsPage() {
             return (
               <Card
                 key={notif.id}
-                className={`cursor-pointer transition-colors hover:bg-gray-50 ${
-                  !notif.isRead ? 'border-l-4 border-l-blue-500' : ''
+                className={`cursor-pointer transition-colors hover:bg-accent ${
+                  !notif.isRead ? 'border-l-4 border-l-primary' : ''
                 }`}
                 onClick={() => handleNotifClick(notif)}
               >
@@ -196,15 +196,15 @@ export default function NotificationsPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className={`text-sm ${notif.isRead ? 'text-gray-600' : 'text-gray-900 font-semibold'}`}>
+                        <p className={`text-sm ${notif.isRead ? 'text-muted-foreground' : 'text-foreground font-semibold'}`}>
                           {notif.title}
                         </p>
                         {!notif.isRead && (
-                          <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0" />
+                          <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
                         )}
                       </div>
-                      <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">{notif.message}</p>
-                      <p className="text-xs text-gray-400 mt-1">{timeAgo(notif.createdAt)}</p>
+                      <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{notif.message}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{timeAgo(notif.createdAt)}</p>
                     </div>
                   </div>
                 </CardContent>

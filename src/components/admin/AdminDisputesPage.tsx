@@ -85,8 +85,8 @@ export default function AdminDisputesPage() {
           <Scale className="h-5 w-5 text-red-600" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">বিরোধ ব্যবস্থাপনা</h1>
-          <p className="text-sm text-gray-500">সকল বিরোধের ব্যবস্থাপনা ও নিষ্পত্তি</p>
+          <h1 className="text-2xl font-bold text-foreground">বিরোধ ব্যবস্থাপনা</h1>
+          <p className="text-sm text-muted-foreground">সকল বিরোধের ব্যবস্থাপনা ও নিষ্পত্তি</p>
         </div>
       </div>
 
@@ -106,9 +106,9 @@ export default function AdminDisputesPage() {
                 <Card key={i} className="animate-pulse">
                   <CardContent className="p-4">
                     <div className="space-y-3">
-                      <div className="h-4 w-48 rounded bg-gray-200" />
-                      <div className="h-3 w-32 rounded bg-gray-200" />
-                      <div className="h-3 w-64 rounded bg-gray-200" />
+                      <div className="h-4 w-48 rounded bg-muted" />
+                      <div className="h-3 w-32 rounded bg-muted" />
+                      <div className="h-3 w-64 rounded bg-muted" />
                     </div>
                   </CardContent>
                 </Card>
@@ -123,8 +123,8 @@ export default function AdminDisputesPage() {
           ) : filteredDisputes.length === 0 ? (
             <Card>
               <CardContent className="p-6 text-center">
-                <Scale className="mx-auto mb-2 h-10 w-10 text-gray-300" />
-                <p className="text-gray-500">কোনো বিরোধ পাওয়া যায়নি</p>
+                <Scale className="mx-auto mb-2 h-10 w-10 text-muted-foreground" />
+                <p className="text-muted-foreground">কোনো বিরোধ পাওয়া যায়নি</p>
               </CardContent>
             </Card>
           ) : (
@@ -140,39 +140,39 @@ export default function AdminDisputesPage() {
                       {/* Dispute Info */}
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-gray-900">
+                          <h3 className="font-semibold text-foreground">
                             {dispute.transaction?.title || 'লেনদেন'}
                           </h3>
                           {getDisputeStatusBadge(dispute.status)}
                         </div>
                         <div className="grid grid-cols-1 gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
                           <div>
-                            <span className="text-gray-500">পরিমাণ: </span>
-                            <span className="font-medium text-gray-900">
+                            <span className="text-muted-foreground">পরিমাণ: </span>
+                            <span className="font-medium text-foreground">
                               {formatBDT(dispute.transaction?.amount || 0)}
                             </span>
                           </div>
                           <div>
-                            <span className="text-gray-500">ক্রেতা: </span>
-                            <span className="text-gray-700">
+                            <span className="text-muted-foreground">ক্রেতা: </span>
+                            <span className="text-foreground">
                               {dispute.buyer?.name || 'অজানা'}
                             </span>
                           </div>
                           <div>
-                            <span className="text-gray-500">বিক্রেতা: </span>
-                            <span className="text-gray-700">
+                            <span className="text-muted-foreground">বিক্রেতা: </span>
+                            <span className="text-foreground">
                               {dispute.seller?.name || 'অজানা'}
                             </span>
                           </div>
                           <div>
-                            <span className="text-gray-500">খোলার তারিখ: </span>
-                            <span className="text-gray-700">
+                            <span className="text-muted-foreground">খোলার তারিখ: </span>
+                            <span className="text-foreground">
                               {formatDate(dispute.createdAt)}
                             </span>
                           </div>
                         </div>
-                        <p className="text-sm text-gray-600">
-                          <span className="text-gray-500">কারণ: </span>
+                        <p className="text-sm text-muted-foreground">
+                          <span className="text-muted-foreground">কারণ: </span>
                           {dispute.reason.length > 100
                             ? dispute.reason.substring(0, 100) + '...'
                             : dispute.reason}

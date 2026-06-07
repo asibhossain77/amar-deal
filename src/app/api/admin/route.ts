@@ -1,10 +1,20 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { requireAdmin } from "@/lib/auth-helper";
+import { requireAdmin, requireAuth } from "@/lib/auth-helper";
 
 // GET /api/admin - Return dashboard statistics (admin only)
 export async function GET() {
   try {
+    // First check if user is authenticated
+    const authSession = await requireAuth();
+    if (!authSession) {
+      return NextResponse.json(
+        { error: "প্রমাণীকরণ আবশ্যক" },
+        { status: 401 }
+      );
+    }
+
+    // Then check admin role
     const session = await requireAdmin();
     if (!session) {
       return NextResponse.json(

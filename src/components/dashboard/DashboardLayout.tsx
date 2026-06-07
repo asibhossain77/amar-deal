@@ -15,7 +15,6 @@ import {
   Shield,
   LogOut,
   Menu,
-  X,
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import type { PageName } from '@/lib/types';
@@ -69,22 +68,22 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   return (
-    <div className="flex h-full flex-col bg-white">
+    <div className="flex h-full flex-col bg-card">
       {/* Header */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
-        <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-600 text-white">
+      <div className="flex items-center gap-3 px-6 py-5 border-b border-border">
+        <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary text-primary-foreground">
           <Shield className="w-5 h-5" />
         </div>
         <div>
-          <h1 className="text-lg font-bold text-gray-900">বাংলা এসক্রো</h1>
-          <p className="text-xs text-gray-500">নিরাপদ লেনদেনের প্ল্যাটফর্ম</p>
+          <h1 className="text-lg font-bold text-foreground">বাংলা এসক্রো</h1>
+          <p className="text-xs text-muted-foreground">নিরাপদ লেনদেনের প্ল্যাটফর্ম</p>
         </div>
       </div>
 
       {/* Navigation */}
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="space-y-1">
-          <p className="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          <p className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             মেনু
           </p>
           {navItems.map((item) => {
@@ -96,11 +95,11 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 onClick={() => handleNav(item.page)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                 }`}
               >
-                <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-gray-400'}`} />
+                <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                 {item.label}
               </button>
             );
@@ -109,7 +108,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           {isAdmin && (
             <>
               <Separator className="my-4" />
-              <p className="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              <p className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 প্রশাসন
               </p>
               {adminNavItems.map((item) => {
@@ -121,11 +120,11 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                     onClick={() => handleNav(item.page)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                       isActive
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                     }`}
                   >
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-gray-400'}`} />
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                     {item.label}
                   </button>
                 );
@@ -136,21 +135,21 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </ScrollArea>
 
       {/* User info & logout */}
-      <div className="border-t border-gray-100 px-4 py-4">
+      <div className="border-t border-border px-4 py-4">
         {user && (
           <div className="flex items-center gap-3 mb-3">
             <Avatar className="h-9 w-9">
-              <AvatarFallback className="bg-blue-100 text-blue-700 text-sm font-semibold">
+              <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
                 {getInitials(user.name)}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user.email}</p>
+              <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
+              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
             </div>
             <Badge
               variant="secondary"
-              className="text-xs bg-blue-50 text-blue-700 border-0 shrink-0"
+              className="text-xs bg-primary/10 text-primary border-0 shrink-0"
             >
               {user.role === 'admin' ? 'প্রশাসক' : 'ব্যবহারকারী'}
             </Badge>
@@ -177,9 +176,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { sidebarOpen, setSidebarOpen } = useAppStore();
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-background">
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-[250px] shrink-0 border-r border-gray-200 flex-col">
+      <aside className="hidden md:flex w-[250px] shrink-0 border-r border-border flex-col">
         <SidebarContent />
       </aside>
 
@@ -196,10 +195,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile top bar */}
-        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
+        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-card border-b border-border">
           <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-blue-600" />
-            <span className="font-bold text-gray-900">বাংলা এসক্রো</span>
+            <Shield className="w-5 h-5 text-primary" />
+            <span className="font-bold text-foreground">বাংলা এসক্রো</span>
           </div>
           <Button
             variant="ghost"

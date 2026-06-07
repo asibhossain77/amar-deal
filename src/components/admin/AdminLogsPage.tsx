@@ -55,7 +55,7 @@ export default function AdminLogsPage() {
     }
     if (lower.includes('toggle') || lower.includes('সক্রিয়') || lower.includes('নিষ্ক্রিয়')) {
       return (
-        <Badge variant="outline" className="border-blue-300 bg-blue-50 text-blue-700">
+        <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary">
           {action}
         </Badge>
       );
@@ -74,12 +74,12 @@ export default function AdminLogsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-          <ScrollText className="h-5 w-5 text-blue-600" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+          <ScrollText className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">কার্যক্রম লগ</h1>
-          <p className="text-sm text-gray-500">প্রশাসকদের সকল কার্যক্রমের রেকর্ড</p>
+          <h1 className="text-2xl font-bold text-foreground">কার্যক্রম লগ</h1>
+          <p className="text-sm text-muted-foreground">প্রশাসকদের সকল কার্যক্রমের রেকর্ড</p>
         </div>
       </div>
 
@@ -90,10 +90,10 @@ export default function AdminLogsPage() {
             <div className="space-y-4">
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-4">
-                  <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
+                  <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 w-48 rounded bg-gray-200 animate-pulse" />
-                    <div className="h-3 w-32 rounded bg-gray-200 animate-pulse" />
+                    <div className="h-4 w-48 rounded bg-muted animate-pulse" />
+                    <div className="h-3 w-32 rounded bg-muted animate-pulse" />
                   </div>
                 </div>
               ))}
@@ -109,15 +109,15 @@ export default function AdminLogsPage() {
       ) : logs.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-center">
-            <ScrollText className="mx-auto mb-2 h-10 w-10 text-gray-300" />
-            <p className="text-gray-500">কোনো লগ পাওয়া যায়নি</p>
+            <ScrollText className="mx-auto mb-2 h-10 w-10 text-muted-foreground" />
+            <p className="text-muted-foreground">কোনো লগ পাওয়া যায়নি</p>
           </CardContent>
         </Card>
       ) : (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Clock className="h-4 w-4 text-gray-500" />
+              <Clock className="h-4 w-4 text-muted-foreground" />
               সর্বশেষ কার্যক্রম
             </CardTitle>
           </CardHeader>
@@ -137,10 +137,10 @@ export default function AdminLogsPage() {
                     <TableRow key={log.id}>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100">
-                            <User className="h-3.5 w-3.5 text-blue-600" />
+                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10">
+                            <User className="h-3.5 w-3.5 text-primary" />
                           </div>
-                          <span className="font-medium text-gray-900">
+                          <span className="font-medium text-foreground">
                             {log.user?.name || 'অজানা'}
                           </span>
                         </div>
@@ -148,16 +148,16 @@ export default function AdminLogsPage() {
                       <TableCell>{getActionBadge(log.action)}</TableCell>
                       <TableCell>
                         <div className="flex items-start gap-1.5 max-w-xs">
-                          <FileText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gray-400" />
-                          <span className="text-sm text-gray-600 truncate">
+                          <FileText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground truncate">
                             {log.details}
                           </span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          <div className="text-gray-700">{formatDate(log.createdAt)}</div>
-                          <div className="text-xs text-gray-400">{timeAgo(log.createdAt)}</div>
+                          <div className="text-foreground">{formatDate(log.createdAt)}</div>
+                          <div className="text-xs text-muted-foreground">{timeAgo(log.createdAt)}</div>
                         </div>
                       </TableCell>
                     </TableRow>

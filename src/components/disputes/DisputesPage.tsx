@@ -52,9 +52,9 @@ function getDisputeStatusColor(status: string): string {
     case 'resolved_seller':
       return 'bg-green-100 text-green-800';
     case 'resolved_cancelled':
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-muted text-foreground';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-muted text-foreground';
   }
 }
 
@@ -154,18 +154,18 @@ export default function DisputesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-[#2563eb]/10 flex items-center justify-center">
-            <Scale className="w-5 h-5 text-[#2563eb]" />
+          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Scale className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900">বিরোধসমূহ</h1>
-            <p className="text-sm text-gray-500 mt-0.5">আপনার সকল বিরোধ দেখুন ও পরিচালনা করুন</p>
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">বিরোধসমূহ</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">আপনার সকল বিরোধ দেখুন ও পরিচালনা করুন</p>
           </div>
         </div>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#2563eb] hover:bg-[#1d4ed8]">
+            <Button className="bg-primary hover:bg-primary/90">
               <Plus className="w-4 h-4 mr-2" />
               নতুন বিরোধ খুলুন
             </Button>
@@ -187,7 +187,7 @@ export default function DisputesPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {eligibleTransactions.length === 0 ? (
-                      <div className="px-2 py-4 text-center text-sm text-gray-500">
+                      <div className="px-2 py-4 text-center text-sm text-muted-foreground">
                         বিরোধযোগ্য লেনদেন নেই
                       </div>
                     ) : (
@@ -228,7 +228,7 @@ export default function DisputesPage() {
               <Button
                 onClick={handleOpenDispute}
                 disabled={submitting}
-                className="bg-[#2563eb] hover:bg-[#1d4ed8]"
+                className="bg-primary hover:bg-primary/90"
               >
                 {submitting ? (
                   <>
@@ -246,7 +246,7 @@ export default function DisputesPage() {
 
       {/* Filter */}
       <div className="flex items-center gap-2">
-        <Filter className="w-4 h-4 text-gray-400" />
+        <Filter className="w-4 h-4 text-muted-foreground" />
         <div className="flex flex-wrap gap-2">
           {filterOptions.map((opt) => (
             <button
@@ -254,8 +254,8 @@ export default function DisputesPage() {
               onClick={() => setFilterStatus(opt.value)}
               className={`px-3 py-1.5 text-sm rounded-full border transition-all ${
                 filterStatus === opt.value
-                  ? 'bg-[#2563eb] text-white border-[#2563eb]'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-background text-muted-foreground border-border hover:border-primary/30'
               }`}
             >
               {opt.label}
@@ -286,9 +286,9 @@ export default function DisputesPage() {
         <Card>
           <CardContent className="py-12">
             <div className="text-center">
-              <AlertTriangle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">কোনো বিরোধ পাওয়া যায়নি</p>
-              <p className="text-sm text-gray-400 mt-1">
+              <AlertTriangle className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground font-medium">কোনো বিরোধ পাওয়া যায়নি</p>
+              <p className="text-sm text-muted-foreground mt-1">
                 {filterStatus !== 'all'
                   ? 'অন্য ফিল্টার দিয়ে খুঁজুন'
                   : 'আপনার কোনো বিরোধ নেই'}
@@ -311,7 +311,7 @@ export default function DisputesPage() {
           {filteredDisputes.map((dispute) => (
             <Card
               key={dispute.id}
-              className="cursor-pointer hover:shadow-md transition-shadow border-l-4 hover:border-l-[#2563eb]"
+              className="cursor-pointer hover:shadow-md transition-shadow border-l-4 hover:border-l-primary"
               style={{
                 borderLeftColor:
                   dispute.status === 'open'
@@ -327,22 +327,22 @@ export default function DisputesPage() {
               <CardContent className="p-4">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 truncate">
+                    <h3 className="font-semibold text-foreground truncate">
                       {dispute.transaction?.title || 'লেনদেন'}
                     </h3>
-                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                       {dispute.reason}
                     </p>
                     <div className="flex items-center gap-3 mt-2">
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-muted-foreground">
                         {formatDate(dispute.createdAt)}
                       </span>
                       {dispute.transaction && (
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-muted-foreground">
                           {formatBDT(dispute.transaction.amount)}
                         </span>
                       )}
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-muted-foreground">
                         {timeAgo(dispute.createdAt)}
                       </span>
                     </div>

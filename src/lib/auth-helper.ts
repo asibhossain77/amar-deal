@@ -14,8 +14,11 @@ export async function requireAuth() {
 }
 
 export async function requireAdmin() {
-  const session = await requireAuth();
-  if (!session || (session.user as { role: string }).role !== "admin") {
+  const session = await getAuthSession();
+  if (!session?.user) {
+    return null;
+  }
+  if ((session.user as { role: string }).role !== "admin") {
     return null;
   }
   return session;

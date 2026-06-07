@@ -137,12 +137,12 @@ export default function AdminPaymentsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-          <ShieldCheck className="h-5 w-5 text-blue-600" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+          <ShieldCheck className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">পেমেন্ট যাচাইকরণ</h1>
-          <p className="text-sm text-gray-500">ব্যবহারকারীদের পেমেন্ট যাচাই ও অনুমোদন</p>
+          <h1 className="text-2xl font-bold text-foreground">পেমেন্ট যাচাইকরণ</h1>
+          <p className="text-sm text-muted-foreground">ব্যবহারকারীদের পেমেন্ট যাচাই ও অনুমোদন</p>
         </div>
       </div>
 
@@ -162,9 +162,9 @@ export default function AdminPaymentsPage() {
                 <Card key={i} className="animate-pulse">
                   <CardContent className="p-4">
                     <div className="space-y-3">
-                      <div className="h-4 w-48 rounded bg-gray-200" />
-                      <div className="h-3 w-32 rounded bg-gray-200" />
-                      <div className="h-3 w-64 rounded bg-gray-200" />
+                      <div className="h-4 w-48 rounded bg-muted" />
+                      <div className="h-3 w-32 rounded bg-muted" />
+                      <div className="h-3 w-64 rounded bg-muted" />
                     </div>
                   </CardContent>
                 </Card>
@@ -179,8 +179,8 @@ export default function AdminPaymentsPage() {
           ) : filteredPayments.length === 0 ? (
             <Card>
               <CardContent className="p-6 text-center">
-                <ShieldCheck className="mx-auto mb-2 h-10 w-10 text-gray-300" />
-                <p className="text-gray-500">কোনো পেমেন্ট পাওয়া যায়নি</p>
+                <ShieldCheck className="mx-auto mb-2 h-10 w-10 text-muted-foreground" />
+                <p className="text-muted-foreground">কোনো পেমেন্ট পাওয়া যায়নি</p>
               </CardContent>
             </Card>
           ) : (
@@ -192,43 +192,43 @@ export default function AdminPaymentsPage() {
                       {/* Payment Info */}
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-gray-900">
+                          <h3 className="font-semibold text-foreground">
                             {payment.transaction?.title || 'লেনদেন'}
                           </h3>
                           {getPaymentStatusBadge(payment.status)}
                         </div>
                         <div className="grid grid-cols-1 gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
                           <div>
-                            <span className="text-gray-500">পরিমাণ: </span>
-                            <span className="font-medium text-gray-900">
+                            <span className="text-muted-foreground">পরিমাণ: </span>
+                            <span className="font-medium text-foreground">
                               {formatBDT(payment.transaction?.amount || 0)}
                             </span>
                           </div>
                           <div>
-                            <span className="text-gray-500">পেমেন্ট পদ্ধতি: </span>
-                            <span className="text-gray-700">{payment.paymentMethod}</span>
+                            <span className="text-muted-foreground">পেমেন্ট পদ্ধতি: </span>
+                            <span className="text-foreground">{payment.paymentMethod}</span>
                           </div>
                           <div>
-                            <span className="text-gray-500">ট্রানজেকশন রেফ: </span>
-                            <span className="font-mono text-sm text-gray-700">
+                            <span className="text-muted-foreground">ট্রানজেকশন রেফ: </span>
+                            <span className="font-mono text-sm text-foreground">
                               {payment.transactionRef}
                             </span>
                           </div>
                           <div>
-                            <span className="text-gray-500">জমাদাতা: </span>
-                            <span className="text-gray-700">
+                            <span className="text-muted-foreground">জমাদাতা: </span>
+                            <span className="text-foreground">
                               {payment.user?.name || 'অজানা'}
                             </span>
                           </div>
                           <div>
-                            <span className="text-gray-500">জমার তারিখ: </span>
-                            <span className="text-gray-700">
+                            <span className="text-muted-foreground">জমার তারিখ: </span>
+                            <span className="text-foreground">
                               {formatDate(payment.createdAt)}
                             </span>
                           </div>
                           <div>
-                            <span className="text-gray-500">সময়: </span>
-                            <span className="text-gray-700">
+                            <span className="text-muted-foreground">সময়: </span>
+                            <span className="text-foreground">
                               {timeAgo(payment.createdAt)}
                             </span>
                           </div>
@@ -239,16 +239,16 @@ export default function AdminPaymentsPage() {
                               setScreenshotUrl(payment.screenshot!);
                               setScreenshotDialogOpen(true);
                             }}
-                            className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                            className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80 hover:underline"
                           >
                             <ImageIcon className="h-4 w-4" />
                             স্ক্রিনশট দেখুন
                           </button>
                         )}
                         {payment.adminNote && (
-                          <div className="mt-2 rounded-md bg-gray-50 p-2 text-sm">
-                            <span className="text-gray-500">প্রশাসক মন্তব্য: </span>
-                            <span className="text-gray-700">{payment.adminNote}</span>
+                          <div className="mt-2 rounded-md bg-muted p-2 text-sm">
+                            <span className="text-muted-foreground">প্রশাসক মন্তব্য: </span>
+                            <span className="text-foreground">{payment.adminNote}</span>
                           </div>
                         )}
                       </div>

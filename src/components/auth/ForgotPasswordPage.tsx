@@ -46,13 +46,13 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-slate-50 px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
       <div className="w-full max-w-md">
-        <Card className="shadow-lg border-slate-200">
+        <Card className="shadow-lg border-border">
           <CardHeader className="text-center pb-2">
             <div className="mx-auto mb-4 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
               {isSuccess ? (
-                <CheckCircle2 className="w-6 h-6 text-green-600" />
+                <CheckCircle2 className="w-6 h-6 text-primary" />
               ) : (
                 <Mail className="w-6 h-6 text-primary" />
               )}
@@ -70,9 +70,9 @@ export default function ForgotPasswordPage() {
           <CardContent>
             {isSuccess ? (
               <div className="space-y-4">
-                <div className="bg-green-50 border border-green-200 text-green-800 text-sm rounded-md px-4 py-4 text-center">
+                <div className="bg-primary/10 border border-primary/20 text-primary text-sm rounded-md px-4 py-4 text-center">
                   <p className="font-medium mb-1">ইমেইল পাঠানো হয়েছে!</p>
-                  <p className="text-green-700">
+                  <p className="text-primary/80">
                     {email} ঠিকানায় পাসওয়ার্ড পুনরুদ্ধারের নির্দেশনা পাঠানো হয়েছে। আপনার ইনবক্স চেক করুন।
                   </p>
                 </div>

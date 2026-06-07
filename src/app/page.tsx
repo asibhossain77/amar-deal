@@ -108,10 +108,10 @@ function PageRouter() {
   // If we have persisted auth, show the app immediately while verifying in background
   if (checking && (!isAuthenticated || !user)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-500">লোড হচ্ছে...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">লোড হচ্ছে...</p>
         </div>
       </div>
     );
@@ -122,19 +122,19 @@ function PageRouter() {
     switch (currentPage) {
       case 'login':
         return (
-          <div className="min-h-screen flex items-center justify-center bg-slate-50">
+          <div className="min-h-screen flex items-center justify-center bg-background">
             <LoginPage />
           </div>
         );
       case 'register':
         return (
-          <div className="min-h-screen flex items-center justify-center bg-slate-50">
+          <div className="min-h-screen flex items-center justify-center bg-background">
             <RegisterPage />
           </div>
         );
       case 'forgot-password':
         return (
-          <div className="min-h-screen flex items-center justify-center bg-slate-50">
+          <div className="min-h-screen flex items-center justify-center bg-background">
             <ForgotPasswordPage />
           </div>
         );

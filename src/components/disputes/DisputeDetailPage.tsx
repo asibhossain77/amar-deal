@@ -37,9 +37,9 @@ function getDisputeStatusColor(status: string): string {
     case 'resolved_seller':
       return 'bg-green-100 text-green-800';
     case 'resolved_cancelled':
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-muted text-foreground';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-muted text-foreground';
   }
 }
 
@@ -150,7 +150,7 @@ export default function DisputeDetailPage() {
     return (
       <div className="p-4 md:p-6 lg:p-8">
         <div className="text-center py-12">
-          <p className="text-gray-500">{error || 'বিরোধের তথ্য পাওয়া যায়নি'}</p>
+          <p className="text-muted-foreground">{error || 'বিরোধের তথ্য পাওয়া যায়নি'}</p>
           <Button variant="outline" className="mt-3" onClick={() => setPage('disputes')}>
             বিরোধ তালিকায় ফিরুন
           </Button>
@@ -172,8 +172,8 @@ export default function DisputeDetailPage() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div className="flex-1 min-w-0">
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900">বিরোধের বিবরণ</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">বিরোধের বিবরণ</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
             {dispute.transaction?.title || 'লেনদেন'} - {formatDate(dispute.createdAt)}
           </p>
         </div>
@@ -188,48 +188,48 @@ export default function DisputeDetailPage() {
       {/* Dispute Info Card */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium text-gray-500">বিরোধের তথ্য</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">বিরোধের তথ্য</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-500">লেনদেন</span>
-              <span className="text-sm font-semibold text-gray-900">
+              <span className="text-sm text-muted-foreground">লেনদেন</span>
+              <span className="text-sm font-semibold text-foreground">
                 {dispute.transaction?.title || 'লেনদেন'}
               </span>
             </div>
             <Separator />
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-500">পরিমাণ</span>
-              <span className="text-sm font-bold text-[#2563eb]">
+              <span className="text-sm text-muted-foreground">পরিমাণ</span>
+              <span className="text-sm font-bold text-primary">
                 {dispute.transaction ? formatBDT(dispute.transaction.amount) : '—'}
               </span>
             </div>
             <Separator />
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-500">ক্রেতা</span>
-              <span className="text-sm font-medium text-gray-900">
+              <span className="text-sm text-muted-foreground">ক্রেতা</span>
+              <span className="text-sm font-medium text-foreground">
                 {dispute.buyer?.name || 'ক্রেতা'}
               </span>
             </div>
             <Separator />
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-500">বিক্রেতা</span>
-              <span className="text-sm font-medium text-gray-900">
+              <span className="text-sm text-muted-foreground">বিক্রেতা</span>
+              <span className="text-sm font-medium text-foreground">
                 {dispute.seller?.name || 'বিক্রেতা'}
               </span>
             </div>
             <Separator />
             <div className="flex justify-between items-start">
-              <span className="text-sm text-gray-500 shrink-0">কারণ</span>
-              <span className="text-sm text-gray-900 text-right max-w-[70%]">
+              <span className="text-sm text-muted-foreground shrink-0">কারণ</span>
+              <span className="text-sm text-foreground text-right max-w-[70%]">
                 {dispute.reason}
               </span>
             </div>
             <Separator />
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-500">খোলার তারিখ</span>
-              <span className="text-sm text-gray-700">{formatDate(dispute.createdAt)}</span>
+              <span className="text-sm text-muted-foreground">খোলার তারিখ</span>
+              <span className="text-sm text-foreground">{formatDate(dispute.createdAt)}</span>
             </div>
             {dispute.resolution && (
               <>
@@ -248,7 +248,7 @@ export default function DisputeDetailPage() {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-[#2563eb]" />
+            <MessageSquare className="w-4 h-4 text-primary" />
             <CardTitle className="text-base">বার্তাসমূহ</CardTitle>
           </div>
         </CardHeader>
@@ -257,8 +257,8 @@ export default function DisputeDetailPage() {
           <div className="space-y-4 max-h-96 overflow-y-auto pr-1 mb-4">
             {(!dispute.messages || dispute.messages.length === 0) ? (
               <div className="text-center py-8">
-                <MessageSquare className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                <p className="text-sm text-gray-400">কোনো বার্তা নেই</p>
+                <MessageSquare className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">কোনো বার্তা নেই</p>
               </div>
             ) : (
               dispute.messages
@@ -278,8 +278,8 @@ export default function DisputeDetailPage() {
                           fromAdmin
                             ? 'bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-center'
                             : fromBuyer
-                            ? 'bg-blue-50 border border-blue-100 rounded-xl rounded-tl-sm px-4 py-3'
-                            : 'bg-gray-50 border border-gray-200 rounded-xl rounded-tr-sm px-4 py-3'
+                            ? 'bg-primary/10 border border-primary/20 rounded-xl rounded-tl-sm px-4 py-3'
+                            : 'bg-muted border border-border rounded-xl rounded-tr-sm px-4 py-3'
                         }`}
                       >
                         {/* Sender info */}
@@ -287,7 +287,7 @@ export default function DisputeDetailPage() {
                           {fromAdmin ? (
                             <Shield className="w-3.5 h-3.5 text-amber-600" />
                           ) : fromBuyer ? (
-                            <User className="w-3.5 h-3.5 text-blue-600" />
+                            <User className="w-3.5 h-3.5 text-primary" />
                           ) : (
                             <Store className="w-3.5 h-3.5 text-gray-600" />
                           )}
@@ -296,21 +296,21 @@ export default function DisputeDetailPage() {
                               fromAdmin
                                 ? 'text-amber-700'
                                 : fromBuyer
-                                ? 'text-blue-700'
-                                : 'text-gray-700'
+                                ? 'text-primary'
+                                : 'text-foreground'
                             }`}
                           >
                             {fromAdmin
                               ? 'অ্যাডমিন'
                               : msg.user?.name || (fromBuyer ? 'ক্রেতা' : 'বিক্রেতা')}
                           </span>
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-muted-foreground">
                             {timeAgo(msg.createdAt)}
                           </span>
                         </div>
 
                         {/* Message */}
-                        <p className="text-sm text-gray-800 whitespace-pre-wrap">{msg.message}</p>
+                        <p className="text-sm text-foreground whitespace-pre-wrap">{msg.message}</p>
                       </div>
                     </div>
                   );
@@ -341,7 +341,7 @@ export default function DisputeDetailPage() {
                   <Button
                     onClick={handleSendMessage}
                     disabled={sendingMessage || !messageText.trim()}
-                    className="bg-[#2563eb] hover:bg-[#1d4ed8] shrink-0 self-end"
+                    className="bg-primary hover:bg-primary/90 shrink-0 self-end"
                   >
                     {sendingMessage ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -428,25 +428,25 @@ export default function DisputeDetailPage() {
         <CardContent className="p-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                <span className="text-xs font-bold text-blue-700">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-xs font-bold text-primary">
                   {getInitials(dispute.buyer?.name || 'ক্রেতা')}
                 </span>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">{dispute.buyer?.name || 'ক্রেতা'}</p>
-                <p className="text-xs text-gray-400">ক্রেতা</p>
+                <p className="text-sm font-medium text-foreground">{dispute.buyer?.name || 'ক্রেতা'}</p>
+                <p className="text-xs text-muted-foreground">ক্রেতা</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                <span className="text-xs font-bold text-gray-700">
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                <span className="text-xs font-bold text-foreground">
                   {getInitials(dispute.seller?.name || 'বিক্রেতা')}
                 </span>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">{dispute.seller?.name || 'বিক্রেতা'}</p>
-                <p className="text-xs text-gray-400">বিক্রেতা</p>
+                <p className="text-sm font-medium text-foreground">{dispute.seller?.name || 'বিক্রেতা'}</p>
+                <p className="text-xs text-muted-foreground">বিক্রেতা</p>
               </div>
             </div>
           </div>
