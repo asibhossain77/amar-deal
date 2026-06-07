@@ -1,133 +1,27 @@
-# Bangla Escrow Website - Worklog
-
 ---
 Task ID: 1
-Agent: Main
-Task: Explore current project structure and dependencies
+Agent: Main Agent
+Task: Fix session getting lost intermittently and admin panel status change not working
 
 Work Log:
-- Examined project structure at /home/z/my-project
-- Read package.json, prisma schema, layout.tsx, globals.css
-- Confirmed Next.js 16 with App Router, Tailwind CSS 4, shadcn/ui, Prisma, NextAuth.js
+- Investigated the project structure and identified key auth/session components
+- Found root causes for both issues:
+  1. Session loss: No 401/403 handling in API client, no periodic session check, no proper NextAuth session config
+  2. Status change not working: Dispute resolution API mismatch (frontend sends `status`, backend expects `outcome`)
+  3. TransactionDetailPage crash: `isDisputed` and `isCancelled` variables defined inside `.map()` callback but used outside of it
+- Fixed API client (`src/lib/api.ts`): Added auto-logout on 401/403 responses, added `logout()` method
+- Fixed dispute resolution API mismatch (`src/lib/api.ts` and `src/components/disputes/DisputeDetailPage.tsx`): Changed `status` to `outcome`
+- Improved session persistence (`src/components/auth/AuthProvider.tsx`): Added NextAuth `useSession` integration, periodic session checks (5 min), window focus re-check
+- Added proper JWT/session config (`src/lib/auth.ts`): Added `maxAge` for session and JWT, added `trigger` support in jwt callback
+- Fixed Header logout to call NextAuth `signOut` (`src/components/shared/Header.tsx`)
+- Added toast error feedback to AdminPaymentsPage and DisputeDetailPage
+- Fixed TransactionDetailPage crash: Moved `isDisputed` and `isCancelled` to component level
+- Added ErrorBoundary to page.tsx wrapping all dashboard pages
 
 Stage Summary:
-- Project initialized with all required dependencies
-- SQLite database at db/custom.db
-- shadcn/ui components already available
-
----
-Task ID: 2
-Agent: Main
-Task: Design and implement Prisma database schema
-
-Work Log:
-- Created comprehensive Prisma schema with 7 models: User, Transaction, Payment, Dispute, DisputeMessage, Notification, AdminLog
-- Defined all relationships and fields
-- Pushed schema to database with `bun run db:push`
-
-Stage Summary:
-- Complete database schema with all required tables
-- Relationships properly defined between entities
-
----
-Task ID: 3
-Agent: Main + Subagent
-Task: Set up authentication and core infrastructure
-
-Work Log:
-- Created NextAuth.js config with credentials provider at /src/lib/auth.ts
-- Created auth route handler at /src/app/api/auth/[...nextauth]/route.ts
-- Created auth helpers at /src/lib/auth-helper.ts
-- Created TypeScript types at /src/lib/types.ts
-- Created Zustand store at /src/lib/store.ts
-- Created API client at /src/lib/api.ts
-- Installed bcryptjs for password hashing
-
-Stage Summary:
-- Full authentication system with NextAuth.js
-- Client-side state management with Zustand
-- Type-safe API client
-
----
-Task ID: 4
-Agent: Subagent
-Task: Build all API routes
-
-Work Log:
-- Created 13 API route files for users, transactions, payments, disputes, notifications, admin
-- Each route implements proper auth checking, validation, and error handling
-- All responses in Bangla
-- Notification system integrated into transaction workflow
-- Admin logging implemented
-
-Stage Summary:
-- Complete REST API for all features
-- Proper authorization and role-based access
-- Bangla error messages
-
----
-Task ID: 5
-Agent: Main + Subagent
-Task: Build frontend components
-
-Work Log:
-- Updated layout.tsx with Hind Siliguri Google Font
-- Updated globals.css with soft blue color palette
-- Created HomePage with Hero, HowItWorks, Benefits, Timeline, FAQ, Contact sections
-- Created Header and Footer shared components
-- Created LoginPage, RegisterPage, ForgotPasswordPage, AuthProvider
-- Created DashboardLayout, DashboardPage, ProfilePage, NotificationsPage
-- Created TransactionsPage, CreateTransactionPage, TransactionDetailPage
-- Created PaymentSubmitPage, DisputesPage, DisputeDetailPage
-- Created AdminDashboardPage, AdminUsersPage, AdminPaymentsPage, AdminDisputesPage, AdminLogsPage
-- Created AboutPage, HowItWorksPage
-- Created helpers.ts with Bangla status labels and utility functions
-- Seeded database with demo users and transactions
-
-Stage Summary:
-- Complete frontend with all pages in Bangla
-- Clean, professional design with soft blue color palette
-- Responsive layout with mobile sidebar
-- Demo data: admin@banglaescrow.com/admin123, buyer@example.com/buyer123, seller@example.com/seller123
-
----
-Task ID: 6
-Agent: Main
-Task: Fix runtime errors and verify functionality
-
-Work Log:
-- Fixed toBanglaNumber null/undefined handling
-- Fixed getInitials null/undefined handling
-- Fixed admin stats API to return flat format matching frontend expectations
-- Updated payments API to return all payments for admin users
-- Updated disputes API to return all disputes for admin users
-- Updated transactions API to return all transactions for admin users
-- Fixed AdminPaymentsPage to use api.getPayments() instead of iterating transactions
-- Fixed page.tsx session checking flow
-- Added proper signOut in DashboardLayout logout button
-- Created seed script and seeded database
-- Verified all pages via browser testing
-
-Stage Summary:
-- All runtime errors fixed
-- Admin can see all data, regular users see only their own
-- Login/logout flow working properly
-- All pages render correctly with Bangla text
-
----
-Task ID: 7
-Agent: Main
-Task: Fix admin panel API response format mismatches
-
-Work Log:
-- Fixed AdminUsersPage - API returns {users, pagination} but frontend expected flat array
-- Fixed toggleUserStatus API - frontend sends 'id' but backend expects 'userId'
-- Fixed AdminDisputesPage - API returns {disputes} but frontend expected flat array
-- Fixed AdminLogsPage - API returns {logs, pagination} but frontend expected flat array
-- Verified all admin pages work via browser testing (admin dashboard, user management, payment verification, dispute management, activity logs)
-- Created project download zip with database file included
-
-Stage Summary:
-- All admin panel pages now correctly parse API responses
-- Admin panel fully functional: dashboard stats, user management with toggle, payment verification with approve/reject, dispute management, activity logs
-- Download zip updated with database file (db/custom.db) and seed script
+- Session persistence significantly improved with periodic checks, window focus re-check, and NextAuth refetchInterval
+- Admin status change now works - verified transaction status change and payment approval in browser
+- Dispute resolution API mismatch fixed (status → outcome)
+- TransactionDetailPage crash fixed (isDisputed/isCancelled scope issue)
+- Error boundary added for graceful error handling
+- All changes pass lint check

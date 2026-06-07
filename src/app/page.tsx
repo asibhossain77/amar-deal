@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import Header from '@/components/shared/Header';
@@ -26,7 +26,52 @@ import AdminDisputesPage from '@/components/admin/AdminDisputesPage';
 import AdminLogsPage from '@/components/admin/AdminLogsPage';
 import AboutPage from '@/components/pages/AboutPage';
 import HowItWorksPage from '@/components/pages/HowItWorksPage';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+// Error Boundary Component
+class ErrorBoundary extends Component<
+  { children: React.ReactNode; fallback?: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: React.ReactNode; fallback?: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('ErrorBoundary caught:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      if (this.props.fallback) return this.props.fallback;
+      return (
+        <div className="p-6 text-center space-y-4">
+          <AlertTriangle className="w-12 h-12 text-yellow-500 mx-auto" />
+          <h2 className="text-lg font-semibold">কিছু একটা সমস্যা হয়েছে</h2>
+          <p className="text-sm text-muted-foreground">
+            {this.state.error?.message || 'অজানা ত্রুটি'}
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => {
+              this.setState({ hasError: false, error: null });
+              useAppStore.getState().setPage('dashboard');
+            }}
+          >
+            ড্যাশবোর্ডে ফিরে যান
+          </Button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function PageRouter() {
   const { currentPage, isAuthenticated, user } = useAppStore();
@@ -128,37 +173,37 @@ function DashboardRouter() {
 
   switch (currentPage) {
     case 'dashboard':
-      return <DashboardPage />;
+      return <ErrorBoundary><DashboardPage /></ErrorBoundary>;
     case 'profile':
-      return <ProfilePage />;
+      return <ErrorBoundary><ProfilePage /></ErrorBoundary>;
     case 'notifications':
-      return <NotificationsPage />;
+      return <ErrorBoundary><NotificationsPage /></ErrorBoundary>;
     case 'transactions':
-      return <TransactionsPage />;
+      return <ErrorBoundary><TransactionsPage /></ErrorBoundary>;
     case 'create-transaction':
-      return <CreateTransactionPage />;
+      return <ErrorBoundary><CreateTransactionPage /></ErrorBoundary>;
     case 'transaction-detail':
-      return <TransactionDetailPage />;
+      return <ErrorBoundary><TransactionDetailPage /></ErrorBoundary>;
     case 'payment-submit':
-      return <PaymentSubmitPage />;
+      return <ErrorBoundary><PaymentSubmitPage /></ErrorBoundary>;
     case 'disputes':
-      return <DisputesPage />;
+      return <ErrorBoundary><DisputesPage /></ErrorBoundary>;
     case 'dispute-detail':
-      return <DisputeDetailPage />;
+      return <ErrorBoundary><DisputeDetailPage /></ErrorBoundary>;
     case 'admin-dashboard':
-      return <AdminDashboardPage />;
+      return <ErrorBoundary><AdminDashboardPage /></ErrorBoundary>;
     case 'admin-users':
-      return <AdminUsersPage />;
+      return <ErrorBoundary><AdminUsersPage /></ErrorBoundary>;
     case 'admin-transactions':
-      return <TransactionsPage />;
+      return <ErrorBoundary><TransactionsPage /></ErrorBoundary>;
     case 'admin-payments':
-      return <AdminPaymentsPage />;
+      return <ErrorBoundary><AdminPaymentsPage /></ErrorBoundary>;
     case 'admin-disputes':
-      return <AdminDisputesPage />;
+      return <ErrorBoundary><AdminDisputesPage /></ErrorBoundary>;
     case 'admin-logs':
-      return <AdminLogsPage />;
+      return <ErrorBoundary><AdminLogsPage /></ErrorBoundary>;
     default:
-      return <DashboardPage />;
+      return <ErrorBoundary><DashboardPage /></ErrorBoundary>;
   }
 }
 

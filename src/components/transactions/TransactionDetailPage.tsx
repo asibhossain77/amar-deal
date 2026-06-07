@@ -164,6 +164,8 @@ export default function TransactionDetailPage() {
   const isBuyer = transaction && user ? transaction.buyerId === user.id : false;
   const isSeller = transaction && user ? transaction.sellerId === user.id : false;
   const isAdmin = user?.role === 'admin';
+  const isDisputed = transaction?.status === 'disputed';
+  const isCancelled = transaction?.status === 'cancelled';
 
   // Loading state
   if (loading) {
@@ -332,8 +334,6 @@ export default function TransactionDetailPage() {
                 {statusTimeline.slice(0, 6).map((status, index) => {
                   const reached = isStatusReached(transaction.status, status);
                   const isCurrent = transaction.status === status;
-                  const isDisputed = transaction.status === 'disputed';
-                  const isCancelled = transaction.status === 'cancelled';
                   const isSpecial = status === 'disputed' || status === 'cancelled';
 
                   // Skip disputed/cancelled in the main flow for desktop

@@ -5,6 +5,7 @@ import { Shield, Menu, LogOut, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { useAppStore } from '@/lib/store';
+import { signOut } from 'next-auth/react';
 
 const navLinks = [
   { label: 'হোম', page: 'home' as const },
@@ -22,9 +23,10 @@ export default function Header() {
     setMobileOpen(false);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setUser(null);
     setPage('home');
+    await signOut({ redirect: false });
   };
 
   return (

@@ -17,9 +17,11 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { api } from '@/lib/api';
 import { formatBDT, formatDate, timeAgo, paymentStatusLabels } from '@/lib/helpers';
+import { useToast } from '@/hooks/use-toast';
 import type { Payment } from '@/lib/types';
 
 export default function AdminPaymentsPage() {
+  const { toast } = useToast();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,8 +67,10 @@ export default function AdminPaymentsPage() {
           p.id === paymentId ? { ...p, status: 'approved' as const } : p
         )
       );
-    } catch (err) {
-      console.error('Failed to approve payment:', err);
+      toast({ title: 'সফল!', description: 'পেমেন্ট অনুমোদিত হয়েছে' });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'পেমেন্ট অনুমোদন করতে সমস্যা হয়েছে';
+      toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
     } finally {
       setProcessingId(null);
     }
@@ -96,8 +100,9 @@ export default function AdminPaymentsPage() {
       setRejectDialogOpen(false);
       setRejectPaymentId(null);
       setAdminNote('');
-    } catch (err) {
-      console.error('Failed to reject payment:', err);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'পেমেন্ট প্রত্যাখ্যান করতে সমস্যা হয়েছে';
+      toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
     } finally {
       setProcessingId(null);
     }

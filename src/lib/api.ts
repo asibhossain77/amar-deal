@@ -10,6 +10,27 @@ async function fetchAPI(endpoint: string, options?: RequestInit) {
   });
   
   if (!res.ok) {
+    // Handle session expiration - auto logout on 401
+    if (res.status === 401) {
+      // Clear user state and redirect to login
+      if (typeof window !== 'undefined') {
+        const { useAppStore } = await import('./store');
+        useAppStore.getState().setUser(null);
+        useAppStore.getState().setPage('login');
+      }
+      throw new Error('সেশন মেয়াদোত্তীর্ণ হয়েছে। দয়া করে আবার লগইন করুন।');
+    }
+    
+    // Handle forbidden - also clear session for admin routes or payment/dispute admin actions
+    if (res.status === 403) {
+      if (typeof window !== 'undefined') {
+        const { useAppStore } = await import('./store');
+        useAppStore.getState().setUser(null);
+        useAppStore.getState().setPage('login');
+      }
+      throw new Error('অনুমতি নেই। দয়া করে আবার লগইন করুন।');
+    }
+    
     const error = await res.json().catch(() => ({ error: 'An error occurred' }));
     throw new Error(error.error || 'An error occurred');
   }
@@ -19,6 +40,21 @@ async function fetchAPI(endpoint: string, options?: RequestInit) {
 
 // Auth
 export const api = {
+  // Authentication
+  logout: async () => {
+    try {
+      const { signOut } = await import('next-auth/react');
+      await signOut({ redirect: false });
+    } catch {
+      // NextAuth signOut may fail, continue anyway
+    }
+    if (typeof window !== 'undefined') {
+      const { useAppStore } = await import('./store');
+      useAppStore.getState().setUser(null);
+      useAppStore.getState().setPage('login');
+    }
+  },
+
   // Transactions
   getTransactions: () => fetchAPI('/transactions'),
   getTransaction: (id: string) => fetchAPI(`/transactions/${id}`),
@@ -41,7 +77,7 @@ export const api = {
     fetchAPI('/disputes', { method: 'POST', body: JSON.stringify(data) }),
   addDisputeMessage: (id: string, message: string) => 
     fetchAPI(`/disputes/${id}`, { method: 'POST', body: JSON.stringify({ message }) }),
-  resolveDispute: (id: string, data: { status: string; resolution: string }) => 
+  resolveDispute: (id: string, data: { outcome: string; resolution: string }) => 
     fetchAPI(`/disputes/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   
   // Notifications

@@ -48,12 +48,34 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
         token.role = (user as { role: string }).role;
+      }
+      // Re-fetch user role on session update to keep it in sync
+      if (trigger === 'update') {
+        try {
+          const dbUser = await db.user.findUnique({
+            where: { id: token.id as string },
+            select: { role: true, isActive: true },
+          });
+          if (dbUser) {
+            token.role = dbUser.role;
+            if (!dbUser.isActive) {
+              // User has been deactivated, force logout
+              return {} as typeof token;
+            }
+          }
+        } catch {
+          // If DB query fails, keep existing token
+        }
       }
       return token;
     },

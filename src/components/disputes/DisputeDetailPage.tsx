@@ -6,6 +6,7 @@ import { useAppStore } from '@/lib/store';
 import { api } from '@/lib/api';
 import type { Dispute, DisputeMessage } from '@/lib/types';
 import { disputeStatusLabels, formatBDT, formatDate, timeAgo, getInitials } from '@/lib/helpers';
+import { useToast } from '@/hooks/use-toast';
 import {
   Card,
   CardContent,
@@ -50,6 +51,7 @@ const resolutionOptions = [
 
 export default function DisputeDetailPage() {
   const { selectedDisputeId, setPage, user } = useAppStore();
+  const { toast } = useToast();
   const [dispute, setDispute] = useState<Dispute | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -92,8 +94,9 @@ export default function DisputeDetailPage() {
       await api.addDisputeMessage(selectedDisputeId!, messageText.trim());
       setMessageText('');
       await fetchDispute();
-    } catch {
-      // Silently handle
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'বার্তা পাঠাতে সমস্যা হয়েছে';
+      toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
     } finally {
       setSendingMessage(false);
     }
@@ -106,15 +109,17 @@ export default function DisputeDetailPage() {
     setResolving(true);
     try {
       await api.resolveDispute(selectedDisputeId!, {
-        status: resolutionStatus,
+        outcome: resolutionStatus,
         resolution: resolutionText.trim(),
       });
       setShowAdminPanel(false);
       setResolutionStatus('');
       setResolutionText('');
       await fetchDispute();
-    } catch {
-      // Silently handle
+      toast({ title: 'সফল!', description: 'বিরোধ সফলভাবে নিষ্পত্তি হয়েছে' });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'বিরোধ নিষ্পত্তি করতে সমস্যা হয়েছে';
+      toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
     } finally {
       setResolving(false);
     }
