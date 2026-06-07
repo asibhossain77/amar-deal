@@ -10,25 +10,24 @@ async function fetchAPI(endpoint: string, options?: RequestInit) {
   });
   
   if (!res.ok) {
-    // Handle session expiration - auto logout on 401
+    // Handle session expiration - auto logout on 401 only for auth-dependent endpoints
     if (res.status === 401) {
-      // Clear user state and redirect to login
-      if (typeof window !== 'undefined') {
-        const { useAppStore } = await import('./store');
-        useAppStore.getState().setUser(null);
-        useAppStore.getState().setPage('login');
+      // Only auto-logout if it's not a settings or public endpoint
+      if (!endpoint.startsWith('/settings')) {
+        if (typeof window !== 'undefined') {
+          const { useAppStore } = await import('./store');
+          useAppStore.getState().setUser(null);
+          useAppStore.getState().setPage('login');
+        }
       }
       throw new Error('সেশন মেয়াদোত্তীর্ণ হয়েছে। দয়া করে আবার লগইন করুন।');
     }
     
-    // Handle forbidden - also clear session for admin routes or payment/dispute admin actions
+    // Handle forbidden - DO NOT auto-logout on 403, just show error
+    // 403 means user is authenticated but doesn't have permission
     if (res.status === 403) {
-      if (typeof window !== 'undefined') {
-        const { useAppStore } = await import('./store');
-        useAppStore.getState().setUser(null);
-        useAppStore.getState().setPage('login');
-      }
-      throw new Error('অনুমতি নেই। দয়া করে আবার লগইন করুন।');
+      const errorData = await res.json().catch(() => ({ error: 'অনুমতি নেই' }));
+      throw new Error(errorData.error || 'এই কাজ করার অনুমতি আপনার নেই');
     }
     
     const error = await res.json().catch(() => ({ error: 'An error occurred' }));

@@ -40,7 +40,8 @@ export type PageName =
   | 'admin-transactions'
   | 'admin-payments'
   | 'admin-disputes'
-  | 'admin-logs';
+  | 'admin-logs'
+  | 'admin-settings';
 
 export interface AppUser {
   id: string;

@@ -115,3 +115,10 @@ model AdminLog {
 
   user        User @relation(fields: [userId], references: [id])
 }
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}

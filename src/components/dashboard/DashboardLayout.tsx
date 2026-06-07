@@ -54,6 +54,7 @@ const adminNavItems: NavItem[] = [
   { label: 'ব্যবহারকারী ব্যবস্থাপনা', icon: Users, page: 'admin-users', adminOnly: true },
   { label: 'পেমেন্ট যাচাই', icon: CreditCard, page: 'admin-payments', adminOnly: true },
   { label: 'বিরোধ ব্যবস্থাপনা', icon: Scale, page: 'admin-disputes', adminOnly: true },
+  { label: 'পেমেন্ট সেটিংস', icon: CreditCard, page: 'admin-settings', adminOnly: true },
   { label: 'কার্যক্রম লগ', icon: FileText, page: 'admin-logs', adminOnly: true },
 ];
 

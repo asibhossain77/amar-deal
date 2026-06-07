@@ -89,11 +89,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validPaymentMethods = ["bKash", "Nagad", "Rocket", "Bank Transfer"];
-    if (!validPaymentMethods.includes(paymentMethod)) {
+    // Normalize payment method values
+    const paymentMethodMap: Record<string, string> = {
+      'bkash': 'bKash',
+      'nagad': 'Nagad',
+      'rocket': 'Rocket',
+      'bank_transfer': 'Bank Transfer',
+      'bKash': 'bKash',
+      'Nagad': 'Nagad',
+      'Rocket': 'Rocket',
+      'Bank Transfer': 'Bank Transfer',
+    };
+    const normalizedMethod = paymentMethodMap[paymentMethod];
+    if (!normalizedMethod) {
       return NextResponse.json(
         {
-          error: `পেমেন্ট মেথড অবশ্যই ${validPaymentMethods.join(", ")} এর মধ্যে হতে হবে`,
+          error: `পেমেন্ট মেথড অবশ্যই bKash, Nagad, Rocket, Bank Transfer এর মধ্যে হতে হবে`,
         },
         { status: 400 }
       );
@@ -146,7 +157,7 @@ export async function POST(request: NextRequest) {
         transactionId,
         userId,
         transactionRef,
-        paymentMethod,
+        paymentMethod: normalizedMethod,
         screenshot: screenshot || null,
         status: "pending",
       },

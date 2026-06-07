@@ -24,6 +24,7 @@ import AdminUsersPage from '@/components/admin/AdminUsersPage';
 import AdminPaymentsPage from '@/components/admin/AdminPaymentsPage';
 import AdminDisputesPage from '@/components/admin/AdminDisputesPage';
 import AdminLogsPage from '@/components/admin/AdminLogsPage';
+import AdminSettingsPage from '@/components/admin/AdminSettingsPage';
 import AboutPage from '@/components/pages/AboutPage';
 import HowItWorksPage from '@/components/pages/HowItWorksPage';
 import { Loader2, AlertTriangle } from 'lucide-react';
@@ -202,6 +203,8 @@ function DashboardRouter() {
       return <ErrorBoundary><AdminDisputesPage /></ErrorBoundary>;
     case 'admin-logs':
       return <ErrorBoundary><AdminLogsPage /></ErrorBoundary>;
+    case 'admin-settings':
+      return <ErrorBoundary><AdminSettingsPage /></ErrorBoundary>;
     default:
       return <ErrorBoundary><DashboardPage /></ErrorBoundary>;
   }
