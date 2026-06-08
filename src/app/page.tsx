@@ -28,6 +28,10 @@ import AdminSettingsPage from '@/components/admin/AdminSettingsPage';
 import AdminGatewaysPage from '@/components/admin/AdminGatewaysPage';
 import AdminGatewayPaymentsPage from '@/components/admin/AdminGatewayPaymentsPage';
 import AdminGatewayThemePage from '@/components/admin/AdminGatewayThemePage';
+import AdminSubscriptionsPage from '@/components/admin/AdminSubscriptionsPage';
+import AdminBadgesPage from '@/components/admin/AdminBadgesPage';
+import AccountSettingsPage from '@/components/account/AccountSettingsPage';
+import SubscriptionPlansPage from '@/components/subscriptions/SubscriptionPlansPage';
 import AboutPage from '@/components/pages/AboutPage';
 import HowItWorksPage from '@/components/pages/HowItWorksPage';
 import { Loader2, AlertTriangle } from 'lucide-react';
@@ -91,17 +95,13 @@ function PageRouter() {
           if (data.user) {
             useAppStore.getState().setUser(data.user);
           } else {
-            // Only clear user if we get a definitive "no session" response
             useAppStore.getState().setUser(null);
           }
         } else if (res.status === 401) {
-          // Session expired - clear user
           useAppStore.getState().setUser(null);
         }
-        // For other errors (500, network), keep the persisted user state
       } catch {
-        // Network error - don't logout, keep persisted state
-        // The user might just have a temporary connection issue
+        // Network error - keep persisted state
       } finally {
         setChecking(false);
       }
@@ -109,7 +109,6 @@ function PageRouter() {
     checkSession();
   }, []);
 
-  // If we have persisted auth, show the app immediately while verifying in background
   if (checking && (!isAuthenticated || !user)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -186,6 +185,10 @@ function DashboardRouter() {
       return <ErrorBoundary><DashboardPage /></ErrorBoundary>;
     case 'profile':
       return <ErrorBoundary><ProfilePage /></ErrorBoundary>;
+    case 'account-settings':
+      return <ErrorBoundary><AccountSettingsPage /></ErrorBoundary>;
+    case 'subscription-plans':
+      return <ErrorBoundary><SubscriptionPlansPage /></ErrorBoundary>;
     case 'notifications':
       return <ErrorBoundary><NotificationsPage /></ErrorBoundary>;
     case 'transactions':
@@ -220,6 +223,10 @@ function DashboardRouter() {
       return <ErrorBoundary><AdminGatewayPaymentsPage /></ErrorBoundary>;
     case 'admin-gateway-theme':
       return <ErrorBoundary><AdminGatewayThemePage /></ErrorBoundary>;
+    case 'admin-subscriptions':
+      return <ErrorBoundary><AdminSubscriptionsPage /></ErrorBoundary>;
+    case 'admin-badges':
+      return <ErrorBoundary><AdminBadgesPage /></ErrorBoundary>;
     default:
       return <ErrorBoundary><DashboardPage /></ErrorBoundary>;
   }

@@ -28,6 +28,8 @@ export type PageName =
   | 'forgot-password'
   | 'dashboard' 
   | 'profile'
+  | 'account-settings'
+  | 'subscription-plans'
   | 'transactions' 
   | 'transaction-detail'
   | 'create-transaction'
@@ -44,17 +46,35 @@ export type PageName =
   | 'admin-settings'
   | 'admin-gateways'
   | 'admin-gateway-payments'
-  | 'admin-gateway-theme';
+  | 'admin-gateway-theme'
+  | 'admin-subscriptions'
+  | 'admin-badges';
 
 export interface AppUser {
   id: string;
   email: string;
+  username?: string;
   name: string;
   phone?: string;
   role: UserRole;
   avatar?: string;
+  country?: string;
+  languagePreference?: string;
   isActive: boolean;
+  isVerified?: boolean;
   createdAt: string;
+  // Reputation
+  buyerRating?: number;
+  sellerRating?: number;
+  totalReviews?: number;
+  completedDeals?: number;
+  successfulTransactions?: number;
+  trustScore?: number;
+  disputeRate?: number;
+  // Subscription
+  currentSubscriptionId?: string;
+  currentSubscription?: UserSubscription;
+  currentPlan?: SubscriptionPlan;
 }
 
 export interface Transaction {
@@ -156,7 +176,6 @@ export interface PaymentGateway {
   maxDeposit: number;
   isActive: boolean;
   sortOrder: number;
-  // Per-gateway theme colors
   themeEnabled: boolean;
   primaryColor: string;
   buttonColor: string;
@@ -184,4 +203,68 @@ export interface GatewayTransaction {
   transaction?: Transaction;
 }
 
+// ─── Subscription & Badge Types ─────────────────────────
 
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  badgeIcon: string;
+  badgeColor: string;
+  monthlyPrice: number;
+  yearlyPrice: number;
+  isActive: boolean;
+  sortOrder: number;
+  // Feature flags
+  priorityListing: boolean;
+  premiumProfile: boolean;
+  featuredProfile: boolean;
+  higherDealLimits: boolean;
+  prioritySupport: boolean;
+  advancedAnalytics: boolean;
+  customProfileBanner: boolean;
+  featuredSellerStatus: boolean;
+  featuredBuyerStatus: boolean;
+  fasterDisputeResolution: boolean;
+  profileVerification: boolean;
+  vipSupport: boolean;
+  maximumVisibility: boolean;
+  exclusiveFeatures: boolean;
+  createdAt: string;
+  updatedAt: string;
+  subscriberCount?: number;
+}
+
+export interface UserSubscription {
+  id: string;
+  userId: string;
+  planId: string;
+  status: 'active' | 'expired' | 'cancelled' | 'pending';
+  billingCycle: 'monthly' | 'yearly';
+  startDate: string;
+  endDate?: string;
+  autoRenew: boolean;
+  paymentMethod?: string;
+  transactionRef?: string;
+  cancelledAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  plan?: SubscriptionPlan;
+  user?: AppUser;
+}
+
+export interface ReputationData {
+  buyerRating: number;
+  sellerRating: number;
+  totalReviews: number;
+  completedDeals: number;
+  successfulTransactions: number;
+  trustScore: number;
+  disputeRate: number;
+  isVerified: boolean;
+  memberSinceBadge: string;
+  memberSinceLabel: string;
+  totalTransactions: number;
+  disputedCount: number;
+}

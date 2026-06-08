@@ -10,14 +10,30 @@ datasource db {
 model User {
   id            String   @id @default(cuid())
   email         String   @unique
+  username      String?  @unique
   name          String
   password      String
   phone         String?
   role          String   @default("user") // "user" or "admin"
   avatar        String?
+  country       String?
+  languagePreference String @default("bn") // "bn" or "en"
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  // Reputation fields
+  buyerRating        Float    @default(0)
+  sellerRating       Float    @default(0)
+  totalReviews       Int      @default(0)
+  completedDeals     Int      @default(0)
+  successfulTransactions Int @default(0)
+  trustScore         Float    @default(0)
+  disputeRate        Float    @default(0)
+  isVerified         Boolean  @default(false)
+
+  // Subscription
+  currentSubscriptionId String?
 
   buyerTransactions    Transaction[] @relation("BuyerTransactions")
   sellerTransactions   Transaction[] @relation("SellerTransactions")
@@ -28,6 +44,7 @@ model User {
   disputeMessages      DisputeMessage[]
   adminLogs            AdminLog[]
   gatewayTransactions  GatewayTransaction[]
+  subscriptions        UserSubscription[]
 }
 
 model Transaction {
@@ -171,4 +188,58 @@ model GatewayTransaction {
   user            User @relation(fields: [userId], references: [id])
 }
 
+// ─── Subscription & Badge System ─────────────────────────
 
+model SubscriptionPlan {
+  id              String   @id @default(cuid())
+  name            String                        // "Basic", "Premium", "Verified Pro", "Business", "Trusted Elite"
+  slug            String   @unique              // "basic", "premium", "verified-pro", "business", "trusted-elite"
+  description     String                        // Plan description
+  badgeIcon       String                        // Emoji or icon identifier for the badge
+  badgeColor      String   @default("#6BBF59")  // Badge accent color
+  monthlyPrice    Float    @default(0)          // 0 = free
+  yearlyPrice     Float    @default(0)          // 0 = free
+  isActive        Boolean  @default(true)       // Admin can enable/disable
+  sortOrder       Int      @default(0)          // Display order
+
+  // Feature flags
+  priorityListing       Boolean @default(false)
+  premiumProfile        Boolean @default(false)
+  featuredProfile       Boolean @default(false)
+  higherDealLimits      Boolean @default(false)
+  prioritySupport       Boolean @default(false)
+  advancedAnalytics     Boolean @default(false)
+  customProfileBanner   Boolean @default(false)
+  featuredSellerStatus  Boolean @default(false)
+  featuredBuyerStatus   Boolean @default(false)
+  fasterDisputeResolution Boolean @default(false)
+  profileVerification   Boolean @default(false)
+  vipSupport            Boolean @default(false)
+  maximumVisibility     Boolean @default(false)
+  exclusiveFeatures     Boolean @default(false)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  subscriptions   UserSubscription[]
+}
+
+model UserSubscription {
+  id              String   @id @default(cuid())
+  userId          String
+  planId          String
+  status          String   @default("active")   // active, expired, cancelled, pending
+  billingCycle    String   @default("monthly")  // monthly, yearly
+  startDate       DateTime @default(now())
+  endDate         DateTime?
+  autoRenew       Boolean  @default(true)
+  paymentMethod   String?
+  transactionRef  String?                         // Payment reference
+  cancelledAt     DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User              @relation(fields: [userId], references: [id])
+  plan            SubscriptionPlan  @relation(fields: [planId], references: [id])
+}

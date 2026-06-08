@@ -15,10 +15,12 @@ import {
   Shield,
   LogOut,
   Menu,
-  Wallet,
   Palette,
   Sun,
   Moon,
+  UserCog,
+  Crown,
+  Award,
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import type { PageName } from '@/lib/types';
@@ -32,12 +34,12 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from '@/components/ui/sheet';
 import { getSiteName, getSiteTagline } from '@/lib/site-defaults';
 import { getInitials } from '@/lib/helpers';
 import { signOut } from 'next-auth/react';
 import { useTheme } from 'next-themes';
+import { BadgeDisplayMini } from '@/components/shared/BadgeDisplay';
 
 interface NavItem {
   label: string;
@@ -54,9 +56,16 @@ const navItems: NavItem[] = [
   { label: 'বিজ্ঞপ্তি', icon: Bell, page: 'notifications' },
 ];
 
+const accountItems: NavItem[] = [
+  { label: 'অ্যাকাউন্ট সেটিংস', icon: UserCog, page: 'account-settings' },
+  { label: 'সাবস্ক্রিপশন প্ল্যান', icon: Crown, page: 'subscription-plans' },
+];
+
 const adminNavItems: NavItem[] = [
   { label: 'প্রশাসন ড্যাশবোর্ড', icon: Settings, page: 'admin-dashboard', adminOnly: true },
   { label: 'ব্যবহারকারী ব্যবস্থাপনা', icon: Users, page: 'admin-users', adminOnly: true },
+  { label: 'সাবস্ক্রিপশন পরিচালনা', icon: Crown, page: 'admin-subscriptions', adminOnly: true },
+  { label: 'ব্যাজ ব্যবস্থাপনা', icon: Award, page: 'admin-badges', adminOnly: true },
   { label: 'পেমেন্ট গেটওয়ে', icon: CreditCard, page: 'admin-gateways', adminOnly: true },
   { label: 'গেটওয়ে পেমেন্ট যাচাই', icon: CreditCard, page: 'admin-gateway-payments', adminOnly: true },
   { label: 'গেটওয়ে থিম সেটিংস', icon: Palette, page: 'admin-gateway-theme', adminOnly: true },
@@ -135,6 +144,30 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             );
           })}
 
+          <Separator className="my-3" />
+
+          <p className="px-3 mb-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+            অ্যাকাউন্ট
+          </p>
+          {accountItems.map((item) => {
+            const isActive = currentPage === item.page;
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.page}
+                onClick={() => handleNav(item.page)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                  isActive
+                    ? 'bg-primary/10 text-primary shadow-sm'
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                }`}
+              >
+                <Icon className={`w-[18px] h-[18px] ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
+                {item.label}
+              </button>
+            );
+          })}
+
           {isAdmin && (
             <>
               <Separator className="my-4" />
@@ -174,8 +207,16 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
+                {user.isVerified && (
+                  <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-blue-500 text-white text-[8px] shrink-0">✓</span>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                <BadgeDisplayMini plan={user.currentPlan} />
+              </div>
             </div>
             <Badge
               variant="secondary"
