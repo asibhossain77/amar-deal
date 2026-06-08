@@ -101,7 +101,7 @@ export const api = {
   
   // Payment Gateways (Admin)
   getAdminGateways: () => fetchAPI('/gateways?admin=true'),
-  createGateway: (data: { name: string; slug: string; logo?: string; accountType: string; accountNumber: string; accountName: string; instructions?: string; minDeposit?: number; maxDeposit?: number; isActive?: boolean; sortOrder?: number }) =>
+  createGateway: (data: { name: string; slug: string; logo?: string; accountType: string; accountNumber: string; accountName: string; instructions?: string; minDeposit?: number; maxDeposit?: number; isActive?: boolean; sortOrder?: number; themeEnabled?: boolean; primaryColor?: string; buttonColor?: string; borderColor?: string; backgroundColor?: string }) =>
     fetchAPI('/gateways', { method: 'POST', body: JSON.stringify(data) }),
   updateGateway: (id: string, data: Record<string, unknown>) =>
     fetchAPI(`/gateways/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
@@ -117,9 +117,4 @@ export const api = {
     fetchAPI('/gateway-transactions', { method: 'POST', body: JSON.stringify(data) }),
   verifyGatewayTransaction: (id: string, data: { status: string; adminNote?: string }) =>
     fetchAPI(`/gateway-transactions/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-
-  // Gateway Theme
-  getGatewayTheme: () => fetchAPI('/gateway-theme'),
-  updateGatewayTheme: (data: { primaryColor?: string; buttonColor?: string; borderColor?: string; backgroundColor?: string }) =>
-    fetchAPI('/gateway-theme', { method: 'PUT', body: JSON.stringify(data) }),
 };

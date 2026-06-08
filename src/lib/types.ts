@@ -156,6 +156,12 @@ export interface PaymentGateway {
   maxDeposit: number;
   isActive: boolean;
   sortOrder: number;
+  // Per-gateway theme colors
+  themeEnabled: boolean;
+  primaryColor: string;
+  buttonColor: string;
+  borderColor: string;
+  backgroundColor: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -178,10 +184,4 @@ export interface GatewayTransaction {
   transaction?: Transaction;
 }
 
-export interface PaymentGatewayTheme {
-  primaryColor: string;
-  buttonColor: string;
-  borderColor: string;
-  backgroundColor: string;
-  updatedAt?: string;
-}
+

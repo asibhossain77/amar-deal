@@ -348,6 +348,11 @@ async function main() {
       maxDeposit: 50000,
       isActive: true,
       sortOrder: 0,
+      themeEnabled: true,
+      primaryColor: "#E2136E",    // bKash Pink
+      buttonColor: "#E2136E",
+      borderColor: "#E2136E",
+      backgroundColor: "#FDE8F1",  // Light pink bg
     },
     {
       name: "bKash মার্চেন্ট",
@@ -360,6 +365,11 @@ async function main() {
       maxDeposit: 200000,
       isActive: true,
       sortOrder: 1,
+      themeEnabled: true,
+      primaryColor: "#E2136E",    // bKash Pink
+      buttonColor: "#C4105E",
+      borderColor: "#E2136E",
+      backgroundColor: "#FDE8F1",
     },
     {
       name: "Nagad",
@@ -372,6 +382,11 @@ async function main() {
       maxDeposit: 50000,
       isActive: true,
       sortOrder: 2,
+      themeEnabled: true,
+      primaryColor: "#F6921E",    // Nagad Orange
+      buttonColor: "#F6921E",
+      borderColor: "#F6921E",
+      backgroundColor: "#FEF3E2",  // Light orange bg
     },
     {
       name: "Rocket",
@@ -384,6 +399,11 @@ async function main() {
       maxDeposit: 50000,
       isActive: true,
       sortOrder: 3,
+      themeEnabled: true,
+      primaryColor: "#8B2F8B",    // Rocket Purple
+      buttonColor: "#8B2F8B",
+      borderColor: "#8B2F8B",
+      backgroundColor: "#F5E6F5",  // Light purple bg
     },
     {
       name: "Upay",
@@ -396,6 +416,11 @@ async function main() {
       maxDeposit: 50000,
       isActive: false,
       sortOrder: 4,
+      themeEnabled: true,
+      primaryColor: "#1A7DC4",    // Upay Blue
+      buttonColor: "#1A7DC4",
+      borderColor: "#1A7DC4",
+      backgroundColor: "#E1F0FB",
     },
     {
       name: "ব্যাংক ট্রান্সফার",
@@ -408,6 +433,11 @@ async function main() {
       maxDeposit: 999999,
       isActive: true,
       sortOrder: 5,
+      themeEnabled: true,
+      primaryColor: "#1E5AA8",    // Bank Blue
+      buttonColor: "#1E5AA8",
+      borderColor: "#1E5AA8",
+      backgroundColor: "#E3EEF8",  // Light blue bg
     },
   ];
 

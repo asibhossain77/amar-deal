@@ -1,13 +1,14 @@
 /* =============================================
-   Payment Gateway Module - Isolated Theme Styles
+   Payment Gateway Module - Dynamic Per-Gateway Theme Styles
    =============================================
    These styles ONLY apply within .payment-gateway-module
-   They use CSS variables that are dynamically set from admin settings.
+   They use CSS variables that are dynamically set per-gateway.
+   When a user selects a gateway, its theme colors are applied.
    This does NOT affect the global website theme or dark/light mode.
    ============================================= */
 
 .payment-gateway-module {
-  /* Default values — overridden by JS from database */
+  /* Default values — overridden by JS from the selected gateway's theme */
   --gateway-primary-color: #6BBF59;
   --gateway-button-color: #6BBF59;
   --gateway-border-color: #6BBF59;
@@ -19,13 +20,23 @@
   --gateway-button-hover: color-mix(in srgb, var(--gateway-button-color) 85%, black);
   --gateway-border-light: color-mix(in srgb, var(--gateway-border-color) 30%, transparent);
   --gateway-bg-solid: color-mix(in srgb, var(--gateway-bg-color) 50%, white);
+
+  /* Transition for smooth color changes when switching gateways */
+  transition: --gateway-primary-color 0.3s ease, --gateway-button-color 0.3s ease, --gateway-border-color 0.3s ease, --gateway-bg-color 0.3s ease;
+}
+
+/* ─── Dark Mode Adaptation ──────────────────────────────── */
+.dark .payment-gateway-module {
+  /* In dark mode, adjust background to be darker */
+  --gateway-bg-solid: color-mix(in srgb, var(--gateway-bg-color) 8%, transparent);
+  --gateway-bg-color-dark: color-mix(in srgb, var(--gateway-primary-color) 8%, transparent);
 }
 
 /* ─── Gateway Selection Cards ────────────────────────────── */
 .payment-gateway-module .gateway-card {
   border: 2px solid var(--gateway-border-light);
   background: var(--gateway-bg-color);
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .payment-gateway-module .gateway-card:hover {
@@ -55,6 +66,10 @@
   padding: 1rem;
 }
 
+.dark .payment-gateway-module .gateway-detail-card .gateway-detail-inner {
+  background: var(--card);
+}
+
 /* ─── Selected Gateway Highlight ─────────────────────────── */
 .payment-gateway-module .gateway-highlight {
   background: var(--gateway-primary-light);
@@ -81,6 +96,10 @@
   border: 1px solid var(--gateway-border-light);
   border-radius: 0.5rem;
   padding: 0.75rem;
+}
+
+.dark .payment-gateway-module .gateway-instructions {
+  background: color-mix(in srgb, var(--gateway-primary-color) 8%, transparent);
 }
 
 .payment-gateway-module .gateway-instructions .instructions-icon {
@@ -187,4 +206,42 @@
 .payment-gateway-module .gateway-amount-text {
   color: var(--gateway-primary-color);
   font-weight: 700;
+}
+
+/* ─── Gateway Color Indicator Dot ────────────────────────── */
+.payment-gateway-module .gateway-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background-color 0.3s ease;
+}
+
+/* ─── Progress Indicator / Loading Spinner ───────────────── */
+.payment-gateway-module .gateway-spinner {
+  border: 3px solid color-mix(in srgb, var(--gateway-primary-color) 20%, transparent);
+  border-top-color: var(--gateway-primary-color);
+  border-radius: 50%;
+  animation: gateway-spin 0.8s linear infinite;
+}
+
+@keyframes gateway-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Gateway Icon Wrapper ──────────────────────────────── */
+.payment-gateway-module .gateway-icon-wrapper {
+  background: var(--gateway-primary-light);
+  color: var(--gateway-primary-color);
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ─── Disabled Theme Notice ─────────────────────────────── */
+.payment-gateway-module .gateway-theme-default {
+  --gateway-primary-color: #6BBF59;
+  --gateway-button-color: #6BBF59;
+  --gateway-border-color: #6BBF59;
+  --gateway-bg-color: #f0f7ee;
 }

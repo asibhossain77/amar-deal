@@ -31,6 +31,11 @@ export async function PUT(
       maxDeposit,
       isActive,
       sortOrder,
+      themeEnabled,
+      primaryColor,
+      buttonColor,
+      borderColor,
+      backgroundColor,
     } = body;
 
     // Check gateway exists
@@ -71,6 +76,11 @@ export async function PUT(
     if (maxDeposit !== undefined) updateData.maxDeposit = maxDeposit;
     if (isActive !== undefined) updateData.isActive = isActive;
     if (sortOrder !== undefined) updateData.sortOrder = sortOrder;
+    if (themeEnabled !== undefined) updateData.themeEnabled = themeEnabled;
+    if (primaryColor !== undefined) updateData.primaryColor = primaryColor;
+    if (buttonColor !== undefined) updateData.buttonColor = buttonColor;
+    if (borderColor !== undefined) updateData.borderColor = borderColor;
+    if (backgroundColor !== undefined) updateData.backgroundColor = backgroundColor;
 
     const gateway = await db.paymentGateway.update({
       where: { id },

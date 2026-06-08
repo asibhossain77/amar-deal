@@ -138,6 +138,14 @@ model PaymentGateway {
   maxDeposit      Float    @default(999999)      // Maximum deposit amount
   isActive        Boolean  @default(true)        // ON/OFF toggle
   sortOrder       Int      @default(0)           // Display order (lower = first)
+
+  // Per-gateway theme colors
+  themeEnabled    Boolean  @default(true)        // Enable custom theme for this gateway
+  primaryColor    String   @default("#6BBF59")   // Primary/accent color
+  buttonColor     String   @default("#6BBF59")   // Submit button color
+  borderColor     String   @default("#6BBF59")   // Border/accent color
+  backgroundColor String   @default("#f0f7ee")   // Background highlight color
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -163,11 +171,4 @@ model GatewayTransaction {
   user            User @relation(fields: [userId], references: [id])
 }
 
-model PaymentGatewayTheme {
-  id              String   @id @default("gateway-theme-singleton")
-  primaryColor    String   @default("#6BBF59")    // Gateway primary/accent color
-  buttonColor     String   @default("#6BBF59")    // Submit payment button color
-  borderColor     String   @default("#6BBF59")    // Card border/accent color
-  backgroundColor String   @default("#f0f7ee")    // Payment box background highlight
-  updatedAt       DateTime @updatedAt
-}
+

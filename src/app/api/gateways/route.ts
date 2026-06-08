@@ -66,6 +66,11 @@ export async function POST(request: NextRequest) {
       maxDeposit,
       isActive,
       sortOrder,
+      themeEnabled,
+      primaryColor,
+      buttonColor,
+      borderColor,
+      backgroundColor,
     } = body;
 
     // Validate required fields
@@ -103,6 +108,11 @@ export async function POST(request: NextRequest) {
         maxDeposit: maxDeposit !== undefined ? maxDeposit : 999999,
         isActive: isActive !== undefined ? isActive : true,
         sortOrder: sortOrder !== undefined ? sortOrder : 0,
+        themeEnabled: themeEnabled !== undefined ? themeEnabled : true,
+        primaryColor: primaryColor || "#6BBF59",
+        buttonColor: buttonColor || "#6BBF59",
+        borderColor: borderColor || "#6BBF59",
+        backgroundColor: backgroundColor || "#f0f7ee",
       },
     });
 

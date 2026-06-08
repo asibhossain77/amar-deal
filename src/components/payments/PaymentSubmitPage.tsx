@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { CreditCard, Loader2, Copy, CheckCircle2, Phone, Building2, Wallet, Info, ImageIcon } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { api } from '@/lib/api';
-import type { Transaction, PaymentGateway, PaymentGatewayTheme } from '@/lib/types';
+import type { Transaction, PaymentGateway } from '@/lib/types';
 import { formatBDT } from '@/lib/helpers';
 import {
   Card,
@@ -22,6 +22,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import PageHeader from '@/components/shared/PageHeader';
+
+// Default theme when gateway has theme disabled
+const DEFAULT_THEME = {
+  primaryColor: '#6BBF59',
+  buttonColor: '#6BBF59',
+  borderColor: '#6BBF59',
+  backgroundColor: '#f0f7ee',
+};
 
 // Helper: get icon based on accountType
 function getGatewayIcon(accountType: string) {
@@ -53,9 +61,6 @@ export default function PaymentSubmitPage() {
   const [gateways, setGateways] = useState<PaymentGateway[]>([]);
   const [gatewaysLoading, setGatewaysLoading] = useState(true);
   const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null);
-
-  // Theme state
-  const [theme, setTheme] = useState<PaymentGatewayTheme | null>(null);
 
   // Form state
   const [amount, setAmount] = useState('');
@@ -105,28 +110,31 @@ export default function PaymentSubmitPage() {
     fetchGateways();
   }, []);
 
-  // Fetch gateway theme
-  useEffect(() => {
-    async function fetchTheme() {
-      try {
-        const data = await api.getGatewayTheme();
-        setTheme(data.theme || data);
-      } catch {
-        // Use defaults - CSS variables have fallback defaults
-      }
-    }
-    fetchTheme();
-  }, []);
+  // Compute CSS variables object for the selected gateway's theme
+  const themeVars: React.CSSProperties = (() => {
+    if (!selectedGateway) return {};
 
-  // Compute CSS variables object for the theme
-  const themeVars: React.CSSProperties = theme
-    ? ({
-        '--gateway-primary-color': theme.primaryColor,
-        '--gateway-button-color': theme.buttonColor,
-        '--gateway-border-color': theme.borderColor,
-        '--gateway-bg-color': theme.backgroundColor,
-      } as React.CSSProperties)
-    : {};
+    // If gateway has custom theme enabled, use its colors
+    if (selectedGateway.themeEnabled) {
+      return {
+        '--gateway-primary-color': selectedGateway.primaryColor,
+        '--gateway-button-color': selectedGateway.buttonColor,
+        '--gateway-border-color': selectedGateway.borderColor,
+        '--gateway-bg-color': selectedGateway.backgroundColor,
+      } as React.CSSProperties;
+    }
+
+    // Otherwise use default green theme
+    return {
+      '--gateway-primary-color': DEFAULT_THEME.primaryColor,
+      '--gateway-button-color': DEFAULT_THEME.buttonColor,
+      '--gateway-border-color': DEFAULT_THEME.borderColor,
+      '--gateway-bg-color': DEFAULT_THEME.backgroundColor,
+    } as React.CSSProperties;
+  })();
+
+  // Get the active color for the selected gateway (for inline styles)
+  const activeColor = selectedGateway?.themeEnabled ? selectedGateway.primaryColor : DEFAULT_THEME.primaryColor;
 
   const handleCopy = (text: string, field: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -360,7 +368,7 @@ export default function PaymentSubmitPage() {
       <PageHeader
         title="পেমেন্ট জমা দিন"
         subtitle="আপনার পেমেন্টের বিবরণ পূরণ করুন"
-        icon={<CreditCard className="h-5 w-5 text-primary" />}
+        icon={<CreditCard className="h-5 w-5" style={{ color: activeColor }} />}
         onBack={handleGoBack}
       />
 
@@ -447,6 +455,7 @@ export default function PaymentSubmitPage() {
                     {gateways.map((gateway) => {
                       const GatewayIcon = getGatewayIcon(gateway.accountType);
                       const isSelected = selectedGateway?.id === gateway.id;
+                      const gwColor = gateway.themeEnabled ? gateway.primaryColor : DEFAULT_THEME.primaryColor;
 
                       return (
                         <label
@@ -457,13 +466,24 @@ export default function PaymentSubmitPage() {
                           {gateway.logo ? (
                             <img src={gateway.logo} alt={gateway.name} className="h-4 w-4 object-contain rounded" />
                           ) : (
-                            <GatewayIcon className="h-4 w-4" />
+                            <div
+                              className="gateway-icon-wrapper h-5 w-5 rounded flex items-center justify-center"
+                              style={isSelected ? {} : { backgroundColor: 'transparent', color: gwColor }}
+                            >
+                              <GatewayIcon className="h-3.5 w-3.5" />
+                            </div>
                           )}
                           <div className="flex-1 min-w-0">
                             <Label htmlFor={`gateway-${gateway.id}`} className="cursor-pointer font-medium text-sm block truncate">
                               {gateway.name}
                             </Label>
                           </div>
+                          {/* Color dot showing gateway's theme color */}
+                          <div
+                            className="gateway-color-dot"
+                            style={{ backgroundColor: gwColor }}
+                            title={gateway.themeEnabled ? 'কাস্টম থিম সক্রিয়' : 'ডিফল্ট থিম'}
+                          />
                           <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 shrink-0">
                             {getAccountTypeLabel(gateway.accountType)}
                           </Badge>

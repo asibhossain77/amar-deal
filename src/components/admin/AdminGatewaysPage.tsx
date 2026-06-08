@@ -95,6 +95,11 @@ interface GatewayFormData {
   maxDeposit: number;
   isActive: boolean;
   sortOrder: number;
+  themeEnabled: boolean;
+  primaryColor: string;
+  buttonColor: string;
+  borderColor: string;
+  backgroundColor: string;
 }
 
 const EMPTY_FORM: GatewayFormData = {
@@ -109,6 +114,11 @@ const EMPTY_FORM: GatewayFormData = {
   maxDeposit: 999999,
   isActive: true,
   sortOrder: 0,
+  themeEnabled: true,
+  primaryColor: '#6BBF59',
+  buttonColor: '#6BBF59',
+  borderColor: '#6BBF59',
+  backgroundColor: '#f0f7ee',
 };
 
 export default function AdminGatewaysPage() {
@@ -181,6 +191,11 @@ export default function AdminGatewaysPage() {
       maxDeposit: gateway.maxDeposit,
       isActive: gateway.isActive,
       sortOrder: gateway.sortOrder,
+      themeEnabled: gateway.themeEnabled,
+      primaryColor: gateway.primaryColor,
+      buttonColor: gateway.buttonColor,
+      borderColor: gateway.borderColor,
+      backgroundColor: gateway.backgroundColor,
     });
     setSlugManuallyEdited(true); // don't overwrite slug when editing
     setDialogOpen(true);
@@ -252,6 +267,11 @@ export default function AdminGatewaysPage() {
         maxDeposit: form.maxDeposit,
         isActive: form.isActive,
         sortOrder: form.sortOrder,
+        themeEnabled: form.themeEnabled,
+        primaryColor: form.primaryColor,
+        buttonColor: form.buttonColor,
+        borderColor: form.borderColor,
+        backgroundColor: form.backgroundColor,
       };
 
       if (editingGateway) {
@@ -420,7 +440,10 @@ export default function AdminGatewaysPage() {
                     {/* Left: Logo + Info */}
                     <div className="flex items-start gap-4">
                       {/* Logo */}
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border bg-muted/50">
+                      <div
+                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border"
+                        style={gateway.themeEnabled ? { borderColor: gateway.primaryColor, backgroundColor: gateway.backgroundColor } : {}}
+                      >
                         {gateway.logo ? (
                           <img
                             src={gateway.logo}
@@ -428,7 +451,7 @@ export default function AdminGatewaysPage() {
                             className="h-10 w-10 object-contain"
                           />
                         ) : (
-                          <Wallet className="h-6 w-6 text-muted-foreground" />
+                          <Wallet className="h-6 w-6" style={gateway.themeEnabled ? { color: gateway.primaryColor } : {}} />
                         )}
                       </div>
 
@@ -450,6 +473,20 @@ export default function AdminGatewaysPage() {
                           ) : (
                             <Badge variant="outline" className="border-red-300 bg-red-50 text-red-700">
                               নিষ্ক্রিয়
+                            </Badge>
+                          )}
+                          {gateway.themeEnabled ? (
+                            <Badge
+                              variant="outline"
+                              className="gap-1"
+                              style={{ borderColor: gateway.primaryColor, color: gateway.primaryColor, backgroundColor: gateway.backgroundColor }}
+                            >
+                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: gateway.primaryColor }} />
+                              কাস্টম থিম
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="border-gray-300 bg-gray-50 text-gray-600">
+                              ডিফল্ট থিম
                             </Badge>
                           )}
                         </div>
@@ -785,6 +822,96 @@ export default function AdminGatewaysPage() {
               <p className="text-xs text-muted-foreground">
                 কম সংখ্যা প্রথমে দেখাবে
               </p>
+            </div>
+
+            {/* Theme Colors Section */}
+            <div className="space-y-3 rounded-lg border p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">কাস্টম থিম রং</p>
+                  <p className="text-xs text-muted-foreground">এই গেটওয়ের জন্য আলাদা রং সেট করুন</p>
+                </div>
+                <Switch
+                  checked={form.themeEnabled}
+                  onCheckedChange={(checked) => setForm((prev) => ({ ...prev, themeEnabled: checked }))}
+                />
+              </div>
+
+              {form.themeEnabled && (
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">প্রাথমিক রং</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={form.primaryColor}
+                        onChange={(e) => setForm((prev) => ({ ...prev, primaryColor: e.target.value }))}
+                        className="w-8 h-8 rounded border cursor-pointer p-0.5"
+                      />
+                      <Input
+                        value={form.primaryColor}
+                        onChange={(e) => setForm((prev) => ({ ...prev, primaryColor: e.target.value }))}
+                        className="font-mono text-xs h-8"
+                        maxLength={7}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">বাটন রং</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={form.buttonColor}
+                        onChange={(e) => setForm((prev) => ({ ...prev, buttonColor: e.target.value }))}
+                        className="w-8 h-8 rounded border cursor-pointer p-0.5"
+                      />
+                      <Input
+                        value={form.buttonColor}
+                        onChange={(e) => setForm((prev) => ({ ...prev, buttonColor: e.target.value }))}
+                        className="font-mono text-xs h-8"
+                        maxLength={7}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">বর্ডার রং</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={form.borderColor}
+                        onChange={(e) => setForm((prev) => ({ ...prev, borderColor: e.target.value }))}
+                        className="w-8 h-8 rounded border cursor-pointer p-0.5"
+                      />
+                      <Input
+                        value={form.borderColor}
+                        onChange={(e) => setForm((prev) => ({ ...prev, borderColor: e.target.value }))}
+                        className="font-mono text-xs h-8"
+                        maxLength={7}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">ব্যাকগ্রাউন্ড রং</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={form.backgroundColor}
+                        onChange={(e) => setForm((prev) => ({ ...prev, backgroundColor: e.target.value }))}
+                        className="w-8 h-8 rounded border cursor-pointer p-0.5"
+                      />
+                      <Input
+                        value={form.backgroundColor}
+                        onChange={(e) => setForm((prev) => ({ ...prev, backgroundColor: e.target.value }))}
+                        className="font-mono text-xs h-8"
+                        maxLength={7}
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground col-span-2">
+                    বিস্তারিত থিম কাস্টমাইজেশনের জন্য &quot;গেটওয়ে থিম সেটিংস&quot; পেজে যান
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
