@@ -1,10 +1,8 @@
 /* =============================================
-   Payment Gateway Module - Dynamic Per-Gateway Theme Styles
+   Payment Gateway Module - Mobile-First Dynamic Per-Gateway Theme Styles
    =============================================
-   These styles ONLY apply within .payment-gateway-module
-   They use CSS variables that are dynamically set per-gateway.
-   When a user selects a gateway, its theme colors are applied.
-   This does NOT affect the global website theme or dark/light mode.
+   Mobile-first responsive design with professional fintech appearance.
+   CSS variables are dynamically set per-gateway.
    ============================================= */
 
 .payment-gateway-module {
@@ -15,59 +13,160 @@
   --gateway-bg-color: #f0f7ee;
 
   /* Derived colors — computed from primary */
-  --gateway-primary-light: color-mix(in srgb, var(--gateway-primary-color) 15%, transparent);
+  --gateway-primary-light: color-mix(in srgb, var(--gateway-primary-color) 12%, transparent);
   --gateway-primary-dark: color-mix(in srgb, var(--gateway-primary-color) 70%, black);
-  --gateway-button-hover: color-mix(in srgb, var(--gateway-button-color) 85%, black);
-  --gateway-border-light: color-mix(in srgb, var(--gateway-border-color) 30%, transparent);
+  --gateway-button-hover: color-mix(in srgb, var(--gateway-button-color) 82%, black);
+  --gateway-border-light: color-mix(in srgb, var(--gateway-border-color) 25%, transparent);
   --gateway-bg-solid: color-mix(in srgb, var(--gateway-bg-color) 50%, white);
+  --gateway-surface: color-mix(in srgb, var(--gateway-bg-color) 80%, white);
+  --gateway-surface-hover: color-mix(in srgb, var(--gateway-bg-color) 100%, white);
 
   /* Transition for smooth color changes when switching gateways */
-  transition: --gateway-primary-color 0.3s ease, --gateway-button-color 0.3s ease, --gateway-border-color 0.3s ease, --gateway-bg-color 0.3s ease;
+  transition: --gateway-primary-color 0.4s ease, --gateway-button-color 0.4s ease, --gateway-border-color 0.4s ease, --gateway-bg-color 0.4s ease;
 }
 
 /* ─── Dark Mode Adaptation ──────────────────────────────── */
 .dark .payment-gateway-module {
-  /* In dark mode, adjust background to be darker */
-  --gateway-bg-solid: color-mix(in srgb, var(--gateway-bg-color) 8%, transparent);
-  --gateway-bg-color-dark: color-mix(in srgb, var(--gateway-primary-color) 8%, transparent);
+  --gateway-bg-solid: color-mix(in srgb, var(--gateway-bg-color) 6%, transparent);
+  --gateway-bg-color-dark: color-mix(in srgb, var(--gateway-primary-color) 6%, transparent);
+  --gateway-surface: color-mix(in srgb, var(--gateway-primary-color) 8%, transparent);
+  --gateway-surface-hover: color-mix(in srgb, var(--gateway-primary-color) 12%, transparent);
 }
 
-/* ─── Gateway Selection Cards ────────────────────────────── */
+/* ─── Gateway Selection Cards - Modern Card Style ────────── */
 .payment-gateway-module .gateway-card {
   border: 2px solid var(--gateway-border-light);
-  background: var(--gateway-bg-color);
-  transition: all 0.25s ease;
+  background: var(--gateway-surface);
+  border-radius: 1rem;
+  padding: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+}
+
+.payment-gateway-module .gateway-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: transparent;
+  transition: background 0.3s ease;
 }
 
 .payment-gateway-module .gateway-card:hover {
   border-color: var(--gateway-border-color);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--gateway-border-color) 20%, transparent);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--gateway-border-color) 15%, transparent);
+  transform: translateY(-1px);
+}
+
+.payment-gateway-module .gateway-card:active {
+  transform: translateY(0);
 }
 
 .payment-gateway-module .gateway-card-selected {
   border-color: var(--gateway-primary-color) !important;
   background: var(--gateway-primary-light) !important;
-  box-shadow: 0 0 0 1px var(--gateway-primary-color), 0 2px 12px color-mix(in srgb, var(--gateway-primary-color) 25%, transparent);
+  box-shadow: 
+    0 0 0 2px color-mix(in srgb, var(--gateway-primary-color) 15%, transparent),
+    0 4px 20px color-mix(in srgb, var(--gateway-primary-color) 20%, transparent);
+  transform: translateY(-2px);
+}
+
+.payment-gateway-module .gateway-card-selected::before {
+  background: var(--gateway-primary-color);
+}
+
+/* ─── Gateway Logo Container ────────────────────────────── */
+.payment-gateway-module .gateway-logo-container {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.payment-gateway-module .gateway-card-selected .gateway-logo-container {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+}
+
+.payment-gateway-module .gateway-logo-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+/* ─── Gateway Check Indicator ────────────────────────────── */
+.payment-gateway-module .gateway-check-indicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gateway-primary-color);
+  color: white;
+  transform: scale(0);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.payment-gateway-module .gateway-card-selected .gateway-check-indicator {
+  transform: scale(1);
 }
 
 /* ─── Gateway Detail Card ────────────────────────────────── */
 .payment-gateway-module .gateway-detail-card {
   border: 2px solid var(--gateway-border-light);
-  background: var(--gateway-bg-color);
+  background: var(--gateway-surface);
+  border-radius: 1rem;
+  overflow: hidden;
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .payment-gateway-module .gateway-detail-card .gateway-detail-header {
   color: var(--gateway-primary-dark);
+  font-size: 1rem;
 }
 
 .payment-gateway-module .gateway-detail-card .gateway-detail-inner {
   background: white;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--gateway-border-color) 10%, transparent);
 }
 
 .dark .payment-gateway-module .gateway-detail-card .gateway-detail-inner {
   background: var(--card);
+  border-color: color-mix(in srgb, var(--gateway-border-color) 15%, transparent);
+}
+
+/* ─── Account Number Highlight ───────────────────────────── */
+.payment-gateway-module .account-number-box {
+  background: color-mix(in srgb, var(--gateway-primary-color) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gateway-primary-color) 15%, transparent);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  text-align: center;
+  position: relative;
+}
+
+.dark .payment-gateway-module .account-number-box {
+  background: color-mix(in srgb, var(--gateway-primary-color) 10%, transparent);
+  border-color: color-mix(in srgb, var(--gateway-primary-color) 20%, transparent);
 }
 
 /* ─── Selected Gateway Highlight ─────────────────────────── */
@@ -81,12 +180,16 @@
 /* ─── Transaction ID Input Box ───────────────────────────── */
 .payment-gateway-module .gateway-input {
   border: 2px solid var(--gateway-border-light);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  min-height: 48px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .payment-gateway-module .gateway-input:focus {
   border-color: var(--gateway-primary-color);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gateway-primary-color) 20%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gateway-primary-color) 15%, transparent);
   outline: none;
 }
 
@@ -94,12 +197,13 @@
 .payment-gateway-module .gateway-instructions {
   background: color-mix(in srgb, var(--gateway-bg-color) 80%, white);
   border: 1px solid var(--gateway-border-light);
-  border-radius: 0.5rem;
-  padding: 0.75rem;
+  border-radius: 0.75rem;
+  padding: 0.875rem;
 }
 
 .dark .payment-gateway-module .gateway-instructions {
   background: color-mix(in srgb, var(--gateway-primary-color) 8%, transparent);
+  border-color: color-mix(in srgb, var(--gateway-primary-color) 15%, transparent);
 }
 
 .payment-gateway-module .gateway-instructions .instructions-icon {
@@ -113,8 +217,10 @@
 /* ─── Upload Screenshot Area ─────────────────────────────── */
 .payment-gateway-module .gateway-upload-area {
   border: 2px dashed var(--gateway-border-light);
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
   transition: border-color 0.2s ease, background 0.2s ease;
+  min-height: 80px;
 }
 
 .payment-gateway-module .gateway-upload-area:hover {
@@ -122,61 +228,105 @@
   background: var(--gateway-primary-light);
 }
 
+.payment-gateway-module .gateway-upload-area.drag-over {
+  border-color: var(--gateway-primary-color);
+  background: var(--gateway-primary-light);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gateway-primary-color) 15%, transparent);
+}
+
 /* ─── Submit Payment Button ──────────────────────────────── */
 .payment-gateway-module .gateway-submit-btn {
-  background-color: var(--gateway-button-color);
+  background: linear-gradient(135deg, var(--gateway-button-color), color-mix(in srgb, var(--gateway-button-color) 85%, black));
   color: white;
   font-weight: 600;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  min-height: 52px;
+  font-size: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
   cursor: pointer;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--gateway-button-color) 25%, transparent);
+  position: relative;
+  overflow: hidden;
+}
+
+.payment-gateway-module .gateway-submit-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transition: width 0.4s ease, height 0.4s ease;
+  transform: translate(-50%, -50%);
+}
+
+.payment-gateway-module .gateway-submit-btn:hover:not(:disabled)::after {
+  width: 300px;
+  height: 300px;
 }
 
 .payment-gateway-module .gateway-submit-btn:hover:not(:disabled) {
-  background-color: var(--gateway-button-hover);
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--gateway-button-color) 30%, transparent);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--gateway-button-color) 35%, transparent);
+  transform: translateY(-1px);
 }
 
 .payment-gateway-module .gateway-submit-btn:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--gateway-button-color) 20%, transparent);
 }
 
 .payment-gateway-module .gateway-submit-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  box-shadow: none;
+  background: color-mix(in srgb, var(--gateway-button-color) 50%, gray);
 }
 
 /* ─── Payment Status Badges ──────────────────────────────── */
 .payment-gateway-module .gateway-badge-pending {
-  background: color-mix(in srgb, var(--gateway-primary-color) 15%, transparent);
+  background: color-mix(in srgb, var(--gateway-primary-color) 12%, transparent);
   color: var(--gateway-primary-dark);
-  border: 1px solid color-mix(in srgb, var(--gateway-primary-color) 30%, transparent);
-  padding: 0.125rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--gateway-primary-color) 25%, transparent);
+  padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .payment-gateway-module .gateway-badge-verified {
   background: #dcfce7;
   color: #166534;
   border: 1px solid #bbf7d0;
-  padding: 0.125rem 0.5rem;
+  padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
+}
+
+.dark .payment-gateway-module .gateway-badge-verified {
+  background: rgba(22, 101, 52, 0.2);
+  color: #86efac;
+  border-color: rgba(34, 197, 94, 0.3);
 }
 
 .payment-gateway-module .gateway-badge-rejected {
   background: #fef2f2;
   color: #991b1b;
   border: 1px solid #fecaca;
-  padding: 0.125rem 0.5rem;
+  padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
+}
+
+.dark .payment-gateway-module .gateway-badge-rejected {
+  background: rgba(153, 27, 27, 0.2);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 /* ─── Gateway Header Accent Line ─────────────────────────── */
@@ -195,11 +345,16 @@
 .payment-gateway-module .gateway-copy-btn {
   border-color: var(--gateway-border-color);
   color: var(--gateway-primary-color);
+  border-radius: 0.5rem;
+  min-height: 40px;
+  min-width: 80px;
+  transition: all 0.2s ease;
 }
 
 .payment-gateway-module .gateway-copy-btn:hover {
   background: var(--gateway-primary-light);
   border-color: var(--gateway-primary-color);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--gateway-primary-color) 15%, transparent);
 }
 
 /* ─── Gateway Amount Display ─────────────────────────────── */
@@ -219,10 +374,18 @@
 
 /* ─── Progress Indicator / Loading Spinner ───────────────── */
 .payment-gateway-module .gateway-spinner {
+  width: 24px;
+  height: 24px;
   border: 3px solid color-mix(in srgb, var(--gateway-primary-color) 20%, transparent);
   border-top-color: var(--gateway-primary-color);
   border-radius: 50%;
   animation: gateway-spin 0.8s linear infinite;
+}
+
+.payment-gateway-module .gateway-spinner-lg {
+  width: 40px;
+  height: 40px;
+  border-width: 4px;
 }
 
 @keyframes gateway-spin {
@@ -234,7 +397,7 @@
   background: var(--gateway-primary-light);
   color: var(--gateway-primary-color);
   padding: 0.5rem;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -244,4 +407,220 @@
   --gateway-button-color: #6BBF59;
   --gateway-border-color: #6BBF59;
   --gateway-bg-color: #f0f7ee;
+}
+
+/* ─── Animations ──────────────────────────────────────────── */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--gateway-primary-color) 30%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--gateway-primary-color) 0%, transparent);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.payment-gateway-module .animate-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.payment-gateway-module .animate-slide-in {
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.payment-gateway-module .animate-fade-in {
+  animation: fadeIn 0.3s ease;
+}
+
+.payment-gateway-module .animate-pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+/* ─── Skeleton Loading Shimmer ────────────────────────────── */
+.payment-gateway-module .gateway-skeleton {
+  background: linear-gradient(90deg, var(--muted) 25%, color-mix(in srgb, var(--muted) 70%, white) 50%, var(--muted) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 0.5rem;
+}
+
+.dark .payment-gateway-module .gateway-skeleton {
+  background: linear-gradient(90deg, var(--muted) 25%, color-mix(in srgb, var(--muted) 80%, white) 50%, var(--muted) 75%);
+  background-size: 200% 100%;
+}
+
+/* ─── Transaction Info Card ───────────────────────────────── */
+.payment-gateway-module .transaction-info-card {
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--gateway-primary-color) 15%, transparent);
+}
+
+.payment-gateway-module .transaction-info-card .info-header {
+  background: linear-gradient(135deg, var(--gateway-primary-color), color-mix(in srgb, var(--gateway-primary-color) 70%, black));
+  padding: 1rem 1.25rem;
+  color: white;
+}
+
+.payment-gateway-module .transaction-info-card .info-body {
+  padding: 1rem 1.25rem;
+  background: var(--gateway-surface);
+}
+
+.dark .payment-gateway-module .transaction-info-card .info-body {
+  background: color-mix(in srgb, var(--gateway-primary-color) 5%, transparent);
+}
+
+/* ─── Success State ───────────────────────────────────────── */
+.payment-gateway-module .success-container {
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.payment-gateway-module .success-checkmark {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6BBF59, #4a9e3d);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 8px 32px rgba(107, 191, 89, 0.3);
+}
+
+.dark .payment-gateway-module .success-checkmark {
+  box-shadow: 0 8px 32px rgba(107, 191, 89, 0.2);
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+/* ─── Mobile-First Responsive Adjustments ─────────────────── */
+
+/* Extra small screens (< 375px) */
+@media (max-width: 374px) {
+  .payment-gateway-module .gateway-card {
+    padding: 0.75rem;
+    min-height: 64px;
+    border-radius: 0.75rem;
+  }
+
+  .payment-gateway-module .gateway-logo-container {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  .payment-gateway-module .gateway-submit-btn {
+    padding: 0.875rem 1rem;
+    min-height: 48px;
+    font-size: 0.9375rem;
+    border-radius: 0.625rem;
+  }
+}
+
+/* Small screens (375px - 639px) - Default mobile */
+@media (min-width: 375px) and (max-width: 639px) {
+  .payment-gateway-module .gateway-card {
+    padding: 0.875rem;
+    min-height: 68px;
+  }
+
+  .payment-gateway-module .gateway-logo-container {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* Medium screens and up (640px+) */
+@media (min-width: 640px) {
+  .payment-gateway-module .gateway-card {
+    padding: 1rem;
+    min-height: 76px;
+  }
+
+  .payment-gateway-module .gateway-logo-container {
+    width: 52px;
+    height: 52px;
+  }
+
+  .payment-gateway-module .gateway-submit-btn {
+    min-height: 56px;
+  }
+}
+
+/* Large screens (1024px+) */
+@media (min-width: 1024px) {
+  .payment-gateway-module .gateway-card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* ─── Touch Target Optimization ────────────────────────────── */
+@media (pointer: coarse) {
+  .payment-gateway-module .gateway-card {
+    min-height: 76px;
+    padding: 1rem;
+  }
+
+  .payment-gateway-module .gateway-submit-btn {
+    min-height: 56px;
+  }
+
+  .payment-gateway-module .gateway-copy-btn {
+    min-height: 44px;
+    min-width: 90px;
+  }
+
+  .payment-gateway-module .gateway-input {
+    min-height: 52px;
+    font-size: 1rem;
+  }
+}
+
+/* ─── Print Styles ─────────────────────────────────────────── */
+@media print {
+  .payment-gateway-module .gateway-submit-btn,
+  .payment-gateway-module .gateway-copy-btn {
+    display: none;
+  }
+  
+  .payment-gateway-module .gateway-card {
+    border: 1px solid #ddd;
+    box-shadow: none;
+  }
 }

@@ -1,7 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { CreditCard, Loader2, Copy, CheckCircle2, Phone, Building2, Wallet, Info, ImageIcon } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { 
+  CreditCard, Loader2, Copy, CheckCircle2, Phone, Building2, 
+  Wallet, Info, ImageIcon, ChevronRight, ArrowLeft, Shield,
+  Upload, FileCheck, AlertCircle
+} from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { api } from '@/lib/api';
 import type { Transaction, PaymentGateway } from '@/lib/types';
@@ -9,19 +13,19 @@ import { formatBDT } from '@/lib/helpers';
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import PageHeader from '@/components/shared/PageHeader';
+import { 
+  getGatewayLogoComponent, 
+  getGatewayBrandColor, 
+  StepIndicator 
+} from './GatewayLogos';
 
 // Default theme when gateway has theme disabled
 const DEFAULT_THEME = {
@@ -48,6 +52,15 @@ function getAccountTypeLabel(accountType: string): string {
   return accountType;
 }
 
+// Helper: get account type icon color
+function getAccountTypeIconColor(accountType: string): string {
+  const type = accountType.toLowerCase();
+  if (type === 'personal') return 'text-blue-500';
+  if (type === 'merchant') return 'text-emerald-500';
+  if (type === 'bank') return 'text-amber-600';
+  return 'text-gray-500';
+}
+
 export default function PaymentSubmitPage() {
   const { selectedPaymentTransactionId, setPage, setSelectedTransactionId } = useAppStore();
   const { toast } = useToast();
@@ -71,6 +84,12 @@ export default function PaymentSubmitPage() {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [amountError, setAmountError] = useState('');
 
+  // UI state
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Compute current step
+  const currentStep = !selectedGateway ? 1 : !transactionRef.trim() || !amount ? 2 : 3;
+
   // Fetch transaction info
   useEffect(() => {
     async function fetchTransaction() {
@@ -82,6 +101,10 @@ export default function PaymentSubmitPage() {
         const data = await api.getTransaction(selectedPaymentTransactionId);
         const tx = data.transaction || data;
         setTransaction(tx);
+        // Pre-fill amount from transaction
+        if (tx?.amount) {
+          setAmount(tx.amount.toString());
+        }
       } catch {
         setError('লেনদেনের তথ্য লোড করতে সমস্যা হয়েছে');
       } finally {
@@ -98,11 +121,10 @@ export default function PaymentSubmitPage() {
         setGatewaysLoading(true);
         const data = await api.getActiveGateways();
         const gatewayList = data.gateways || data || [];
-        // Sort by sortOrder
         const sorted = [...gatewayList].sort((a: PaymentGateway, b: PaymentGateway) => a.sortOrder - b.sortOrder);
         setGateways(sorted);
       } catch {
-        // Silently fail - gateways will be empty
+        // Silently fail
       } finally {
         setGatewaysLoading(false);
       }
@@ -113,8 +135,6 @@ export default function PaymentSubmitPage() {
   // Compute CSS variables object for the selected gateway's theme
   const themeVars: React.CSSProperties = (() => {
     if (!selectedGateway) return {};
-
-    // If gateway has custom theme enabled, use its colors
     if (selectedGateway.themeEnabled) {
       return {
         '--gateway-primary-color': selectedGateway.primaryColor,
@@ -123,8 +143,6 @@ export default function PaymentSubmitPage() {
         '--gateway-bg-color': selectedGateway.backgroundColor,
       } as React.CSSProperties;
     }
-
-    // Otherwise use default green theme
     return {
       '--gateway-primary-color': DEFAULT_THEME.primaryColor,
       '--gateway-button-color': DEFAULT_THEME.buttonColor,
@@ -133,10 +151,9 @@ export default function PaymentSubmitPage() {
     } as React.CSSProperties;
   })();
 
-  // Get the active color for the selected gateway (for inline styles)
   const activeColor = selectedGateway?.themeEnabled ? selectedGateway.primaryColor : DEFAULT_THEME.primaryColor;
 
-  const handleCopy = (text: string, field: string) => {
+  const handleCopy = useCallback((text: string, field: string) => {
     navigator.clipboard.writeText(text).then(() => {
       setCopiedField(field);
       toast({
@@ -145,22 +162,21 @@ export default function PaymentSubmitPage() {
       });
       setTimeout(() => setCopiedField(null), 2000);
     });
-  };
+  }, [toast]);
 
-  const handleGatewaySelect = (gateway: PaymentGateway) => {
+  const handleGatewaySelect = useCallback((gateway: PaymentGateway) => {
     setSelectedGateway(gateway);
     setError('');
     setAmountError('');
-    setAmount('');
-  };
+    // Don't reset amount if it was pre-filled from transaction
+  }, []);
 
-  const handleAmountChange = (value: string) => {
+  const handleAmountChange = useCallback((value: string) => {
     setAmount(value);
     setAmountError('');
     setError('');
 
     if (!selectedGateway || !value) return;
-
     const numValue = parseFloat(value);
     if (isNaN(numValue)) return;
 
@@ -170,21 +186,41 @@ export default function PaymentSubmitPage() {
     if (selectedGateway.maxDeposit > 0 && numValue > selectedGateway.maxDeposit) {
       setAmountError(`সর্বোচ্চ জমার পরিমাণ ${formatBDT(selectedGateway.maxDeposit)}`);
     }
-  };
+  }, [selectedGateway]);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setScreenshotFileName(file.name);
-
     const reader = new FileReader();
     reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setScreenshot(base64String);
+      setScreenshot(reader.result as string);
     };
     reader.readAsDataURL(file);
-  };
+  }, []);
+
+  // Drag and drop handler
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    setScreenshotFileName(file.name);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setScreenshot(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setIsDragging(false);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -255,282 +291,315 @@ export default function PaymentSubmitPage() {
     }
   };
 
-  // Render gateway details card after selection
-  const renderGatewayDetails = () => {
-    if (!selectedGateway) return null;
-
-    const GatewayIcon = getGatewayIcon(selectedGateway.accountType);
-
-    return (
-      <div className="gateway-detail-card rounded-lg shadow-sm">
-        <div className="p-4 pb-2">
-          <h3 className="gateway-detail-header text-sm font-semibold flex items-center gap-2">
-            {selectedGateway.logo ? (
-              <img src={selectedGateway.logo} alt={selectedGateway.name} className="h-5 w-5 object-contain rounded" />
-            ) : (
-              <GatewayIcon className="h-4 w-4" />
-            )}
-            {selectedGateway.name} পেমেন্টের তথ্য
-          </h3>
-        </div>
-        <div className="px-4 pb-4 space-y-3">
-          <div className="gateway-detail-inner space-y-3">
-            {/* Account Number with copy */}
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">অ্যাকাউন্ট নাম্বার</p>
-                <p className="text-xl font-bold text-foreground font-mono tracking-wide">{selectedGateway.accountNumber}</p>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="gateway-copy-btn gap-1 shrink-0"
-                onClick={() => handleCopy(selectedGateway.accountNumber, `gateway-${selectedGateway.id}-number`)}
-              >
-                {copiedField === `gateway-${selectedGateway.id}-number` ? (
-                  <><CheckCircle2 className="h-3 w-3 text-green-600" /> কপি হয়েছে</>
-                ) : (
-                  <><Copy className="h-3 w-3" /> কপি</>
-                )}
-              </Button>
-            </div>
-
-            {/* Account Name */}
-            {selectedGateway.accountName && (
-              <div className="pt-2 border-t">
-                <p className="text-xs text-muted-foreground">অ্যাকাউন্টের নাম</p>
-                <p className="text-sm font-medium text-foreground">{selectedGateway.accountName}</p>
-              </div>
-            )}
-
-            {/* Min/Max Deposit Info */}
-            {(selectedGateway.minDeposit > 0 || selectedGateway.maxDeposit > 0) && (
-              <div className="pt-2 border-t flex items-center gap-4">
-                {selectedGateway.minDeposit > 0 && (
-                  <div>
-                    <p className="text-xs text-muted-foreground">সর্বনিম্ন জমা</p>
-                    <p className="text-sm font-medium text-foreground">{formatBDT(selectedGateway.minDeposit)}</p>
-                  </div>
-                )}
-                {selectedGateway.maxDeposit > 0 && (
-                  <div>
-                    <p className="text-xs text-muted-foreground">সর্বোচ্চ জমা</p>
-                    <p className="text-sm font-medium text-foreground">{formatBDT(selectedGateway.maxDeposit)}</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Payment Instructions */}
-          {selectedGateway.instructions ? (
-            <div className="gateway-instructions flex items-start gap-2">
-              <Info className="instructions-icon h-4 w-4 shrink-0 mt-0.5" />
-              <p className="instructions-text text-xs">{selectedGateway.instructions}</p>
-            </div>
-          ) : (
-            <div className="gateway-instructions flex items-start gap-2">
-              <Info className="instructions-icon h-4 w-4 shrink-0 mt-0.5" />
-              <p className="instructions-text text-xs">
-                উপরের নাম্বারে <strong>Send Money</strong> করুন এবং ট্রানজেকশন আইডি নিচে দিন।
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  // Success state
+  // ─── Success State ────────────────────────────
   if (success) {
     return (
       <div className="payment-gateway-module page-container" style={themeVars}>
-        <div className="max-w-lg mx-auto text-center py-12">
-          <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
+        <div className="max-w-lg mx-auto text-center py-8 sm:py-12 success-container">
+          <div className="success-checkmark">
+            <CheckCircle2 className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-xl font-bold text-foreground mb-2">পেমেন্ট সফলভাবে জমা হয়েছে!</h2>
-          <p className="text-sm text-muted-foreground mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">পেমেন্ট সফলভাবে জমা হয়েছে!</h2>
+          <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
             আপনার পেমেন্ট যাচাইয়ের জন্য অপেক্ষমাণ রয়েছে। অ্যাডমিন যাচাই করার পর আপনাকে জানানো হবে।
           </p>
-          <Button onClick={handleGoToTransaction} className="bg-primary hover:bg-primary/90 btn-lift">
-            লেনদেনের বিবরণ দেখুন
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button onClick={handleGoToTransaction} className="gap-2 min-h-[44px]">
+              লেনদেনের বিবরণ দেখুন
+            </Button>
+            <Button variant="outline" onClick={() => setPage('transactions')} className="gap-2 min-h-[44px]">
+              সব লেনদেন
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
+  // ─── Main Payment Form ────────────────────────
   return (
-    <div className="payment-gateway-module page-container space-y-6" style={themeVars}>
-      {/* Header */}
-      <PageHeader
-        title="পেমেন্ট জমা দিন"
-        subtitle="আপনার পেমেন্টের বিবরণ পূরণ করুন"
-        icon={<CreditCard className="h-5 w-5" style={{ color: activeColor }} />}
-        onBack={handleGoBack}
-      />
+    <div className="payment-gateway-module page-container space-y-4 sm:space-y-6" style={themeVars}>
+      {/* Header with Back Button */}
+      <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleGoBack}
+          className="shrink-0 h-10 w-10 rounded-full hover:bg-muted"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
+            <CreditCard className="h-5 w-5" style={{ color: activeColor }} />
+            পেমেন্ট জমা দিন
+          </h1>
+          <p className="text-xs text-muted-foreground mt-0.5">আপনার পেমেন্টের বিবরণ পূরণ করুন</p>
+        </div>
+        <div className="shrink-0">
+          <Shield className="h-5 w-5 text-green-500" />
+        </div>
+      </div>
 
-      {/* Transaction Info Summary */}
-      <Card className="card-modern">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium text-muted-foreground">লেনদেনের তথ্য</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="space-y-3">
-              <Skeleton className="h-5 w-3/4" />
-              <Skeleton className="h-5 w-1/2" />
-              <Skeleton className="h-5 w-2/3" />
+      {/* Step Indicator */}
+      <StepIndicator currentStep={currentStep} />
+
+      {/* Transaction Info Summary - Compact Card */}
+      <Card className="transaction-info-card">
+        {loading ? (
+          <CardContent className="p-4 space-y-3">
+            <div className="gateway-skeleton h-4 w-3/4" />
+            <div className="gateway-skeleton h-6 w-1/2" />
+            <div className="gateway-skeleton h-4 w-2/3" />
+          </CardContent>
+        ) : transaction ? (
+          <>
+            <div className="info-header">
+              <p className="text-xs opacity-80 mb-1">লেনদেনের তথ্য</p>
+              <h3 className="text-sm font-semibold truncate">{transaction.title}</h3>
             </div>
-          ) : transaction ? (
-            <div className="space-y-3">
+            <div className="info-body space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">শিরোনাম</span>
-                <span className="text-sm font-semibold text-foreground">{transaction.title}</span>
+                <span className="text-xs text-muted-foreground">পরিমাণ</span>
+                <span className="gateway-amount-text text-lg font-bold">{formatBDT(transaction.amount)}</span>
               </div>
-              <Separator />
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">পরিমাণ</span>
-                <span className="gateway-amount-text text-lg">{formatBDT(transaction.amount)}</span>
-              </div>
-              <Separator />
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">বিক্রেতা</span>
-                <span className="text-sm font-medium text-foreground">{transaction.seller?.name || 'বিক্রেতা'}</span>
+                <span className="text-xs text-muted-foreground">বিক্রেতা</span>
+                <span className="text-xs font-medium text-foreground">{transaction.seller?.name || 'বিক্রেতা'}</span>
               </div>
             </div>
-          ) : (
-            <div className="text-center py-4">
-              <p className="text-sm text-muted-foreground">লেনদেনের তথ্য পাওয়া যায়নি</p>
-              <Button variant="outline" size="sm" className="mt-2" onClick={() => setPage('transactions')}>
-                লেনদেন তালিকায় যান
-              </Button>
-            </div>
-          )}
-        </CardContent>
+          </>
+        ) : (
+          <CardContent className="p-4 text-center">
+            <p className="text-sm text-muted-foreground">লেনদেনের তথ্য পাওয়া যায়নি</p>
+            <Button variant="outline" size="sm" className="mt-2 min-h-[40px]" onClick={() => setPage('transactions')}>
+              লেনদেন তালিকায় যান
+            </Button>
+          </CardContent>
+        )}
       </Card>
 
       {/* Payment Form */}
       {transaction && (
-        <Card className="card-modern">
-          <CardHeader>
-            <CardTitle className="text-base">পেমেন্টের বিবরণ</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Gateway Selection */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">পেমেন্ট গেটওয়ে নির্বাচন করুন <span className="text-red-500">*</span></Label>
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          
+          {/* ═══ STEP 1: Gateway Selection ═══ */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold flex items-center gap-1.5">
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white" style={{ backgroundColor: activeColor }}>1</span>
+              পেমেন্ট গেটওয়ে নির্বাচন করুন
+              <span className="text-red-500">*</span>
+            </Label>
 
-                {gatewaysLoading ? (
-                  <div className="grid grid-cols-2 gap-3">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="gateway-card rounded-lg p-3">
-                        <div className="flex items-center gap-3">
-                          <Skeleton className="h-4 w-4 rounded" />
-                          <Skeleton className="h-4 w-20" />
-                        </div>
+            {gatewaysLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="gateway-card rounded-xl p-3">
+                    <div className="flex items-center gap-3">
+                      <div className="gateway-skeleton w-12 h-12 rounded-xl" />
+                      <div className="flex-1 space-y-2">
+                        <div className="gateway-skeleton h-4 w-24" />
+                        <div className="gateway-skeleton h-3 w-16" />
                       </div>
-                    ))}
-                  </div>
-                ) : gateways.length === 0 ? (
-                  <div className="gateway-card rounded-lg p-4 flex items-start gap-2">
-                    <Info className="instructions-icon h-4 w-4 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">কোনো পেমেন্ট গেটওয়ে সক্রিয় নেই</p>
-                      <p className="text-xs text-muted-foreground mt-1">অ্যাডমিন এখনো কোনো পেমেন্ট গেটওয়ে সক্রিয় করেননি। অ্যাডমিনের সাথে যোগাযোগ করুন।</p>
                     </div>
                   </div>
-                ) : (
-                  <RadioGroup
-                    value={selectedGateway?.id || ''}
-                    onValueChange={(value) => {
-                      const gateway = gateways.find(g => g.id === value);
-                      if (gateway) handleGatewaySelect(gateway);
-                    }}
-                    className="grid grid-cols-2 gap-3"
-                  >
-                    {gateways.map((gateway) => {
-                      const GatewayIcon = getGatewayIcon(gateway.accountType);
-                      const isSelected = selectedGateway?.id === gateway.id;
-                      const gwColor = gateway.themeEnabled ? gateway.primaryColor : DEFAULT_THEME.primaryColor;
-
-                      return (
-                        <label
-                          key={gateway.id}
-                          className={`gateway-card ${isSelected ? 'gateway-card-selected' : ''} rounded-lg p-3 cursor-pointer transition-all hover:shadow-sm flex items-center gap-3`}
-                        >
-                          <RadioGroupItem value={gateway.id} id={`gateway-${gateway.id}`} />
-                          {gateway.logo ? (
-                            <img src={gateway.logo} alt={gateway.name} className="h-4 w-4 object-contain rounded" />
-                          ) : (
-                            <div
-                              className="gateway-icon-wrapper h-5 w-5 rounded flex items-center justify-center"
-                              style={isSelected ? {} : { backgroundColor: 'transparent', color: gwColor }}
-                            >
-                              <GatewayIcon className="h-3.5 w-3.5" />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <Label htmlFor={`gateway-${gateway.id}`} className="cursor-pointer font-medium text-sm block truncate">
-                              {gateway.name}
-                            </Label>
-                          </div>
-                          {/* Color dot showing gateway's theme color */}
-                          <div
-                            className="gateway-color-dot"
-                            style={{ backgroundColor: gwColor }}
-                            title={gateway.themeEnabled ? 'কাস্টম থিম সক্রিয়' : 'ডিফল্ট থিম'}
-                          />
-                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 shrink-0">
-                            {getAccountTypeLabel(gateway.accountType)}
-                          </Badge>
-                        </label>
-                      );
-                    })}
-                  </RadioGroup>
-                )}
+                ))}
               </div>
+            ) : gateways.length === 0 ? (
+              <div className="gateway-card rounded-xl p-4 flex items-start gap-3">
+                <Info className="instructions-icon h-5 w-5 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium">কোনো পেমেন্ট গেটওয়ে সক্রিয় নেই</p>
+                  <p className="text-xs text-muted-foreground mt-1">অ্যাডমিন এখনো কোনো পেমেন্ট গেটওয়ে সক্রিয় করেননি।</p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {gateways.map((gateway) => {
+                  const isSelected = selectedGateway?.id === gateway.id;
+                  const gwColor = gateway.themeEnabled ? gateway.primaryColor : DEFAULT_THEME.primaryColor;
+                  const LogoComponent = getGatewayLogoComponent(gateway.slug);
+                  const GatewayIcon = getGatewayIcon(gateway.accountType);
+                  const brandColor = getGatewayBrandColor(gateway.slug);
 
-              {/* Gateway Details Card */}
-              {renderGatewayDetails()}
+                  return (
+                    <button
+                      key={gateway.id}
+                      type="button"
+                      onClick={() => handleGatewaySelect(gateway)}
+                      className={`gateway-card ${isSelected ? 'gateway-card-selected' : ''} rounded-xl p-3 sm:p-4 cursor-pointer text-left w-full`}
+                    >
+                      {/* Check indicator for selected state */}
+                      <div className="gateway-check-indicator">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        {/* Gateway Logo */}
+                        <div className="gateway-logo-container" style={gateway.logo && LogoComponent ? {} : { backgroundColor: `${brandColor}15`, color: brandColor }}>
+                          {gateway.logo ? (
+                            <img src={gateway.logo} alt={gateway.name} className="h-full w-full object-contain rounded-xl" />
+                          ) : LogoComponent ? (
+                            <LogoComponent size={48} />
+                          ) : (
+                            <GatewayIcon className="h-5 w-5" style={{ color: brandColor }} />
+                          )}
+                        </div>
+
+                        {/* Gateway Info */}
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-semibold truncate ${isSelected ? 'text-foreground' : 'text-foreground/80'}`}>
+                            {gateway.name}
+                          </p>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <Badge 
+                              variant="secondary" 
+                              className={`text-[10px] px-1.5 py-0 ${getAccountTypeIconColor(gateway.accountType)}`}
+                            >
+                              {getAccountTypeLabel(gateway.accountType)}
+                            </Badge>
+                            {gateway.minDeposit > 0 && (
+                              <span className="text-[10px] text-muted-foreground">
+                                সর্বনিম্ন {formatBDT(gateway.minDeposit)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Chevron for selected */}
+                        <ChevronRight className={`h-4 w-4 transition-colors ${isSelected ? '' : 'text-muted-foreground/40'}`} style={isSelected ? { color: gwColor } : {}} />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* ═══ STEP 2: Payment Details (shown after gateway selection) ═══ */}
+          {selectedGateway && (
+            <div className="animate-slide-up space-y-4 sm:space-y-5">
+              
+              {/* Gateway Detail Card */}
+              <div className="gateway-detail-card rounded-xl">
+                <div className="p-3 sm:p-4 pb-2 flex items-center gap-2">
+                  {selectedGateway.logo ? (
+                    <img src={selectedGateway.logo} alt={selectedGateway.name} className="h-5 w-5 object-contain rounded" />
+                  ) : (
+                    <div className="gateway-icon-wrapper h-6 w-6 rounded-md flex items-center justify-center" style={{ backgroundColor: `${activeColor}15`, color: activeColor }}>
+                      {React.createElement(getGatewayIcon(selectedGateway.accountType), { className: 'h-3.5 w-3.5' })}
+                    </div>
+                  )}
+                  <h3 className="gateway-detail-header text-sm font-semibold">
+                    {selectedGateway.name} পেমেন্টের তথ্য
+                  </h3>
+                </div>
+                <div className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-3">
+                  <div className="gateway-detail-inner space-y-3">
+                    {/* Account Number - Prominent Display */}
+                    <div className="account-number-box">
+                      <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider">অ্যাকাউন্ট নাম্বার</p>
+                      <p className="text-xl sm:text-2xl font-bold text-foreground font-mono tracking-wider">{selectedGateway.accountNumber}</p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="gateway-copy-btn gap-1.5 mt-2 min-h-[36px]"
+                        onClick={() => handleCopy(selectedGateway.accountNumber, `gateway-${selectedGateway.id}-number`)}
+                      >
+                        {copiedField === `gateway-${selectedGateway.id}-number` ? (
+                          <><CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> কপি হয়েছে</>
+                        ) : (
+                          <><Copy className="h-3.5 w-3.5" /> কপি করুন</>
+                        )}
+                      </Button>
+                    </div>
+
+                    {/* Account Name */}
+                    {selectedGateway.accountName && (
+                      <div className="flex items-center justify-between py-2 border-b border-border/50">
+                        <span className="text-xs text-muted-foreground">অ্যাকাউন্টের নাম</span>
+                        <span className="text-sm font-medium text-foreground">{selectedGateway.accountName}</span>
+                      </div>
+                    )}
+
+                    {/* Min/Max Deposit */}
+                    {(selectedGateway.minDeposit > 0 || selectedGateway.maxDeposit > 0) && (
+                      <div className="flex items-center gap-4 text-xs">
+                        {selectedGateway.minDeposit > 0 && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-muted-foreground">সর্বনিম্ন:</span>
+                            <span className="font-semibold text-foreground">{formatBDT(selectedGateway.minDeposit)}</span>
+                          </div>
+                        )}
+                        {selectedGateway.maxDeposit > 0 && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-muted-foreground">সর্বোচ্চ:</span>
+                            <span className="font-semibold text-foreground">{formatBDT(selectedGateway.maxDeposit)}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Payment Instructions */}
+                  <div className="gateway-instructions flex items-start gap-2">
+                    <Info className="instructions-icon h-4 w-4 shrink-0 mt-0.5" />
+                    <p className="instructions-text text-xs leading-relaxed">
+                      {selectedGateway.instructions || (
+                        <>উপরের নাম্বারে <strong>Send Money</strong> করুন এবং ট্রানজেকশন আইডি নিচে দিন।</>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
 
               <Separator />
 
-              {/* Payment Amount */}
+              {/* ═══ Payment Amount ═══ */}
               <div className="space-y-2">
-                <Label htmlFor="amount" className="text-sm font-medium">
-                  পেমেন্টের পরিমাণ <span className="text-red-500">*</span>
+                <Label htmlFor="amount" className="text-sm font-semibold flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white" style={{ backgroundColor: activeColor }}>2</span>
+                  পেমেন্টের পরিমাণ
+                  <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  id="amount"
-                  type="number"
-                  placeholder="পরিমাণ লিখুন"
-                  value={amount}
-                  onChange={(e) => handleAmountChange(e.target.value)}
-                  min={selectedGateway?.minDeposit || undefined}
-                  max={selectedGateway?.maxDeposit || undefined}
-                  step="any"
-                  className="gateway-input"
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-muted-foreground">৳</span>
+                  <Input
+                    id="amount"
+                    type="number"
+                    placeholder="0.00"
+                    value={amount}
+                    onChange={(e) => handleAmountChange(e.target.value)}
+                    min={selectedGateway?.minDeposit || undefined}
+                    max={selectedGateway?.maxDeposit || undefined}
+                    step="any"
+                    className="gateway-input pl-8 text-lg font-bold"
+                  />
+                </div>
                 {amountError && (
-                  <p className="text-xs text-red-500">{amountError}</p>
+                  <div className="flex items-center gap-1.5 text-red-500">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                    <p className="text-xs">{amountError}</p>
+                  </div>
                 )}
                 {selectedGateway && (selectedGateway.minDeposit > 0 || selectedGateway.maxDeposit > 0) && !amountError && (
                   <p className="text-xs text-muted-foreground">
                     {selectedGateway.minDeposit > 0 && `সর্বনিম্ন: ${formatBDT(selectedGateway.minDeposit)}`}
-                    {selectedGateway.minDeposit > 0 && selectedGateway.maxDeposit > 0 && ' | '}
+                    {selectedGateway.minDeposit > 0 && selectedGateway.maxDeposit > 0 && ' • '}
                     {selectedGateway.maxDeposit > 0 && `সর্বোচ্চ: ${formatBDT(selectedGateway.maxDeposit)}`}
                   </p>
                 )}
               </div>
 
-              {/* Transaction ID */}
+              {/* ═══ Transaction ID ═══ */}
               <div className="space-y-2">
-                <Label htmlFor="transactionRef" className="text-sm font-medium">
-                  ট্রানজেকশন আইডি <span className="text-red-500">*</span>
+                <Label htmlFor="transactionRef" className="text-sm font-semibold flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold text-white" style={{ backgroundColor: activeColor }}>3</span>
+                  ট্রানজেকশন আইডি
+                  <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="transactionRef"
@@ -540,73 +609,81 @@ export default function PaymentSubmitPage() {
                     setTransactionRef(e.target.value);
                     setError('');
                   }}
-                  className="gateway-input"
+                  className="gateway-input font-mono"
                   required
                 />
                 <p className="text-xs text-muted-foreground">আপনার পেমেন্ট প্রদানের ট্রানজেকশন আইডি দিন</p>
               </div>
 
-              {/* Screenshot Upload */}
+              {/* ═══ Screenshot Upload ═══ */}
               <div className="space-y-2">
-                <Label htmlFor="screenshot" className="text-sm font-medium">
-                  পেমেন্টের স্ক্রিনশট
-                </Label>
-                <div className="gateway-upload-area flex items-center gap-3 p-3">
-                  <div className="flex-1 relative">
-                    <Input
-                      id="screenshot"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="cursor-pointer border-0 bg-transparent p-0 file:bg-transparent file:border-0"
-                    />
+                <Label className="text-sm font-semibold">পেমেন্টের স্ক্রিনশট</Label>
+                <div 
+                  className={`gateway-upload-area flex flex-col items-center justify-center gap-2 text-center ${isDragging ? 'drag-over' : ''}`}
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                >
+                  {screenshotFileName ? (
+                    <div className="flex items-center gap-2">
+                      <FileCheck className="h-5 w-5 text-green-500" />
+                      <span className="text-sm text-foreground font-medium truncate max-w-[200px]">{screenshotFileName}</span>
+                    </div>
+                  ) : (
+                    <Upload className="h-6 w-6 text-muted-foreground" />
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      {screenshotFileName ? 'ফাইল পরিবর্তন করুন' : 'স্ক্রিনশট আপলোড করুন'}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">ড্র্যাগ ও ড্রপ অথবা ক্লিক করুন</p>
                   </div>
+                  <Input
+                    id="screenshot"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="cursor-pointer border-0 bg-transparent p-0 file:bg-transparent file:border-0 file:text-sm file:font-medium"
+                  />
                 </div>
-                {screenshotFileName && (
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <ImageIcon className="h-3 w-3" />
-                    {screenshotFileName}
-                  </p>
-                )}
                 <p className="text-xs text-muted-foreground">স্ক্রিনশট আপলোড করুন (ঐচ্ছিক)</p>
               </div>
 
-              {/* Note */}
+              {/* ═══ Note ═══ */}
               <div className="space-y-2">
-                <Label htmlFor="note" className="text-sm font-medium">
-                  নোট
-                </Label>
+                <Label htmlFor="note" className="text-sm font-medium">নোট</Label>
                 <Textarea
                   id="note"
                   placeholder="অতিরিক্ত তথ্য লিখুন (ঐচ্ছিক)"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  rows={3}
-                  className="gateway-input"
+                  rows={2}
+                  className="gateway-input resize-none"
                 />
               </div>
 
-              {/* Error */}
+              {/* ═══ Error ═══ */}
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <p className="text-sm text-red-600">{error}</p>
+                <div className="flex items-start gap-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3 animate-slide-in">
+                  <AlertCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
                 </div>
               )}
 
-              {/* Submit */}
+              {/* ═══ Submit Button ═══ */}
               <button
                 type="submit"
-                className="gateway-submit-btn w-full py-3 rounded-md flex items-center justify-center gap-2"
+                className="gateway-submit-btn w-full py-3.5 rounded-xl flex items-center justify-center gap-2 text-base"
                 disabled={submitting || !selectedGateway || !transactionRef.trim() || !amount || !!amountError}
               >
                 {submitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-5 h-5 animate-spin" />
                     জমা হচ্ছে...
                   </>
                 ) : (
                   <>
-                    <CreditCard className="w-4 h-4" />
+                    <CreditCard className="w-5 h-5" />
                     পেমেন্ট জমা দিন
                   </>
                 )}
@@ -614,17 +691,29 @@ export default function PaymentSubmitPage() {
 
               {/* Help text when button is disabled */}
               {!selectedGateway && (
-                <p className="text-xs text-center text-muted-foreground">পেমেন্ট গেটওয়ে নির্বাচন করুন</p>
+                <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1">
+                  <Info className="h-3 w-3" /> পেমেন্ট গেটওয়ে নির্বাচন করুন
+                </p>
               )}
-              {selectedGateway && !amount && (
-                <p className="text-xs text-center text-muted-foreground">পেমেন্টের পরিমাণ দিন</p>
+              {selectedGateway && (!amount || amountError) && (
+                <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1">
+                  <Info className="h-3 w-3" /> পেমেন্টের পরিমাণ সঠিকভাবে দিন
+                </p>
               )}
-              {selectedGateway && amount && !transactionRef.trim() && (
-                <p className="text-xs text-center text-muted-foreground">ট্রানজেকশন আইডি দিন</p>
+              {selectedGateway && amount && !amountError && !transactionRef.trim() && (
+                <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1">
+                  <Info className="h-3 w-3" /> ট্রানজেকশন আইডি দিন
+                </p>
               )}
-            </form>
-          </CardContent>
-        </Card>
+
+              {/* Security badge */}
+              <div className="flex items-center justify-center gap-1.5 pt-1 pb-2">
+                <Shield className="h-3.5 w-3.5 text-green-500" />
+                <span className="text-[10px] text-muted-foreground">সুরক্ষিত পেমেন্ট • এসক্রো সুরক্ষিত</span>
+              </div>
+            </div>
+          )}
+        </form>
       )}
     </div>
   );
