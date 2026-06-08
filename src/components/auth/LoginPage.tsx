@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useAppStore } from '@/lib/store';
+import { getSiteName } from '@/lib/site-defaults';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +13,7 @@ import { Mail, Lock, Eye, EyeOff, Loader2, ArrowLeft, Shield } from 'lucide-reac
 export default function LoginPage() {
   const { setUser, setPage, siteSettings } = useAppStore();
 
-  const siteName = siteSettings.site_name || 'বাংলা এসক্রো';
+  const siteName = getSiteName(siteSettings.site_name);
   const siteLogo = siteSettings.site_logo;
   const loginBg = siteSettings.site_login_bg;
 

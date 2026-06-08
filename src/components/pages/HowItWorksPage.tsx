@@ -14,6 +14,8 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useAppStore } from '@/lib/store';
+import { getSiteName } from '@/lib/site-defaults';
 
 const steps = [
   {
@@ -103,6 +105,9 @@ const disputeSteps = [
 ];
 
 export default function HowItWorksPage() {
+  const { siteSettings } = useAppStore();
+  const siteName = getSiteName(siteSettings.site_name);
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -113,7 +118,7 @@ export default function HowItWorksPage() {
           </div>
           <h1 className="mb-4 text-3xl font-bold sm:text-4xl">কিভাবে কাজ করে</h1>
           <p className="mx-auto max-w-2xl text-lg leading-relaxed text-primary-foreground/80">
-            বাংলা এসক্রোতে লেনদেনের সম্পূর্ণ প্রক্রিয়া জানুন। আমাদের সহজ ও নিরাপদ
+            {siteName}এ লেনদেনের সম্পূর্ণ প্রক্রিয়া জানুন। আমাদের সহজ ও নিরাপদ
             পদ্ধতিতে ক্রেতা ও বিক্রেতা উভয়েই সুরক্ষিত থাকেন।
           </p>
         </div>
@@ -214,7 +219,7 @@ export default function HowItWorksPage() {
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="mb-3 text-2xl font-bold text-foreground">এখনই শুরু করুন</h2>
           <p className="mb-6 text-muted-foreground">
-            নিরাপদ লেনদেনের জন্য আজই বাংলা এসক্রোতে যোগ দিন এবং নির্ভরযোগ্য
+            নিরাপদ লেনদেনের জন্য আজই {siteName}এ যোগ দিন এবং নির্ভরযোগ্য
             এসক্রো পরিষেবা উপভোগ করুন।
           </p>
           <div className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-lg">

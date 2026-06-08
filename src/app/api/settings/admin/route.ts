@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin, requireAuth } from "@/lib/auth-helper";
+import { SITE_DEFAULTS } from "@/lib/site-defaults";
 
 // Allowed keys for site settings
 const SITE_SETTING_KEYS = [
@@ -85,16 +86,16 @@ export async function GET(request: NextRequest) {
     if (category === "site") {
       return NextResponse.json({
         settings: {
-          site_name: settingsMap.site_name || "বাংলা এসক্রো",
-          site_tagline: settingsMap.site_tagline || "বাংলাদেশের সবচেয়ে বিশ্বস্ত এসক্রো পরিষেবা। ক্রেতা ও বিক্রেতা উভয়ের জন্য নিরাপদ লেনদেন নিশ্চিত করুন।",
+          site_name: settingsMap.site_name || SITE_DEFAULTS.site_name,
+          site_tagline: settingsMap.site_tagline || SITE_DEFAULTS.site_tagline,
           site_logo: settingsMap.site_logo || "",
           site_favicon: settingsMap.site_favicon || "",
           site_banner: settingsMap.site_banner || "",
           site_login_bg: settingsMap.site_login_bg || "",
-          site_copyright: settingsMap.site_copyright || "© ২০২৪ বাংলা এসক্রো। সর্বস্বত্ব সংরক্ষিত।",
-          seo_meta_title: settingsMap.seo_meta_title || "বাংলা এসক্রো - নিরাপদ লেনদেনের প্ল্যাটফর্ম",
-          seo_meta_description: settingsMap.seo_meta_description || "বাংলাদেশের সবচেয়ে বিশ্বস্ত এসক্রো পরিষেবা। ক্রেতা ও বিক্রেতা উভয়ের জন্য নিরাপদ লেনদেন নিশ্চিত করুন।",
-          maintenance_mode: settingsMap.maintenance_mode || "false",
+          site_copyright: settingsMap.site_copyright || SITE_DEFAULTS.site_copyright,
+          seo_meta_title: settingsMap.seo_meta_title || SITE_DEFAULTS.seo_meta_title,
+          seo_meta_description: settingsMap.seo_meta_description || SITE_DEFAULTS.seo_meta_description,
+          maintenance_mode: settingsMap.maintenance_mode || SITE_DEFAULTS.maintenance_mode,
         },
       });
     }

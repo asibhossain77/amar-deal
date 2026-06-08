@@ -3,6 +3,8 @@ import { Hind_Siliguri } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
+import { db } from "@/lib/db";
+import { SITE_DEFAULTS } from "@/lib/site-defaults";
 
 const hindSiliguri = Hind_Siliguri({
   variable: "--font-hind-siliguri",
@@ -10,11 +12,37 @@ const hindSiliguri = Hind_Siliguri({
   weight: ["300", "400", "500", "600", "700"],
 });
 
-export const metadata: Metadata = {
-  title: "বাংলা এসক্রো - নিরাপদ লেনদেনের প্ল্যাটফর্ম",
-  description: "বাংলাদেশের সবচেয়ে বিশ্বস্ত এসক্রো পরিষেবা। ক্রেতা ও বিক্রেতা উভয়ের জন্য নিরাপদ লেনদেন নিশ্চিত করুন।",
-  keywords: ["এসক্রো", "বাংলা এসক্রো", "নিরাপদ লেনদেন", "বাংলাদেশ", "escrow", "Bangladesh"],
-};
+// Fetch site settings from DB for server-side metadata
+async function getSiteSettings() {
+  try {
+    const settings = await db.siteSetting.findMany();
+    const map: Record<string, string> = {};
+    for (const s of settings) {
+      map[s.key] = s.value;
+    }
+    return {
+      site_name: map.site_name || SITE_DEFAULTS.site_name,
+      seo_meta_title: map.seo_meta_title || SITE_DEFAULTS.seo_meta_title,
+      seo_meta_description: map.seo_meta_description || SITE_DEFAULTS.seo_meta_description,
+    };
+  } catch {
+    return {
+      site_name: SITE_DEFAULTS.site_name,
+      seo_meta_title: SITE_DEFAULTS.seo_meta_title,
+      seo_meta_description: SITE_DEFAULTS.seo_meta_description,
+    };
+  }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+
+  return {
+    title: settings.seo_meta_title,
+    description: settings.seo_meta_description,
+    keywords: ["এসক্রো", settings.site_name, "নিরাপদ লেনদেন", "বাংলাদেশ", "escrow", "Bangladesh"],
+  };
+}
 
 export default function RootLayout({
   children,

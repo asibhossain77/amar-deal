@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/s
 import { useAppStore } from '@/lib/store';
 import { signOut } from 'next-auth/react';
 import { useTheme } from 'next-themes';
+import { getSiteName } from '@/lib/site-defaults';
 
 const navLinks = [
   { label: 'হোম', page: 'home' as const },
@@ -35,7 +36,7 @@ export default function Header() {
   const { currentPage, setPage, user, isAuthenticated, setUser, siteSettings } = useAppStore();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const siteName = siteSettings.site_name || 'বাংলা এসক্রো';
+  const siteName = getSiteName(siteSettings.site_name);
   const siteLogo = siteSettings.site_logo;
 
   const handleNavClick = (page: typeof navLinks[number]['page']) => {

@@ -2,14 +2,15 @@
 
 import { Shield } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
+import { getSiteName, getSiteTagline, getSiteCopyright } from '@/lib/site-defaults';
 
 export default function Footer() {
   const { setPage, siteSettings } = useAppStore();
 
-  const siteName = siteSettings.site_name || 'বাংলা এসক্রো';
+  const siteName = getSiteName(siteSettings.site_name);
   const siteLogo = siteSettings.site_logo;
-  const siteTagline = siteSettings.site_tagline || 'বাংলাদেশের সবচেয়ে বিশ্বস্ত এসক্রো পরিষেবা। ক্রেতা ও বিক্রেতা উভয়ের জন্য নিরাপদ লেনদেন নিশ্চিত করুন।';
-  const siteCopyright = siteSettings.site_copyright || '© ২০২৪ বাংলা এসক্রো। সর্বস্বত্ব সংরক্ষিত।';
+  const siteTagline = getSiteTagline(siteSettings.site_tagline);
+  const siteCopyright = getSiteCopyright(siteSettings.site_copyright);
 
   return (
     <footer className="bg-muted border-t border-border mt-auto transition-theme">

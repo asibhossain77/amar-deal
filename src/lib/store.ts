@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { PageName, AppUser, Transaction, Dispute, Notification } from './types';
+import { SITE_DEFAULTS } from './site-defaults';
 
 // ─── Site Settings Interface ─────────────────────────────
 export interface SiteSettings {
@@ -17,16 +18,7 @@ export interface SiteSettings {
 }
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
-  site_name: 'বাংলা এসক্রো',
-  site_tagline: 'বাংলাদেশের সবচেয়ে বিশ্বস্ত এসক্রো পরিষেবা। ক্রেতা ও বিক্রেতা উভয়ের জন্য নিরাপদ লেনদেন নিশ্চিত করুন।',
-  site_logo: '',
-  site_favicon: '',
-  site_banner: '',
-  site_login_bg: '',
-  site_copyright: '© ২০২৪ বাংলা এসক্রো। সর্বস্বত্ব সংরক্ষিত।',
-  seo_meta_title: 'বাংলা এসক্রো - নিরাপদ লেনদেনের প্ল্যাটফর্ম',
-  seo_meta_description: 'বাংলাদেশের সবচেয়ে বিশ্বস্ত এসক্রো পরিষেবা। ক্রেতা ও বিক্রেতা উভয়ের জন্য নিরাপদ লেনদেন নিশ্চিত করুন।',
-  maintenance_mode: 'false',
+  ...SITE_DEFAULTS,
 };
 
 // ─── App State Interface ─────────────────────────────────

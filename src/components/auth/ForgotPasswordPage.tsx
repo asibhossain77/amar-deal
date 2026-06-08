@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAppStore } from '@/lib/store';
+import { getSiteName } from '@/lib/site-defaults';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Mail, Loader2, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
-  const { setPage } = useAppStore();
+  const { setPage, siteSettings } = useAppStore();
+  const siteName = getSiteName(siteSettings.site_name);
 
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');

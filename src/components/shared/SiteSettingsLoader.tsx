@@ -3,13 +3,16 @@
 import { useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { DEFAULT_SITE_SETTINGS } from '@/lib/store';
+import { getSiteName, getSeoMetaTitle, getSeoMetaDescription } from '@/lib/site-defaults';
 
 /**
  * This component loads site settings on mount and updates:
  * - Document title (browser tab)
+ * - Meta description
+ * - Meta keywords
  * - Favicon
  * - Zustand store for all components to access
- * 
+ *
  * Must be rendered inside the app tree.
  */
 export default function SiteSettingsLoader() {
@@ -23,13 +26,37 @@ export default function SiteSettingsLoader() {
           const data = await res.json();
           const settings = data.settings || data;
           const merged = { ...DEFAULT_SITE_SETTINGS, ...settings };
-          
+
           // Update Zustand store
           setSiteSettings(merged);
 
           // Update document title
-          if (merged.site_name) {
-            document.title = merged.seo_meta_title || `${merged.site_name} - নিরাপদ লেনদেনের প্ল্যাটফর্ম`;
+          const metaTitle = getSeoMetaTitle(merged.seo_meta_title);
+          document.title = metaTitle;
+
+          // Update meta description
+          const metaDesc = getSeoMetaDescription(merged.seo_meta_description);
+          let descMeta = document.querySelector('meta[name="description"]');
+          if (descMeta) {
+            descMeta.setAttribute('content', metaDesc);
+          } else {
+            descMeta = document.createElement('meta');
+            descMeta.setAttribute('name', 'description');
+            descMeta.setAttribute('content', metaDesc);
+            document.head.appendChild(descMeta);
+          }
+
+          // Update meta keywords
+          const siteName = getSiteName(merged.site_name);
+          let keywordsMeta = document.querySelector('meta[name="keywords"]');
+          const keywords = `এসক্রো, ${siteName}, নিরাপদ লেনদেন, বাংলাদেশ, escrow, Bangladesh`;
+          if (keywordsMeta) {
+            keywordsMeta.setAttribute('content', keywords);
+          } else {
+            keywordsMeta = document.createElement('meta');
+            keywordsMeta.setAttribute('name', 'keywords');
+            keywordsMeta.setAttribute('content', keywords);
+            document.head.appendChild(keywordsMeta);
           }
 
           // Update favicon dynamically

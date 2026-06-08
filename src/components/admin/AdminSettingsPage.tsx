@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
 import type { SiteSettings } from '@/lib/store';
 import { DEFAULT_SITE_SETTINGS } from '@/lib/store';
+import { getSiteName, getSiteCopyright, getSeoMetaTitle, getSeoMetaDescription, SITE_DEFAULTS } from '@/lib/site-defaults';
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp'];
@@ -393,7 +394,7 @@ export default function AdminSettingsPage() {
                 <Label htmlFor="site_name" className="text-sm font-semibold">ওয়েবসাইটের নাম</Label>
                 <Input
                   id="site_name"
-                  placeholder="যেমন: বাংলা এসক্রো"
+                  placeholder={`যেমন: ${SITE_DEFAULTS.site_name}`}
                   value={settings.site_name}
                   onChange={(e) => updateField('site_name', e.target.value)}
                   className="min-h-[44px]"
@@ -420,7 +421,7 @@ export default function AdminSettingsPage() {
                 </Label>
                 <Input
                   id="site_copyright"
-                  placeholder="যেমন: © ২০২৪ বাংলা এসক্রো। সর্বস্বত্ব সংরক্ষিত।"
+                  placeholder={`যেমন: ${SITE_DEFAULTS.site_copyright}`}
                   value={settings.site_copyright}
                   onChange={(e) => updateField('site_copyright', e.target.value)}
                   className="min-h-[44px]"
@@ -448,7 +449,7 @@ export default function AdminSettingsPage() {
                       <Shield className="w-4 h-4 text-primary-foreground" />
                     </div>
                   )}
-                  <span className="text-sm font-bold">{settings.site_name || 'বাংলা এসক্রো'}</span>
+                  <span className="text-sm font-bold">{getSiteName(settings.site_name)}</span>
                 </div>
                 {/* Preview Body */}
                 <div className="p-3 space-y-2">
@@ -458,7 +459,7 @@ export default function AdminSettingsPage() {
                 </div>
                 {/* Preview Footer */}
                 <div className="p-3 border-t bg-muted/30">
-                  <p className="text-[9px] text-muted-foreground truncate">{settings.site_copyright || '© ২০২৪ বাংলা এসক্রো। সর্বস্বত্ব সংরক্ষিত।'}</p>
+                  <p className="text-[9px] text-muted-foreground truncate">{getSiteCopyright(settings.site_copyright)}</p>
                 </div>
               </div>
             </CardContent>
@@ -567,7 +568,7 @@ export default function AdminSettingsPage() {
                 <Label htmlFor="seo_meta_title" className="text-sm font-semibold">Meta Title</Label>
                 <Input
                   id="seo_meta_title"
-                  placeholder="যেমন: বাংলা এসক্রো - নিরাপদ লেনদেনের প্ল্যাটফর্ম"
+                  placeholder={`যেমন: ${SITE_DEFAULTS.seo_meta_title}`}
                   value={settings.seo_meta_title}
                   onChange={(e) => updateField('seo_meta_title', e.target.value)}
                   className="min-h-[44px]"
@@ -601,13 +602,13 @@ export default function AdminSettingsPage() {
                 <Label className="text-xs text-muted-foreground">Google সার্চ প্রিভিউ</Label>
                 <div className="p-3 rounded-lg border bg-white dark:bg-card">
                   <p className="text-sm text-blue-700 dark:text-blue-400 font-medium truncate">
-                    {settings.seo_meta_title || 'বাংলা এসক্রো - নিরাপদ লেনদেনের প্ল্যাটফর্ম'}
+                    {getSeoMetaTitle(settings.seo_meta_title)}
                   </p>
                   <p className="text-xs text-green-700 dark:text-green-400 truncate mt-0.5">
                     yourdomain.com
                   </p>
                   <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-                    {settings.seo_meta_description || 'বাংলাদেশের সবচেয়ে বিশ্বস্ত এসক্রো পরিষেবা।'}
+                    {getSeoMetaDescription(settings.seo_meta_description)}
                   </p>
                 </div>
               </div>

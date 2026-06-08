@@ -2,6 +2,8 @@
 
 import { Shield, Target, Eye, Lock, EyeOff, Handshake, Zap, Users, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useAppStore } from '@/lib/store';
+import { getSiteName } from '@/lib/site-defaults';
 
 const values = [
   {
@@ -42,6 +44,9 @@ const team = [
 ];
 
 export default function AboutPage() {
+  const { siteSettings } = useAppStore();
+  const siteName = getSiteName(siteSettings.site_name);
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -52,7 +57,7 @@ export default function AboutPage() {
           </div>
           <h1 className="mb-4 text-3xl font-bold sm:text-4xl">আমাদের সম্পর্কে</h1>
           <p className="mx-auto max-w-2xl text-lg leading-relaxed text-primary-foreground/80">
-            বাংলা এসক্রো হলো বাংলাদেশের একটি বিশ্বস্ত এসক্রো পরিষেবা প্ল্যাটফর্ম।
+            {siteName} হলো বাংলাদেশের একটি বিশ্বস্ত এসক্রো পরিষেবা প্ল্যাটফর্ম।
             আমরা ক্রেতা ও বিক্রেতা উভয়ের জন্য নিরাপদ ও স্বচ্ছ লেনদেন নিশ্চিত করি।
           </p>
         </div>
@@ -125,7 +130,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-4xl">
           <div className="mb-8 text-center">
             <h2 className="mb-2 text-2xl font-bold text-foreground">কেন আমাদের বিশ্বাস করবেন?</h2>
-            <p className="text-muted-foreground">বাংলা এসক্রোতে আপনার বিশ্বাসের কারণ</p>
+            <p className="text-muted-foreground">{siteName}এ আপনার বিশ্বাসের কারণ</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center">

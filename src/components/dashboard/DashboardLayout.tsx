@@ -34,6 +34,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { getSiteName, getSiteTagline } from '@/lib/site-defaults';
 import { getInitials } from '@/lib/helpers';
 import { signOut } from 'next-auth/react';
 import { useTheme } from 'next-themes';
@@ -83,7 +84,8 @@ function ThemeToggle() {
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { currentPage, setPage, user, setSidebarOpen, siteSettings } = useAppStore();
   const isAdmin = user?.role === 'admin';
-  const siteName = siteSettings.site_name || 'বাংলা এসক্রো';
+  const siteName = getSiteName(siteSettings.site_name);
+  const siteTagline = getSiteTagline(siteSettings.site_tagline);
 
   const handleNav = (page: PageName) => {
     setPage(page);
@@ -104,7 +106,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         )}
         <div>
           <h1 className="text-base font-bold text-foreground">{siteName}</h1>
-          <p className="text-[11px] text-muted-foreground">নিরাপদ লেনদেনের প্ল্যাটফর্ম</p>
+          <p className="text-[11px] text-muted-foreground line-clamp-2">{siteTagline}</p>
         </div>
       </div>
 
@@ -205,7 +207,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { sidebarOpen, setSidebarOpen, siteSettings } = useAppStore();
-  const siteName = siteSettings.site_name || 'বাংলা এসক্রো';
+  const siteName = getSiteName(siteSettings.site_name);
 
   return (
     <div className="flex h-screen bg-background transition-theme">

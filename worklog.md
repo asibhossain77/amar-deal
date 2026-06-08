@@ -135,3 +135,66 @@ Stage Summary:
 - Login/Register pages support custom background images
 - All existing SiteSetting DB model used as key-value store (no schema changes needed)
 
+
+---
+Task ID: 10
+Agent: Main Agent
+Task: Fix website branding system — remove all hardcoded "বাংলা এসক্রো" and make Website Name fully dynamic across entire site
+
+Work Log:
+- Created centralized site defaults file (src/lib/site-defaults.ts):
+  - SITE_DEFAULTS constant with all default branding values (single source of truth)
+  - Helper functions: getSiteName(), getSiteTagline(), getSiteCopyright(), getSeoMetaTitle(), getSeoMetaDescription()
+- Updated src/lib/store.ts:
+  - Imported SITE_DEFAULTS from centralized file
+  - DEFAULT_SITE_SETTINGS now spreads from SITE_DEFAULTS (no more hardcoded Bengali text)
+- Updated src/app/api/settings/route.ts:
+  - Imported SITE_DEFAULTS for fallback values
+  - Replaced all hardcoded Bengali fallbacks with SITE_DEFAULTS references
+- Updated src/app/api/settings/admin/route.ts:
+  - Imported SITE_DEFAULTS for fallback values
+  - Replaced all hardcoded Bengali fallbacks with SITE_DEFAULTS references
+- Updated src/app/layout.tsx:
+  - Converted from static Metadata export to async generateMetadata()
+  - Now fetches site settings directly from DB for server-side metadata
+  - Title and description are dynamic, keywords include the site name
+- Updated src/components/shared/SiteSettingsLoader.tsx:
+  - Now updates document title, meta description, and meta keywords dynamically
+  - Uses getSiteName(), getSeoMetaTitle(), getSeoMetaDescription() helpers
+  - Creates/updates meta tags in document head on settings load
+- Updated src/components/shared/Header.tsx:
+  - Replaced `siteSettings.site_name || 'বাংলা এসক্রো'` with `getSiteName(siteSettings.site_name)`
+- Updated src/components/shared/Footer.tsx:
+  - Replaced all 3 hardcoded fallbacks with getSiteName(), getSiteTagline(), getSiteCopyright()
+- Updated src/components/dashboard/DashboardLayout.tsx:
+  - Replaced both `siteSettings.site_name || 'বাংলা এসক্রো'` with `getSiteName()`
+  - Replaced hardcoded subtitle "নিরাপদ লেনদেনের প্ল্যাটফর্ম" with dynamic `getSiteTagline()` + line-clamp
+- Updated src/components/auth/LoginPage.tsx:
+  - Replaced `siteSettings.site_name || 'বাংলা এসক্রো'` with `getSiteName()`
+- Updated src/components/auth/RegisterPage.tsx:
+  - Replaced `siteSettings.site_name || 'বাংলা এসক্রো'` with `getSiteName()`
+- Updated src/components/auth/ForgotPasswordPage.tsx:
+  - Added dynamic siteName via getSiteName() for future use
+- Updated src/components/home/HomePage.tsx:
+  - ContactSection now uses getSiteName() for the company name display
+  - "বাংলা এসক্রো লিমিটেড" replaced with dynamic `{siteName}`
+- Updated src/components/pages/HowItWorksPage.tsx:
+  - Hero section: "বাংলা এসক্রোতে" replaced with `{siteName}এ`
+  - CTA section: "বাংলা এসক্রোতে" replaced with `{siteName}এ`
+- Updated src/components/pages/AboutPage.tsx:
+  - Hero section: "বাংলা এসক্রো হলো" replaced with `{siteName} হলো`
+  - Why Trust Us: "বাংলা এসক্রোতে" replaced with `{siteName}এ`
+- Updated src/components/admin/AdminSettingsPage.tsx:
+  - All placeholder text now uses SITE_DEFAULTS (e.g., `placeholder={যেমন: ${SITE_DEFAULTS.site_name}}`)
+  - All preview fallbacks use helper functions (getSiteName, getSiteCopyright, getSeoMetaTitle, getSeoMetaDescription)
+  - Google search preview uses dynamic values
+
+Stage Summary:
+- Zero hardcoded "বাংলা এসক্রো" references remain in source code (only in site-defaults.ts as the single source of truth)
+- All 15 files updated to use centralized defaults
+- generateMetadata() in layout.tsx makes server-side metadata dynamic
+- SiteSettingsLoader now updates document title + meta description + meta keywords + favicon client-side
+- All pages (Header, Footer, Login, Register, Dashboard, About, HowItWorks, HomePage, Admin Settings) use dynamic site name
+- Lint passes clean
+- API returns correct values using centralized defaults
+- Server compiles and serves pages (HTTP 200)

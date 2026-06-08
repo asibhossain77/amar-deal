@@ -27,6 +27,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { useAppStore } from '@/lib/store';
+import { getSiteName } from '@/lib/site-defaults';
 
 /* ─────────────── Hero Section ─────────────── */
 function HeroSection() {
@@ -374,6 +375,8 @@ function FAQSection() {
 
 /* ─────────────── Contact Section ─────────────── */
 function ContactSection() {
+  const { siteSettings } = useAppStore();
+  const siteName = getSiteName(siteSettings.site_name);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -412,7 +415,7 @@ function ContactSection() {
                   ঠিকানা
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  বাংলা এসক্রো লিমিটেড<br />
+                  {siteName}<br />
                   ১২৩, গুলশান এভিনিউ<br />
                   ঢাকা-১২১২, বাংলাদেশ
                 </p>
