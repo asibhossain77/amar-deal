@@ -64,7 +64,7 @@ import {
 import { useAppStore } from '@/lib/store';
 import { api } from '@/lib/api';
 import { formatDate, getInitials, toBanglaNumber, formatBDT } from '@/lib/helpers';
-import type { ReputationData, SubscriptionPlan, UserSubscription } from '@/lib/types';
+import type { ReputationData, SubscriptionPlan, UserSubscription, PrivacySettings, VisibilityGrant } from '@/lib/types';
 import PageHeader from '@/components/shared/PageHeader';
 import BadgeDisplay from '@/components/shared/BadgeDisplay';
 import { useToast } from '@/hooks/use-toast';
@@ -220,6 +220,22 @@ export default function AccountSettingsPage() {
   const [currentPlan, setCurrentPlan] = useState<SubscriptionPlan | null>(null);
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
 
+  // Privacy
+  const [privacySettings, setPrivacySettings] = useState<{
+    ratingVisibility: string;
+    reviewVisibility: string;
+    trustScoreVisibility: string;
+  }>({
+    ratingVisibility: 'private',
+    reviewVisibility: 'private',
+    trustScoreVisibility: 'private',
+  });
+  const [visibilityGrantsGiven, setVisibilityGrantsGiven] = useState<VisibilityGrant[]>([]);
+  const [visibilityGrantsReceived, setVisibilityGrantsReceived] = useState<VisibilityGrant[]>([]);
+  const [privacyLoading, setPrivacyLoading] = useState(false);
+  const [privacySaving, setPrivacySaving] = useState(false);
+  const [grantActionLoading, setGrantActionLoading] = useState<string | null>(null);
+
   // File input ref
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -267,10 +283,41 @@ export default function AccountSettingsPage() {
     }
   }, []);
 
+  const loadPrivacySettings = useCallback(async () => {
+    try {
+      setPrivacyLoading(true);
+      const data = await api.getPrivacySettings();
+      setPrivacySettings({
+        ratingVisibility: data.ratingVisibility || 'private',
+        reviewVisibility: data.reviewVisibility || 'private',
+        trustScoreVisibility: data.trustScoreVisibility || 'private',
+      });
+    } catch {
+      // Silently fail - privacy tab will show defaults
+    } finally {
+      setPrivacyLoading(false);
+    }
+  }, []);
+
+  const loadVisibilityGrants = useCallback(async () => {
+    try {
+      const [givenData, receivedData] = await Promise.all([
+        api.getVisibilityGrants('given'),
+        api.getVisibilityGrants('received'),
+      ]);
+      setVisibilityGrantsGiven(Array.isArray(givenData) ? givenData : givenData?.grants || []);
+      setVisibilityGrantsReceived(Array.isArray(receivedData) ? receivedData : receivedData?.grants || []);
+    } catch {
+      // Silently fail - grants will show empty
+    }
+  }, []);
+
   useEffect(() => {
     loadProfile();
     loadReputation();
-  }, [loadProfile, loadReputation]);
+    loadPrivacySettings();
+    loadVisibilityGrants();
+  }, [loadProfile, loadReputation, loadPrivacySettings, loadVisibilityGrants]);
 
   // ─── Handlers ───────────────────────────────
   const handleProfileSave = async () => {
@@ -443,7 +490,7 @@ export default function AccountSettingsPage() {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="w-full sm:w-auto grid grid-cols-3 sm:inline-flex h-10 p-1 bg-muted/60 rounded-xl">
+        <TabsList className="w-full sm:w-auto grid grid-cols-4 sm:inline-flex h-10 p-1 bg-muted/60 rounded-xl">
           <TabsTrigger value="profile" className="gap-1.5 rounded-lg text-xs sm:text-sm data-[state=active]:shadow-sm">
             <User className="w-3.5 h-3.5" />
             প্রোফাইল
@@ -455,6 +502,10 @@ export default function AccountSettingsPage() {
           <TabsTrigger value="reputation" className="gap-1.5 rounded-lg text-xs sm:text-sm data-[state=active]:shadow-sm">
             <Award className="w-3.5 h-3.5" />
             সুনাম
+          </TabsTrigger>
+          <TabsTrigger value="privacy" className="gap-1.5 rounded-lg text-xs sm:text-sm data-[state=active]:shadow-sm">
+            <Eye className="w-3.5 h-3.5" />
+            গোপনীয়তা
           </TabsTrigger>
         </TabsList>
 
@@ -1318,6 +1369,374 @@ export default function AccountSettingsPage() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* ═══════════════════════════════════════════════════════
+            TAB 4: গোপনীয়তা (Privacy Settings)
+            ═══════════════════════════════════════════════════════ */}
+        <TabsContent value="privacy" className="space-y-6">
+          {/* Rating Visibility */}
+          <Card className="border-0 shadow-md">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Star className="w-5 h-5 text-primary" />
+                রেটিং দৃশ্যমানতা
+              </CardTitle>
+              <CardDescription>আপনার রেটিং তথ্য কারা দেখতে পাবেন তা নিয়ন্ত্রণ করুন</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Select
+                value={privacySettings.ratingVisibility}
+                onValueChange={(v) => setPrivacySettings((p) => ({ ...p, ratingVisibility: v }))}
+              >
+                <SelectTrigger className="w-full h-10">
+                  <Eye className="w-4 h-4 mr-1 text-muted-foreground" />
+                  <SelectValue placeholder="দৃশ্যমানতা নির্বাচন করুন" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="private">
+                    <span className="flex items-center gap-2">
+                      <Lock className="w-3.5 h-3.5" />
+                      ব্যক্তিগত — শুধুমাত্র আপনি এবং প্রশাসক দেখতে পাবেন
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="limited">
+                    <span className="flex items-center gap-2">
+                      <EyeOff className="w-3.5 h-3.5" />
+                      সীমিত — সারসংক্ষেপ সূচক দেখাবে
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="public">
+                    <span className="flex items-center gap-2">
+                      <Globe className="w-3.5 h-3.5" />
+                      সর্বজনীন — সকলে দেখতে পারবেন
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="p-3 rounded-xl bg-muted/30 text-sm text-muted-foreground">
+                {privacySettings.ratingVisibility === 'private' && '🔒 শুধুমাত্র আপনি এবং প্রশাসক আপনার রেটিং দেখতে পারবেন'}
+                {privacySettings.ratingVisibility === 'limited' && '👁️ অন্যরা শুধুমাত্র সারসংক্ষেপ সূচক দেখতে পাবেন (যেমন: "ইতিবাচক রেটিং")'}
+                {privacySettings.ratingVisibility === 'public' && '🌐 সকলে আপনার বিস্তারিত রেটিং তথ্য দেখতে পারবেন'}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Review Visibility */}
+          <Card className="border-0 shadow-md">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-primary" />
+                রিভিউ দৃশ্যমানতা
+              </CardTitle>
+              <CardDescription>আপনার রিভিউ তালিকা কারা দেখতে পাবেন তা নিয়ন্ত্রণ করুন</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Select
+                value={privacySettings.reviewVisibility}
+                onValueChange={(v) => setPrivacySettings((p) => ({ ...p, reviewVisibility: v }))}
+              >
+                <SelectTrigger className="w-full h-10">
+                  <Eye className="w-4 h-4 mr-1 text-muted-foreground" />
+                  <SelectValue placeholder="দৃশ্যমানতা নির্বাচন করুন" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="private">
+                    <span className="flex items-center gap-2">
+                      <Lock className="w-3.5 h-3.5" />
+                      ব্যক্তিগত — কেউ রিভিউ দেখতে পারবে না
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="shared">
+                    <span className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      শেয়ারকৃত — শুধুমাত্র অনুমোদিত ব্যবহারকারীরা
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="public">
+                    <span className="flex items-center gap-2">
+                      <Globe className="w-3.5 h-3.5" />
+                      সর্বজনীন — সকলে দেখতে পারবেন
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="p-3 rounded-xl bg-muted/30 text-sm text-muted-foreground">
+                {privacySettings.reviewVisibility === 'private' && '🔒 কেউ আপনার রিভিউ দেখতে পারবে না'}
+                {privacySettings.reviewVisibility === 'shared' && '🤝 শুধুমাত্র অনুমোদিত ব্যবহারকারীরা আপনার রিভিউ দেখতে পারবেন'}
+                {privacySettings.reviewVisibility === 'public' && '🌐 সকলে আপনার রিভিউ তালিকা দেখতে পারবেন'}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Trust Score Visibility */}
+          <Card className="border-0 shadow-md">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Shield className="w-5 h-5 text-primary" />
+                ট্রাস্ট স্কোর দৃশ্যমানতা
+              </CardTitle>
+              <CardDescription>আপনার ট্রাস্ট স্কোর কারা দেখতে পাবেন তা নিয়ন্ত্রণ করুন</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Select
+                value={privacySettings.trustScoreVisibility}
+                onValueChange={(v) => setPrivacySettings((p) => ({ ...p, trustScoreVisibility: v }))}
+              >
+                <SelectTrigger className="w-full h-10">
+                  <Eye className="w-4 h-4 mr-1 text-muted-foreground" />
+                  <SelectValue placeholder="দৃশ্যমানতা নির্বাচন করুন" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="private">
+                    <span className="flex items-center gap-2">
+                      <Lock className="w-3.5 h-3.5" />
+                      ব্যক্তিগত
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="limited">
+                    <span className="flex items-center gap-2">
+                      <EyeOff className="w-3.5 h-3.5" />
+                      সীমিত
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="public">
+                    <span className="flex items-center gap-2">
+                      <Globe className="w-3.5 h-3.5" />
+                      সর্বজনীন
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="p-3 rounded-xl bg-muted/30 text-sm text-muted-foreground">
+                {privacySettings.trustScoreVisibility === 'private' && '🔒 আপনার ট্রাস্ট স্কোর কেউ দেখতে পারবে না'}
+                {privacySettings.trustScoreVisibility === 'limited' && '👁️ অন্যরা শুধুমাত্র সূচক দেখতে পাবেন (যেমন: "বিশ্বস্ত ব্যবহারকারী")'}
+                {privacySettings.trustScoreVisibility === 'public' && '🌐 সকলে আপনার বিস্তারিত ট্রাস্ট স্কোর দেখতে পারবেন'}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Visibility Grants */}
+          <Card className="border-0 shadow-md">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Settings className="w-5 h-5 text-primary" />
+                দৃশ্যমানতা অনুদান
+              </CardTitle>
+              <CardDescription>
+                আপনার রিভিউ দেখার জন্য অনুমোদিত ব্যবহারকারীদের পরিচালনা করুন
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              {/* Grants Given */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
+                  <ChevronRight className="w-4 h-4 text-primary" />
+                  প্রদত্ত অনুদান ({toBanglaNumber(visibilityGrantsGiven.length)})
+                </h4>
+                {visibilityGrantsGiven.length === 0 ? (
+                  <div className="p-4 rounded-xl bg-muted/20 text-center text-sm text-muted-foreground">
+                    কোনো অনুদান দেওয়া হয়নি
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                    {visibilityGrantsGiven.map((grant) => (
+                      <div
+                        key={grant.id}
+                        className="flex items-center justify-between gap-3 p-3 rounded-xl bg-muted/20 hover:bg-muted/30 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <Avatar className="h-8 w-8 shrink-0">
+                            {grant.grantee?.avatar ? (
+                              <AvatarImage src={grant.grantee.avatar} alt={grant.grantee.name} />
+                            ) : (
+                              <AvatarFallback className="text-xs font-medium bg-primary/10 text-primary">
+                                {getInitials(grant.grantee?.name || '?')}
+                              </AvatarFallback>
+                            )}
+                          </Avatar>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-foreground truncate">
+                              {grant.grantee?.name || 'অজানা'}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {grant.review?.reviewType === 'buyer' ? 'ক্রেতা রিভিউ' :
+                               grant.review?.reviewType === 'seller' ? 'বিক্রেতা রিভিউ' : 'রিভিউ'}
+                              {grant.review?.rating ? ` • ⭐ ${grant.review.rating}` : ''}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Badge
+                            variant={grant.status === 'accepted' ? 'default' : grant.status === 'pending' ? 'secondary' : 'outline'}
+                            className="text-[10px] px-2"
+                          >
+                            {grant.status === 'accepted' ? 'গৃহীত' : grant.status === 'pending' ? 'অপেক্ষমান' : 'বাতিল'}
+                          </Badge>
+                          {grant.status === 'accepted' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 text-xs px-2"
+                              disabled={grantActionLoading === grant.id}
+                              onClick={async () => {
+                                try {
+                                  setGrantActionLoading(grant.id);
+                                  await api.respondToVisibilityGrant(grant.id, 'revoke');
+                                  toast({ title: 'সফল!', description: 'অনুদান বাতিল করা হয়েছে' });
+                                  loadVisibilityGrants();
+                                } catch (err) {
+                                  const message = err instanceof Error ? err.message : 'বাতিল করতে সমস্যা হয়েছে';
+                                  toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
+                                } finally {
+                                  setGrantActionLoading(null);
+                                }
+                              }}
+                            >
+                              {grantActionLoading === grant.id ? <Loader2 className="w-3 h-3 animate-spin" /> : 'বাতিল'}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* Grants Received */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
+                  <ChevronRight className="w-4 h-4 text-primary" />
+                  প্রাপ্ত অনুদান ({toBanglaNumber(visibilityGrantsReceived.length)})
+                </h4>
+                {visibilityGrantsReceived.length === 0 ? (
+                  <div className="p-4 rounded-xl bg-muted/20 text-center text-sm text-muted-foreground">
+                    কোনো অনুদান পাওয়া যায়নি
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                    {visibilityGrantsReceived.map((grant) => (
+                      <div
+                        key={grant.id}
+                        className="flex items-center justify-between gap-3 p-3 rounded-xl bg-muted/20 hover:bg-muted/30 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <Avatar className="h-8 w-8 shrink-0">
+                            {grant.grantor?.avatar ? (
+                              <AvatarImage src={grant.grantor.avatar} alt={grant.grantor.name} />
+                            ) : (
+                              <AvatarFallback className="text-xs font-medium bg-primary/10 text-primary">
+                                {getInitials(grant.grantor?.name || '?')}
+                              </AvatarFallback>
+                            )}
+                          </Avatar>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-foreground truncate">
+                              {grant.grantor?.name || 'অজানা'}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {grant.review?.reviewType === 'buyer' ? 'ক্রেতা রিভিউ' :
+                               grant.review?.reviewType === 'seller' ? 'বিক্রেতা রিভিউ' : 'রিভিউ'}
+                              {grant.review?.rating ? ` • ⭐ ${grant.review.rating}` : ''}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Badge
+                            variant={grant.status === 'accepted' ? 'default' : grant.status === 'pending' ? 'secondary' : 'outline'}
+                            className="text-[10px] px-2"
+                          >
+                            {grant.status === 'accepted' ? 'গৃহীত' : grant.status === 'pending' ? 'অপেক্ষমান' : 'বাতিল'}
+                          </Badge>
+                          {grant.status === 'pending' && (
+                            <div className="flex gap-1.5">
+                              <Button
+                                variant="default"
+                                size="sm"
+                                className="h-7 text-xs px-2"
+                                disabled={grantActionLoading === grant.id}
+                                onClick={async () => {
+                                  try {
+                                    setGrantActionLoading(grant.id);
+                                    await api.respondToVisibilityGrant(grant.id, 'accept');
+                                    toast({ title: 'সফল!', description: 'অনুদান গ্রহণ করা হয়েছে' });
+                                    loadVisibilityGrants();
+                                  } catch (err) {
+                                    const message = err instanceof Error ? err.message : 'গ্রহণ করতে সমস্যা হয়েছে';
+                                    toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
+                                  } finally {
+                                    setGrantActionLoading(null);
+                                  }
+                                }}
+                              >
+                                {grantActionLoading === grant.id ? <Loader2 className="w-3 h-3 animate-spin" /> : 'গ্রহণ'}
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 text-xs px-2"
+                                disabled={grantActionLoading === grant.id}
+                                onClick={async () => {
+                                  try {
+                                    setGrantActionLoading(grant.id);
+                                    await api.respondToVisibilityGrant(grant.id, 'reject');
+                                    toast({ title: 'সফল!', description: 'অনুদান প্রত্যাখ্যান করা হয়েছে' });
+                                    loadVisibilityGrants();
+                                  } catch (err) {
+                                    const message = err instanceof Error ? err.message : 'প্রত্যাখ্যান করতে সমস্যা হয়েছে';
+                                    toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
+                                  } finally {
+                                    setGrantActionLoading(null);
+                                  }
+                                }}
+                              >
+                                প্রত্যাখ্যান
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Separator />
+
+          {/* Save Privacy Settings */}
+          <div className="flex justify-end">
+            <Button
+              onClick={async () => {
+                try {
+                  setPrivacySaving(true);
+                  await api.updatePrivacySettings({
+                    ratingVisibility: privacySettings.ratingVisibility,
+                    reviewVisibility: privacySettings.reviewVisibility,
+                    trustScoreVisibility: privacySettings.trustScoreVisibility,
+                  });
+                  toast({ title: 'সফল!', description: 'গোপনীয়তা সেটিংস সফলভাবে আপডেট হয়েছে' });
+                } catch (err) {
+                  const message = err instanceof Error ? err.message : 'আপডেট করতে সমস্যা হয়েছে';
+                  toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
+                } finally {
+                  setPrivacySaving(false);
+                }
+              }}
+              disabled={privacySaving || privacyLoading}
+              className="min-w-[140px] h-10 shadow-md hover:shadow-lg transition-all"
+            >
+              {privacySaving ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4 mr-2" />
+              )}
+              সংরক্ষণ করুন
+            </Button>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

@@ -21,6 +21,7 @@ import {
   UserCog,
   Crown,
   Award,
+  MessageSquare,
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import type { PageName } from '@/lib/types';
@@ -72,6 +73,7 @@ const adminNavItems: NavItem[] = [
   { label: 'গেটওয়ে পেমেন্ট যাচাই', icon: CreditCard, page: 'admin-gateway-payments', adminOnly: true },
   { label: 'গেটওয়ে থিম সেটিংস', icon: Palette, page: 'admin-gateway-theme', adminOnly: true },
   { label: 'বিরোধ ব্যবস্থাপনা', icon: Scale, page: 'admin-disputes', adminOnly: true },
+  { label: 'রিভিউ মডারেশন', icon: MessageSquare, page: 'admin-reviews', adminOnly: true },
   { label: 'কার্যক্রম লগ', icon: FileText, page: 'admin-logs', adminOnly: true },
   { label: 'ওয়েবসাইট সেটিংস', icon: Settings, page: 'admin-settings', adminOnly: true },
 ];

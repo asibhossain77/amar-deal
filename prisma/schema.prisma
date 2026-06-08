@@ -36,6 +36,11 @@ model User {
   accountType         String   @default("both") // "buyer", "seller", "both"
   lastActive          DateTime @default(now())
 
+  // Privacy settings for ratings & reviews
+  ratingVisibility    String   @default("private")  // "private", "limited", "public" — controls who can see numeric ratings
+  reviewVisibility    String   @default("private")  // "private", "shared", "public" — controls who can see review list
+  trustScoreVisibility String  @default("private")  // "private", "limited", "public" — controls who can see trust score details
+
   // Subscription
   currentSubscriptionId String?
 
@@ -53,6 +58,8 @@ model User {
   givenReviews         Review[] @relation("ReviewAuthor")
   reports              Report[] @relation("ReportedUser")
   reportsFiled         Report[] @relation("ReportAuthor")
+  visibilityGrantsGiven ReviewVisibilityGrant[] @relation("VisibilityGrantor")
+  visibilityGrantsReceived ReviewVisibilityGrant[] @relation("VisibilityGrantee")
 }
 
 model Transaction {
@@ -264,12 +271,32 @@ model Review {
   comment         String?                        // Review text
   reviewType      String   @default("general")  // "buyer", "seller", "general"
   isPublic        Boolean  @default(true)        // Show on public profile
+  isHidden        Boolean  @default(false)       // Admin can hide abusive reviews
+  adminNote       String?                        // Admin moderation note
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   fromUser        User     @relation("ReviewAuthor", fields: [fromUserId], references: [id])
   toUser          User     @relation("ReviewRecipient", fields: [toUserId], references: [id])
   transaction     Transaction? @relation(fields: [transactionId], references: [id])
+  visibilityGrants ReviewVisibilityGrant[]      // Who this review is shared with
+}
+
+// ─── Review Visibility Sharing ─────────────────────────
+// Allows users to grant specific other users access to their reviews/ratings
+
+model ReviewVisibilityGrant {
+  id              String   @id @default(cuid())
+  grantorId       String                        // The user who owns the reviews (granting access)
+  granteeId       String                        // The user being granted access
+  status          String   @default("pending")  // "pending", "accepted", "revoked"
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  grantor         User     @relation("VisibilityGrantor", fields: [grantorId], references: [id])
+  grantee         User     @relation("VisibilityGrantee", fields: [granteeId], references: [id])
+  review          Review   @relation(fields: [reviewId], references: [id])
+  reviewId        String                        // Which review this grant is for
 }
 
 model Report {

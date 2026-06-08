@@ -1,17 +1,127 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { requireAuth } from "@/lib/auth-helper";
+import { requireAuth, requireAdmin } from "@/lib/auth-helper";
 
-// GET /api/users/[id]/reviews - Get reviews for a user
+// GET /api/users/[id]/reviews - Get reviews for a user with privacy controls
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
+    // 1. Auth required
+    const session = await requireAuth();
+    if (!session) {
+      return NextResponse.json(
+        { error: "লগইন আবশ্যক" },
+        { status: 401 }
+      );
+    }
 
+    const { id: targetUserId } = await params;
+    const viewerId = (session.user as { id: string }).id;
+
+    // Check if target user exists
+    const targetUser = await db.user.findUnique({
+      where: { id: targetUserId },
+      select: {
+        id: true,
+        reviewVisibility: true,
+      },
+    });
+
+    if (!targetUser) {
+      return NextResponse.json(
+        { error: "ব্যবহারকারী পাওয়া যায়নি" },
+        { status: 404 }
+      );
+    }
+
+    // 2. Determine viewer access level
+    const isOwner = viewerId === targetUserId;
+    const adminSession = await requireAdmin();
+    const isAdmin = !!adminSession;
+
+    // 3. Owner or Admin: return ALL reviews (including hidden)
+    if (isOwner || isAdmin) {
+      const reviews = await db.review.findMany({
+        where: { toUserId: targetUserId },
+        include: {
+          fromUser: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              avatar: true,
+              isVerified: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return NextResponse.json({
+        reviews,
+        privacyLevel: "full" as const,
+      });
+    }
+
+    // 4. Non-owner, non-admin: check reviewVisibility
+    const reviewVisibility = targetUser.reviewVisibility; // "private" | "shared" | "public"
+
+    if (reviewVisibility === "private") {
+      return NextResponse.json(
+        { error: "এই ব্যবহারকারীর রিভিউ দেখার অনুমতি নেই" },
+        { status: 403 }
+      );
+    }
+
+    if (reviewVisibility === "shared") {
+      // Return only reviews where there's an accepted ReviewVisibilityGrant from targetUser to viewer
+      const acceptedGrants = await db.reviewVisibilityGrant.findMany({
+        where: {
+          grantorId: targetUserId,
+          granteeId: viewerId,
+          status: "accepted",
+        },
+        select: { reviewId: true },
+      });
+
+      const grantedReviewIds = acceptedGrants.map((g) => g.reviewId);
+
+      // Only return granted reviews that are not hidden
+      const reviews = await db.review.findMany({
+        where: {
+          id: { in: grantedReviewIds.length > 0 ? grantedReviewIds : ["__none__"] },
+          toUserId: targetUserId,
+          isHidden: false,
+        },
+        include: {
+          fromUser: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              avatar: true,
+              isVerified: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return NextResponse.json({
+        reviews,
+        privacyLevel: "shared" as const,
+      });
+    }
+
+    // reviewVisibility === "public": return only non-hidden public reviews
     const reviews = await db.review.findMany({
-      where: { toUserId: id, isPublic: true },
+      where: {
+        toUserId: targetUserId,
+        isPublic: true,
+        isHidden: false,
+      },
       include: {
         fromUser: {
           select: {
@@ -26,7 +136,10 @@ export async function GET(
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ reviews });
+    return NextResponse.json({
+      reviews,
+      privacyLevel: "limited" as const,
+    });
   } catch (error) {
     console.error("Get reviews error:", error);
     return NextResponse.json(
@@ -62,7 +175,14 @@ export async function POST(
     }
 
     // Check if target user exists
-    const targetUser = await db.user.findUnique({ where: { id: toUserId } });
+    const targetUser = await db.user.findUnique({
+      where: { id: toUserId },
+      select: {
+        id: true,
+        reviewVisibility: true,
+      },
+    });
+
     if (!targetUser) {
       return NextResponse.json(
         { error: "ব্যবহারকারী পাওয়া যায়নি" },
@@ -82,8 +202,26 @@ export async function POST(
       );
     }
 
+    // Rate limiting: max 5 reviews per day
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const reviewsToday = await db.review.count({
+      where: {
+        fromUserId: currentUserId,
+        createdAt: { gte: todayStart },
+      },
+    });
+
+    if (reviewsToday >= 5) {
+      return NextResponse.json(
+        { error: "আপনি আজ সর্বোচ্চ ৫টি রিভিউ দিতে পারবেন" },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
-    const { rating, comment, reviewType, transactionId } = body;
+    const { rating, comment, reviewType, transactionId, isPublic: isPublicOverride } = body;
 
     // Validate rating
     if (!rating || rating < 1 || rating > 5) {
@@ -91,6 +229,16 @@ export async function POST(
         { error: "রেটিং ১ থেকে ৫ এর মধ্যে হতে হবে" },
         { status: 400 }
       );
+    }
+
+    // Determine isPublic default based on target user's reviewVisibility
+    let isPublic: boolean;
+    if (isPublicOverride !== undefined) {
+      // Allow explicit override from the request body
+      isPublic = !!isPublicOverride;
+    } else {
+      // Default: if target has "private" reviewVisibility, isPublic defaults to false
+      isPublic = targetUser.reviewVisibility !== "private";
     }
 
     // Create the review
@@ -102,7 +250,7 @@ export async function POST(
         rating: parseInt(rating),
         comment: comment || null,
         reviewType: reviewType || "general",
-        isPublic: true,
+        isPublic,
       },
       include: {
         fromUser: {

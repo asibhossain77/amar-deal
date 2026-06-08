@@ -108,6 +108,25 @@ export const api = {
   getUserReviews: (userId: string) => fetchAPI(`/users/${userId}/reviews`),
   reportUser: (userId: string, data: { reason: string; description?: string }) =>
     fetchAPI(`/users/${userId}/report`, { method: 'POST', body: JSON.stringify(data) }),
+
+  // Privacy Settings
+  getPrivacySettings: () => fetchAPI('/account/privacy'),
+  updatePrivacySettings: (data: { ratingVisibility?: string; reviewVisibility?: string; trustScoreVisibility?: string }) =>
+    fetchAPI('/account/privacy', { method: 'PUT', body: JSON.stringify(data) }),
+
+  // Visibility Grants
+  getVisibilityGrants: (direction?: string, status?: string) =>
+    fetchAPI(`/account/visibility-grants${direction || status ? `?${direction ? `direction=${direction}` : ''}${direction && status ? '&' : ''}${status ? `status=${status}` : ''}` : ''}`),
+  createVisibilityGrant: (granteeId: string, reviewId: string) =>
+    fetchAPI('/account/visibility-grants', { method: 'POST', body: JSON.stringify({ granteeId, reviewId }) }),
+  respondToVisibilityGrant: (grantId: string, action: 'accept' | 'revoke' | 'reject') =>
+    fetchAPI('/account/visibility-grants', { method: 'PUT', body: JSON.stringify({ grantId, action }) }),
+
+  // Admin Reviews
+  getAdminReviews: (filters?: { status?: string; userId?: string; page?: number; limit?: number }) =>
+    fetchAPI(`/admin/reviews${filters ? `?${new URLSearchParams(Object.entries(filters).filter(([_, v]) => v !== undefined).map(([k, v]) => [k, String(v)])).toString()}` : ''}`),
+  moderateReview: (reviewId: string, action: 'hide' | 'show' | 'delete' | 'note', adminNote?: string) =>
+    fetchAPI('/admin/reviews', { method: 'PUT', body: JSON.stringify({ reviewId, action, adminNote }) }),
   
   // Subscriptions (Public)
   getSubscriptionPlans: () => fetchAPI('/subscriptions/plans'),

@@ -30,6 +30,7 @@ import AdminGatewayPaymentsPage from '@/components/admin/AdminGatewayPaymentsPag
 import AdminGatewayThemePage from '@/components/admin/AdminGatewayThemePage';
 import AdminSubscriptionsPage from '@/components/admin/AdminSubscriptionsPage';
 import AdminBadgesPage from '@/components/admin/AdminBadgesPage';
+import AdminReviewsPage from '@/components/admin/AdminReviewsPage';
 import AccountSettingsPage from '@/components/account/AccountSettingsPage';
 import SubscriptionPlansPage from '@/components/subscriptions/SubscriptionPlansPage';
 import PublicProfilePage from '@/components/profile/PublicProfilePage';
@@ -230,6 +231,8 @@ function DashboardRouter() {
       return <ErrorBoundary><AdminSubscriptionsPage /></ErrorBoundary>;
     case 'admin-badges':
       return <ErrorBoundary><AdminBadgesPage /></ErrorBoundary>;
+    case 'admin-reviews':
+      return <ErrorBoundary><AdminReviewsPage /></ErrorBoundary>;
     default:
       return <ErrorBoundary><DashboardPage /></ErrorBoundary>;
   }

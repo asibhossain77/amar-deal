@@ -19,6 +19,11 @@ export type DisputeStatus =
 
 export type UserRole = 'user' | 'admin';
 
+// Privacy visibility levels
+export type RatingVisibility = 'private' | 'limited' | 'public';
+export type ReviewVisibility = 'private' | 'shared' | 'public';
+export type TrustScoreVisibility = 'private' | 'limited' | 'public';
+
 export type PageName = 
   | 'home' 
   | 'about' 
@@ -49,6 +54,7 @@ export type PageName =
   | 'admin-gateway-theme'
   | 'admin-subscriptions'
   | 'admin-badges'
+  | 'admin-reviews'
   | 'public-profile';
 
 export interface AppUser {
@@ -72,6 +78,10 @@ export interface AppUser {
   successfulTransactions?: number;
   trustScore?: number;
   disputeRate?: number;
+  // Privacy
+  ratingVisibility?: RatingVisibility;
+  reviewVisibility?: ReviewVisibility;
+  trustScoreVisibility?: TrustScoreVisibility;
   // Subscription
   currentSubscriptionId?: string;
   currentSubscription?: UserSubscription;
@@ -240,20 +250,25 @@ export interface PublicProfile {
   country?: string;
   createdAt: string;
   lastActive: string;
-  buyerRating: number;
-  sellerRating: number;
-  overallRating: number;
-  totalReviews: number;
-  positiveReviewPercentage: number;
-  completedDeals: number;
-  successfulTransactions: number;
-  trustScore: number;
-  disputeRate: number;
-  successRate: number;
+  // Privacy-aware fields (may be hidden based on visibility settings)
+  privacyLevel?: 'full' | 'shared' | 'limited';
+  canRequestAccess?: boolean;
+  ratingIndicators?: string[];
+  trustIndicators?: string[];
+  buyerRating?: number;
+  sellerRating?: number;
+  overallRating?: number;
+  totalReviews?: number;
+  positiveReviewPercentage?: number;
+  completedDeals?: number;
+  successfulTransactions?: number;
+  trustScore?: number;
+  disputeRate?: number;
+  successRate?: number;
   currentPlan: SubscriptionPlan | null;
   currentSubscription: { id: string; status: string; startDate: string; endDate?: string } | null;
   earnedBadges: EarnedBadge[];
-  stats: {
+  stats?: {
     totalTransactions: number;
     completedTransactions: number;
     inProgressTransactions: number;
@@ -262,8 +277,8 @@ export interface PublicProfile {
     sellerTransactionCount: number;
   };
   memberSinceBadge: string;
-  accountAgeDays: number;
-  reviews: PublicReview[];
+  accountAgeDays?: number;
+  reviews?: PublicReview[];
   canReview: boolean;
   hasReviewed: boolean;
 }
@@ -292,6 +307,76 @@ export interface Report {
   adminNote?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface VisibilityGrant {
+  id: string;
+  grantorId: string;
+  granteeId: string;
+  reviewId: string;
+  status: 'pending' | 'accepted' | 'revoked';
+  createdAt: string;
+  updatedAt: string;
+  grantor: {
+    id: string;
+    name: string;
+    username?: string;
+    avatar?: string;
+    isVerified: boolean;
+  };
+  grantee: {
+    id: string;
+    name: string;
+    username?: string;
+    avatar?: string;
+    isVerified: boolean;
+  };
+  review: {
+    id: string;
+    rating: number;
+    comment?: string;
+    reviewType: string;
+    createdAt: string;
+  };
+}
+
+export interface PrivacySettings {
+  ratingVisibility: RatingVisibility;
+  reviewVisibility: ReviewVisibility;
+  trustScoreVisibility: TrustScoreVisibility;
+  grantsGivenCount: number;
+  grantsReceivedCount: number;
+}
+
+export interface AdminReview {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  transactionId?: string;
+  rating: number;
+  comment?: string;
+  reviewType: string;
+  isPublic: boolean;
+  isHidden: boolean;
+  adminNote?: string;
+  createdAt: string;
+  updatedAt: string;
+  fromUser: {
+    id: string;
+    name: string;
+    username?: string;
+    avatar?: string;
+    isVerified: boolean;
+    email?: string;
+  };
+  toUser: {
+    id: string;
+    name: string;
+    username?: string;
+    avatar?: string;
+    isVerified: boolean;
+    email?: string;
+  };
 }
 
 // ─── Subscription & Badge Types ─────────────────────────

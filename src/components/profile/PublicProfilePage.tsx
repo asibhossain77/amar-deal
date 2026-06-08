@@ -58,9 +58,13 @@ import {
   ThumbsUp,
   AlertTriangle,
   Eye,
+  EyeOff,
   BarChart3,
   Zap,
   Globe,
+  Lock,
+  ShieldCheck,
+  Share2,
 } from 'lucide-react';
 import { BadgeIcon, VerificationBadge } from '@/components/shared/BadgeIcon';
 import { useToast } from '@/hooks/use-toast';
@@ -128,6 +132,23 @@ function TrustScoreRing({ score, size = 120 }: { score: number; size?: number })
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-2xl font-bold text-foreground">{toBanglaNumber(Math.round(score))}</span>
         <span className="text-[10px] text-muted-foreground">ট্রাস্ট স্কোর</span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Privacy Protected Indicator ─────────────────────────
+function PrivacyProtectedIndicator({ size = 120 }: { size?: number }) {
+  return (
+    <div
+      className="relative inline-flex items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/30"
+      style={{ width: size, height: size }}
+    >
+      <div className="flex flex-col items-center justify-center gap-1">
+        <Lock className="text-muted-foreground/60" style={{ width: size * 0.25, height: size * 0.25 }} />
+        <span className="text-[10px] text-muted-foreground text-center leading-tight px-2">
+          গোপনীয়<br />সুরক্ষিত
+        </span>
       </div>
     </div>
   );
@@ -235,6 +256,8 @@ function ReviewCard({ review, onUserClick }: { review: PublicReview; onUserClick
 export default function PublicProfilePage() {
   const { selectedUserId, user: currentUser, setPage, setSelectedUserId } = useAppStore();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
+  const [privacyLevel, setPrivacyLevel] = useState<'full' | 'shared' | 'limited'>('full');
+  const [canRequestAccess, setCanRequestAccess] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedBadge, setSelectedBadge] = useState<EarnedBadge | null>(null);
@@ -246,6 +269,8 @@ export default function PublicProfilePage() {
   const [reportDescription, setReportDescription] = useState('');
   const [submittingReport, setSubmittingReport] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [accessRequestOpen, setAccessRequestOpen] = useState(false);
+  const [submittingAccessRequest, setSubmittingAccessRequest] = useState(false);
   const { toast } = useToast();
 
   const fetchProfile = useCallback(async () => {
@@ -255,6 +280,8 @@ export default function PublicProfilePage() {
     try {
       const data = await api.getPublicProfile(selectedUserId);
       setProfile(data.profile);
+      setPrivacyLevel(data.privacyLevel || 'full');
+      setCanRequestAccess(data.canRequestAccess || false);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'প্রোফাইল লোড করতে ত্রুটি হয়েছে');
     } finally {
@@ -330,6 +357,20 @@ export default function PublicProfilePage() {
     }
   };
 
+  const handleRequestAccess = async () => {
+    setSubmittingAccessRequest(true);
+    try {
+      // Simulate sending a request — just show a toast for now
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      toast({ title: 'সফল', description: 'অনুরোধ পাঠানো হয়েছে' });
+      setAccessRequestOpen(false);
+    } catch {
+      toast({ title: 'ত্রুটি', description: 'অনুরোধ পাঠাতে সমস্যা হয়েছে', variant: 'destructive' });
+    } finally {
+      setSubmittingAccessRequest(false);
+    }
+  };
+
   const getAccountTypeLabel = (type: string) => {
     switch (type) {
       case 'buyer': return 'ক্রেতা';
@@ -367,6 +408,11 @@ export default function PublicProfilePage() {
       default: return 'bg-gray-100 text-gray-700';
     }
   };
+
+  // ─── Derived privacy flags ─────────────────────────
+  const isLimited = privacyLevel === 'limited';
+  const isShared = privacyLevel === 'shared';
+  const isFull = privacyLevel === 'full';
 
   // ─── Loading State ─────────────────────────
   if (loading) {
@@ -427,6 +473,20 @@ export default function PublicProfilePage() {
 
   const isOwnProfile = currentUser?.id === profile.id;
 
+  // Safe accessors for optional fields
+  const overallRating = profile.overallRating ?? 0;
+  const totalReviews = profile.totalReviews ?? 0;
+  const completedDeals = profile.completedDeals ?? 0;
+  const trustScore = profile.trustScore ?? 0;
+  const buyerRating = profile.buyerRating ?? 0;
+  const sellerRating = profile.sellerRating ?? 0;
+  const positiveReviewPercentage = profile.positiveReviewPercentage ?? 0;
+  const successRate = profile.successRate ?? 0;
+  const disputeRate = profile.disputeRate ?? 0;
+  const successfulTransactions = profile.successfulTransactions ?? 0;
+  const reviews = profile.reviews ?? [];
+  const stats = profile.stats;
+
   return (
     <div className="page-container space-y-6">
       {/* Header with actions */}
@@ -437,6 +497,19 @@ export default function PublicProfilePage() {
           icon={<User className="h-5 w-5 text-primary" />}
         />
         <div className="flex items-center gap-2">
+          {/* Privacy Level Indicator */}
+          {isLimited && (
+            <Badge variant="outline" className="text-xs gap-1 border-amber-300 text-amber-700 dark:border-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30">
+              <EyeOff className="w-3 h-3" />
+              সীমিত দৃশ্যমানতা
+            </Badge>
+          )}
+          {isShared && (
+            <Badge variant="outline" className="text-xs gap-1 border-emerald-300 text-emerald-700 dark:border-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30">
+              <Share2 className="w-3 h-3" />
+              শেয়ার করা অ্যাক্সেস
+            </Badge>
+          )}
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -576,6 +649,50 @@ export default function PublicProfilePage() {
                   </Badge>
                 )}
               </div>
+              {/* Privacy indicator badges for limited view */}
+              {isLimited && (
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
+                  {profile.trustIndicators?.includes('trusted_user') && (
+                    <Badge className="bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 border-0 text-xs gap-1">
+                      <ShieldCheck className="w-3 h-3" />
+                      বিশ্বস্ত ব্যবহারকারী
+                    </Badge>
+                  )}
+                  {profile.trustIndicators?.includes('new_user') && (
+                    <Badge variant="outline" className="text-xs gap-1 border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400">
+                      <Clock className="w-3 h-3" />
+                      নতুন ব্যবহারকারী
+                    </Badge>
+                  )}
+                  {profile.ratingIndicators?.includes('positive_rating') && (
+                    <Badge className="bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 border-0 text-xs gap-1">
+                      <ThumbsUp className="w-3 h-3" />
+                      ইতিবাচক রেটিং
+                    </Badge>
+                  )}
+                  {profile.ratingIndicators?.includes('has_reviews') && (
+                    <Badge variant="outline" className="text-xs gap-1 border-amber-300 text-amber-700 dark:border-amber-700 dark:text-amber-400">
+                      <MessageSquare className="w-3 h-3" />
+                      রিভিউ আছে
+                    </Badge>
+                  )}
+                </div>
+              )}
+              {/* Shared access indicator for shared view */}
+              {isShared && (
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
+                  <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border-0 text-xs gap-1">
+                    <Share2 className="w-3 h-3" />
+                    শেয়ার করা অ্যাক্সেস
+                  </Badge>
+                  {profile.trustIndicators?.includes('trusted_user') && (
+                    <Badge className="bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 border-0 text-xs gap-1">
+                      <ShieldCheck className="w-3 h-3" />
+                      বিশ্বস্ত ব্যবহারকারী
+                    </Badge>
+                  )}
+                </div>
+              )}
               <p className="text-xs text-muted-foreground mt-2">
                 সর্বশেষ সক্রিয়: {timeAgo(profile.lastActive)}
               </p>
@@ -584,18 +701,42 @@ export default function PublicProfilePage() {
             {/* Quick Stats - Desktop */}
             <div className="hidden lg:flex items-center gap-6">
               <div className="text-center">
-                <p className="text-2xl font-bold text-foreground">{toBanglaNumber(profile.overallRating)}</p>
-                <StarRating rating={profile.overallRating} size="sm" />
-                <p className="text-xs text-muted-foreground mt-0.5">{toBanglaNumber(profile.totalReviews)} রিভিউ</p>
+                {isLimited ? (
+                  <>
+                    <p className="text-2xl font-bold text-muted-foreground">—</p>
+                    <p className="text-xs text-muted-foreground mt-1">রেটিং গোপনীয়</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-2xl font-bold text-foreground">{toBanglaNumber(overallRating)}</p>
+                    <StarRating rating={overallRating} size="sm" />
+                    <p className="text-xs text-muted-foreground mt-0.5">{toBanglaNumber(totalReviews)} রিভিউ</p>
+                  </>
+                )}
               </div>
               <Separator orientation="vertical" className="h-12" />
               <div className="text-center">
-                <p className="text-2xl font-bold text-foreground">{toBanglaNumber(profile.completedDeals)}</p>
-                <p className="text-xs text-muted-foreground">সম্পন্ন ডিল</p>
+                {isLimited ? (
+                  <>
+                    <p className="text-2xl font-bold text-muted-foreground">—</p>
+                    <p className="text-xs text-muted-foreground">সম্পন্ন ডিল</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-2xl font-bold text-foreground">{toBanglaNumber(completedDeals)}</p>
+                    <p className="text-xs text-muted-foreground">সম্পন্ন ডিল</p>
+                  </>
+                )}
               </div>
               <Separator orientation="vertical" className="h-12" />
               <div className="text-center">
-                <TrustScoreRing score={profile.trustScore} size={70} />
+                {isLimited ? (
+                  <PrivacyProtectedIndicator size={70} />
+                ) : isShared && !profile.trustScore ? (
+                  <PrivacyProtectedIndicator size={70} />
+                ) : (
+                  <TrustScoreRing score={trustScore} size={70} />
+                )}
               </div>
             </div>
           </div>
@@ -603,16 +744,40 @@ export default function PublicProfilePage() {
           {/* Quick Stats - Mobile */}
           <div className="grid grid-cols-3 gap-3 mt-4 lg:hidden">
             <div className="text-center p-3 rounded-lg bg-muted/30">
-              <p className="text-lg font-bold text-foreground">{toBanglaNumber(profile.overallRating)}</p>
-              <StarRating rating={profile.overallRating} size="sm" />
-              <p className="text-[10px] text-muted-foreground mt-0.5">{toBanglaNumber(profile.totalReviews)} রিভিউ</p>
+              {isLimited ? (
+                <>
+                  <p className="text-lg font-bold text-muted-foreground">—</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">রেটিং গোপনীয়</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-lg font-bold text-foreground">{toBanglaNumber(overallRating)}</p>
+                  <StarRating rating={overallRating} size="sm" />
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{toBanglaNumber(totalReviews)} রিভিউ</p>
+                </>
+              )}
             </div>
             <div className="text-center p-3 rounded-lg bg-muted/30">
-              <p className="text-lg font-bold text-foreground">{toBanglaNumber(profile.completedDeals)}</p>
-              <p className="text-[10px] text-muted-foreground">সম্পন্ন ডিল</p>
+              {isLimited ? (
+                <>
+                  <p className="text-lg font-bold text-muted-foreground">—</p>
+                  <p className="text-[10px] text-muted-foreground">সম্পন্ন ডিল</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-lg font-bold text-foreground">{toBanglaNumber(completedDeals)}</p>
+                  <p className="text-[10px] text-muted-foreground">সম্পন্ন ডিল</p>
+                </>
+              )}
             </div>
             <div className="flex items-center justify-center p-3 rounded-lg bg-muted/30">
-              <TrustScoreRing score={profile.trustScore} size={50} />
+              {isLimited ? (
+                <PrivacyProtectedIndicator size={50} />
+              ) : isShared && !profile.trustScore ? (
+                <PrivacyProtectedIndicator size={50} />
+              ) : (
+                <TrustScoreRing score={trustScore} size={50} />
+              )}
             </div>
           </div>
         </CardContent>
@@ -632,34 +797,104 @@ export default function PublicProfilePage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Trust Score Ring or Privacy Indicator */}
               <div className="flex justify-center">
-                <TrustScoreRing score={profile.trustScore} size={120} />
+                {isLimited ? (
+                  <PrivacyProtectedIndicator size={120} />
+                ) : isShared && !profile.trustScore ? (
+                  <PrivacyProtectedIndicator size={120} />
+                ) : (
+                  <TrustScoreRing score={trustScore} size={120} />
+                )}
               </div>
+
+              {/* Privacy indicator badges for limited */}
+              {isLimited && (
+                <div className="flex flex-wrap justify-center gap-2">
+                  {profile.trustIndicators?.includes('trusted_user') && (
+                    <Badge className="bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 border-0 text-xs gap-1">
+                      <ShieldCheck className="w-3 h-3" />
+                      বিশ্বস্ত ব্যবহারকারী
+                    </Badge>
+                  )}
+                  {profile.trustIndicators?.includes('new_user') && (
+                    <Badge variant="outline" className="text-xs gap-1 border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400">
+                      <Clock className="w-3 h-3" />
+                      নতুন ব্যবহারকারী
+                    </Badge>
+                  )}
+                </div>
+              )}
+
+              {/* Shared access badge for shared */}
+              {isShared && (
+                <div className="flex justify-center">
+                  <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border-0 text-xs gap-1">
+                    <Share2 className="w-3 h-3" />
+                    শেয়ার করা অ্যাক্সেস
+                  </Badge>
+                </div>
+              )}
+
               <Separator />
-              <div className="space-y-3">
-                <ProgressBar value={profile.overallRating} max={5} color="#f59e0b" label={`রেটিং: ${toBanglaNumber(profile.overallRating)}/৫`} />
-                <ProgressBar value={profile.successRate} color="#16a34a" label={`সাফল্যের হার: ${toBanglaNumber(profile.successRate)}%`} />
-                <ProgressBar value={Math.max(100 - profile.disputeRate * 10, 0)} color={profile.disputeRate < 5 ? '#16a34a' : profile.disputeRate < 15 ? '#d97706' : '#dc2626'} label={`বিরোধ হার: ${toBanglaNumber(profile.disputeRate)}%`} />
-              </div>
+
+              {/* Progress bars — hidden for limited, partial for shared, full for full */}
+              {isLimited ? (
+                <div className="py-4 text-center">
+                  <Lock className="w-6 h-6 text-muted-foreground/50 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">রেটিং তথ্য গোপনীয়</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {(isFull || profile.overallRating !== undefined) && (
+                    <ProgressBar value={overallRating} max={5} color="#f59e0b" label={`রেটিং: ${toBanglaNumber(overallRating)}/৫`} />
+                  )}
+                  {(isFull || profile.successRate !== undefined) && (
+                    <ProgressBar value={successRate} color="#16a34a" label={`সাফল্যের হার: ${toBanglaNumber(successRate)}%`} />
+                  )}
+                  {isFull && (
+                    <ProgressBar value={Math.max(100 - disputeRate * 10, 0)} color={disputeRate < 5 ? '#16a34a' : disputeRate < 15 ? '#d97706' : '#dc2626'} label={`বিরোধ হার: ${toBanglaNumber(disputeRate)}%`} />
+                  )}
+                </div>
+              )}
+
               <Separator />
-              <div className="grid grid-cols-2 gap-2 text-center">
-                <div className="p-2 rounded-lg bg-muted/30">
-                  <p className="text-lg font-bold text-foreground">{toBanglaNumber(profile.stats.totalTransactions)}</p>
-                  <p className="text-[10px] text-muted-foreground">মোট লেনদেন</p>
+
+              {/* Stats grid — hidden for limited, partial for shared, full for full */}
+              {isLimited ? (
+                <div className="py-2 text-center">
+                  <EyeOff className="w-5 h-5 text-muted-foreground/40 mx-auto mb-1" />
+                  <p className="text-xs text-muted-foreground">পরিসংখ্যান গোপনীয়</p>
                 </div>
-                <div className="p-2 rounded-lg bg-muted/30">
-                  <p className="text-lg font-bold text-foreground">{toBanglaNumber(profile.successfulTransactions)}</p>
-                  <p className="text-[10px] text-muted-foreground">সফল এসক্রো</p>
+              ) : stats ? (
+                <div className="grid grid-cols-2 gap-2 text-center">
+                  <div className="p-2 rounded-lg bg-muted/30">
+                    <p className="text-lg font-bold text-foreground">{toBanglaNumber(stats.totalTransactions)}</p>
+                    <p className="text-[10px] text-muted-foreground">মোট লেনদেন</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-muted/30">
+                    <p className="text-lg font-bold text-foreground">{toBanglaNumber(successfulTransactions)}</p>
+                    <p className="text-[10px] text-muted-foreground">সফল এসক্রো</p>
+                  </div>
+                  {isFull && (
+                    <>
+                      <div className="p-2 rounded-lg bg-muted/30">
+                        <p className="text-lg font-bold text-foreground">{toBanglaNumber(stats.buyerTransactionCount)}</p>
+                        <p className="text-[10px] text-muted-foreground">ক্রেতা হিসেবে</p>
+                      </div>
+                      <div className="p-2 rounded-lg bg-muted/30">
+                        <p className="text-lg font-bold text-foreground">{toBanglaNumber(stats.sellerTransactionCount)}</p>
+                        <p className="text-[10px] text-muted-foreground">বিক্রেতা হিসেবে</p>
+                      </div>
+                    </>
+                  )}
                 </div>
-                <div className="p-2 rounded-lg bg-muted/30">
-                  <p className="text-lg font-bold text-foreground">{toBanglaNumber(profile.stats.buyerTransactionCount)}</p>
-                  <p className="text-[10px] text-muted-foreground">ক্রেতা হিসেবে</p>
+              ) : (
+                <div className="py-2 text-center">
+                  <EyeOff className="w-5 h-5 text-muted-foreground/40 mx-auto mb-1" />
+                  <p className="text-xs text-muted-foreground">পরিসংখ্যান গোপনীয়</p>
                 </div>
-                <div className="p-2 rounded-lg bg-muted/30">
-                  <p className="text-lg font-bold text-foreground">{toBanglaNumber(profile.stats.sellerTransactionCount)}</p>
-                  <p className="text-[10px] text-muted-foreground">বিক্রেতা হিসেবে</p>
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
 
@@ -754,64 +989,127 @@ export default function PublicProfilePage() {
             </CardContent>
           </Card>
 
-          {/* Detailed Stats Card */}
-          <Card className="card-modern">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-primary" />
-                লেনদেন পরিসংখ্যান
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3 rounded-xl bg-green-50 dark:bg-green-950/20 text-center">
-                  <CheckCircle className="w-5 h-5 text-green-600 mx-auto mb-1" />
-                  <p className="text-lg font-bold text-green-700 dark:text-green-400">{toBanglaNumber(profile.stats.completedTransactions)}</p>
-                  <p className="text-[10px] text-muted-foreground">সম্পন্ন</p>
+          {/* Detailed Stats Card — hidden for limited, partial for shared, full for full */}
+          {isLimited ? (
+            <Card className="card-modern border-amber-200 dark:border-amber-900 bg-amber-50/30 dark:bg-amber-950/10">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-amber-500" />
+                  লেনদেন পরিসংখ্যান
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="py-6 text-center">
+                  <Lock className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
+                  <p className="text-sm font-medium text-foreground mb-1">পরিসংখ্যান গোপনীয়</p>
+                  <p className="text-xs text-muted-foreground">এই ব্যবহারকারীর বিস্তারিত পরিসংখ্যান গোপনীয়তা সুরক্ষিত</p>
                 </div>
-                <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/20 text-center">
-                  <Zap className="w-5 h-5 text-blue-600 mx-auto mb-1" />
-                  <p className="text-lg font-bold text-blue-700 dark:text-blue-400">{toBanglaNumber(profile.stats.inProgressTransactions)}</p>
-                  <p className="text-[10px] text-muted-foreground">চলমান</p>
+                {/* Privacy indicator badges */}
+                <div className="flex flex-wrap justify-center gap-2 mt-2">
+                  {profile.ratingIndicators?.includes('positive_rating') && (
+                    <Badge className="bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 border-0 text-xs gap-1">
+                      <ThumbsUp className="w-3 h-3" />
+                      ইতিবাচক রেটিং
+                    </Badge>
+                  )}
+                  {profile.ratingIndicators?.includes('has_reviews') && (
+                    <Badge variant="outline" className="text-xs gap-1 border-amber-300 text-amber-700 dark:border-amber-700 dark:text-amber-400">
+                      <MessageSquare className="w-3 h-3" />
+                      রিভিউ আছে
+                    </Badge>
+                  )}
                 </div>
-                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/20 text-center">
-                  <AlertTriangle className="w-5 h-5 text-red-600 mx-auto mb-1" />
-                  <p className="text-lg font-bold text-red-700 dark:text-red-400">{toBanglaNumber(profile.stats.disputedTransactions)}</p>
-                  <p className="text-[10px] text-muted-foreground">বিরোধিত</p>
-                </div>
-                <div className="p-3 rounded-xl bg-primary/5 dark:bg-primary/10 text-center">
-                  <TrendingUp className="w-5 h-5 text-primary mx-auto mb-1" />
-                  <p className="text-lg font-bold text-primary">{toBanglaNumber(profile.successRate)}%</p>
-                  <p className="text-[10px] text-muted-foreground">সাফল্যের হার</p>
-                </div>
-              </div>
-              
-              {/* Rating breakdown */}
-              <div className="mt-4 space-y-2">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">রেটিং বিবরণ</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">ক্রেতা রেটিং</span>
-                  <div className="flex items-center gap-2">
-                    <StarRating rating={profile.buyerRating} size="sm" />
-                    <span className="text-sm font-medium text-foreground">{toBanglaNumber(profile.buyerRating)}</span>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="card-modern">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-primary" />
+                  লেনদেন পরিসংখ্যান
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {stats ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="p-3 rounded-xl bg-green-50 dark:bg-green-950/20 text-center">
+                      <CheckCircle className="w-5 h-5 text-green-600 mx-auto mb-1" />
+                      <p className="text-lg font-bold text-green-700 dark:text-green-400">{toBanglaNumber(stats.completedTransactions)}</p>
+                      <p className="text-[10px] text-muted-foreground">সম্পন্ন</p>
+                    </div>
+                    {isFull && (
+                      <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/20 text-center">
+                        <Zap className="w-5 h-5 text-blue-600 mx-auto mb-1" />
+                        <p className="text-lg font-bold text-blue-700 dark:text-blue-400">{toBanglaNumber(stats.inProgressTransactions)}</p>
+                        <p className="text-[10px] text-muted-foreground">চলমান</p>
+                      </div>
+                    )}
+                    {isFull && (
+                      <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/20 text-center">
+                        <AlertTriangle className="w-5 h-5 text-red-600 mx-auto mb-1" />
+                        <p className="text-lg font-bold text-red-700 dark:text-red-400">{toBanglaNumber(stats.disputedTransactions)}</p>
+                        <p className="text-[10px] text-muted-foreground">বিরোধিত</p>
+                      </div>
+                    )}
+                    <div className="p-3 rounded-xl bg-primary/5 dark:bg-primary/10 text-center">
+                      <TrendingUp className="w-5 h-5 text-primary mx-auto mb-1" />
+                      <p className="text-lg font-bold text-primary">{toBanglaNumber(successRate)}%</p>
+                      <p className="text-[10px] text-muted-foreground">সাফল্যের হার</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">বিক্রেতা রেটিং</span>
-                  <div className="flex items-center gap-2">
-                    <StarRating rating={profile.sellerRating} size="sm" />
-                    <span className="text-sm font-medium text-foreground">{toBanglaNumber(profile.sellerRating)}</span>
+                ) : (
+                  <div className="py-4 text-center">
+                    <EyeOff className="w-6 h-6 text-muted-foreground/40 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">পরিসংখ্যান গোপনীয়</p>
                   </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">ইতিবাচক রিভিউ</span>
-                  <span className="text-sm font-medium text-foreground">{toBanglaNumber(profile.positiveReviewPercentage)}%</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                )}
+                
+                {/* Rating breakdown — hidden for limited, shown for shared/full */}
+                {isLimited ? (
+                  <div className="mt-4 py-4 text-center">
+                    <Lock className="w-6 h-6 text-muted-foreground/40 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">রেটিং তথ্য গোপনীয়</p>
+                  </div>
+                ) : (
+                  <div className="mt-4 space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">রেটিং বিবরণ</p>
+                    {(isFull || profile.buyerRating !== undefined) && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">ক্রেতা রেটিং</span>
+                        <div className="flex items-center gap-2">
+                          <StarRating rating={buyerRating} size="sm" />
+                          <span className="text-sm font-medium text-foreground">{toBanglaNumber(buyerRating)}</span>
+                        </div>
+                      </div>
+                    )}
+                    {(isFull || profile.sellerRating !== undefined) && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">বিক্রেতা রেটিং</span>
+                        <div className="flex items-center gap-2">
+                          <StarRating rating={sellerRating} size="sm" />
+                          <span className="text-sm font-medium text-foreground">{toBanglaNumber(sellerRating)}</span>
+                        </div>
+                      </div>
+                    )}
+                    {(isFull || profile.positiveReviewPercentage !== undefined) && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">ইতিবাচক রিভিউ</span>
+                        <span className="text-sm font-medium text-foreground">{toBanglaNumber(positiveReviewPercentage)}%</span>
+                      </div>
+                    )}
+                    {isShared && profile.buyerRating === undefined && profile.sellerRating === undefined && profile.positiveReviewPercentage === undefined && (
+                      <div className="py-3 text-center">
+                        <Lock className="w-5 h-5 text-muted-foreground/40 mx-auto mb-1" />
+                        <p className="text-xs text-muted-foreground">রেটিং তথ্য গোপনীয়</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
-          {/* Write Review Section */}
+          {/* Write Review Section — available for all privacy levels if canReview */}
           {!isOwnProfile && profile.canReview && !profile.hasReviewed && (
             <Card className="card-modern border-primary/20">
               <CardHeader className="pb-3">
@@ -897,37 +1195,125 @@ export default function PublicProfilePage() {
             </Card>
           )}
 
-          {/* Reviews Section */}
-          <Card className="card-modern">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
+          {/* Reviews Section — conditional based on privacy level */}
+          {isLimited ? (
+            <Card className="card-modern border-amber-200 dark:border-amber-900">
+              <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-primary" />
-                  পাবলিক রিভিউ ({toBanglaNumber(profile.reviews.length)})
+                  <EyeOff className="w-4 h-4 text-amber-500" />
+                  রিভিউ
                 </CardTitle>
-                {profile.totalReviews > 0 && (
-                  <div className="flex items-center gap-1.5">
-                    <StarRating rating={profile.overallRating} size="sm" />
-                    <span className="text-sm font-medium text-foreground">{toBanglaNumber(profile.overallRating)}</span>
+              </CardHeader>
+              <CardContent>
+                <div className="py-6 text-center">
+                  <Lock className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
+                  <p className="text-sm font-medium text-foreground mb-1">রিভিউ দেখার অনুমতি নেই</p>
+                  <p className="text-xs text-muted-foreground mb-4">এই ব্যবহারকারীর রিভিউ গোপনীয়তা সুরক্ষিত</p>
+                  {/* Rating indicator badges */}
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {profile.ratingIndicators?.includes('positive_rating') && (
+                      <Badge className="bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 border-0 text-xs gap-1">
+                        <ThumbsUp className="w-3 h-3" />
+                        ইতিবাচক রেটিং
+                      </Badge>
+                    )}
+                    {profile.ratingIndicators?.includes('has_reviews') && (
+                      <Badge variant="outline" className="text-xs gap-1 border-amber-300 text-amber-700 dark:border-amber-700 dark:text-amber-400">
+                        <MessageSquare className="w-3 h-3" />
+                        রিভিউ আছে
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                {/* Request Access button */}
+                {canRequestAccess && (
+                  <div className="flex justify-center mt-2">
+                    <Dialog open={accessRequestOpen} onOpenChange={setAccessRequestOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="gap-2">
+                          <Eye className="w-4 h-4" />
+                          রিভিউ দেখার অনুরোধ করুন
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            <Eye className="w-5 h-5 text-primary" />
+                            রিভিউ দেখার অনুরোধ
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="py-4">
+                          <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 mb-4">
+                            <Avatar className="h-10 w-10">
+                              {profile.avatar ? <AvatarImage src={profile.avatar} alt={profile.name} /> : null}
+                              <AvatarFallback className="bg-primary/10 text-primary text-sm">{getInitials(profile.name)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="text-sm font-medium">{profile.name}</p>
+                              {profile.username && <p className="text-xs text-muted-foreground">@{profile.username}</p>}
+                            </div>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            এই ব্যবহারকারীর রিভিউ ও রেটিং দেখতে অনুমতি চান?
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            অনুরোধ পাঠানোর পর, ব্যবহারকারী সিদ্ধান্ত নেবেন তিনি আপনার সাথে রিভিউ শেয়ার করতে চান কিনা।
+                          </p>
+                        </div>
+                        <DialogFooter>
+                          <DialogClose asChild>
+                            <Button variant="outline">বাতিল</Button>
+                          </DialogClose>
+                          <Button onClick={handleRequestAccess} disabled={submittingAccessRequest}>
+                            {submittingAccessRequest ? 'পাঠানো হচ্ছে...' : 'অনুরোধ পাঠান'}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              {profile.reviews.length === 0 ? (
-                <div className="text-center py-8">
-                  <MessageSquare className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">এখনো কোনো রিভিউ নেই</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="card-modern">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Eye className="w-4 h-4 text-primary" />
+                    পাবলিক রিভিউ ({toBanglaNumber(reviews.length)})
+                  </CardTitle>
+                  {totalReviews > 0 && (isFull || profile.overallRating !== undefined) && (
+                    <div className="flex items-center gap-1.5">
+                      <StarRating rating={overallRating} size="sm" />
+                      <span className="text-sm font-medium text-foreground">{toBanglaNumber(overallRating)}</span>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="divide-y divide-border">
-                  {profile.reviews.map((review) => (
-                    <ReviewCard key={review.id} review={review} onUserClick={handleUserClick} />
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                {isShared && (
+                  <div className="mt-2">
+                    <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border-0 text-xs gap-1">
+                      <Share2 className="w-3 h-3" />
+                      শেয়ার করা রিভিউ দেখছেন
+                    </Badge>
+                  </div>
+                )}
+              </CardHeader>
+              <CardContent>
+                {reviews.length === 0 ? (
+                  <div className="text-center py-8">
+                    <MessageSquare className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">এখনো কোনো রিভিউ নেই</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-border">
+                    {reviews.map((review) => (
+                      <ReviewCard key={review.id} review={review} onUserClick={handleUserClick} />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 
