@@ -262,9 +262,9 @@ export default function AccountSettingsPage() {
       if (data.plan || data.currentPlan) {
         setCurrentPlan(data.plan || data.currentPlan);
       }
-      // Also update store user
+      // Also update store user - use functional update to avoid stale closure
       if (u.name && u.email) {
-        setUser({ ...user, ...u } as typeof user);
+        setUser((prev) => prev ? { ...prev, ...u } as typeof prev : u as typeof prev);
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'প্রোফাইল লোড করতে সমস্যা হয়েছে';
@@ -272,7 +272,7 @@ export default function AccountSettingsPage() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, setUser]);
 
   const loadReputation = useCallback(async () => {
     try {
@@ -287,10 +287,12 @@ export default function AccountSettingsPage() {
     try {
       setPrivacyLoading(true);
       const data = await api.getPrivacySettings();
+      // API returns { settings: { ratingVisibility, reviewVisibility, trustScoreVisibility }, ... }
+      const s = data.settings || data;
       setPrivacySettings({
-        ratingVisibility: data.ratingVisibility || 'private',
-        reviewVisibility: data.reviewVisibility || 'private',
-        trustScoreVisibility: data.trustScoreVisibility || 'private',
+        ratingVisibility: s.ratingVisibility || 'private',
+        reviewVisibility: s.reviewVisibility || 'private',
+        trustScoreVisibility: s.trustScoreVisibility || 'private',
       });
     } catch {
       // Silently fail - privacy tab will show defaults
@@ -336,8 +338,8 @@ export default function AccountSettingsPage() {
         avatar: profile.avatar || undefined,
       });
       toast({ title: 'সফল!', description: 'প্রোফাইল সফলভাবে আপডেট হয়েছে' });
-      // Update store
-      setUser({ ...user, name: profile.name, username: profile.username, phone: profile.phone, country: profile.country, languagePreference: profile.languagePreference, avatar: profile.avatar } as typeof user);
+      // Update store using functional update to avoid stale closure
+      setUser((prev) => prev ? { ...prev, name: profile.name, username: profile.username, phone: profile.phone, country: profile.country, languagePreference: profile.languagePreference, avatar: profile.avatar } as typeof prev : prev);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'আপডেট করতে সমস্যা হয়েছে';
       toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });

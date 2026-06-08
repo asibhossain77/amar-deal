@@ -17,7 +17,9 @@ async function fetchAPI(endpoint: string, options?: RequestInit) {
       if (!endpoint.startsWith('/settings') && !endpoint.startsWith('/admin')) {
         if (typeof window !== 'undefined') {
           const { useAppStore } = await import('./store');
-          useAppStore.getState().setUser(null);
+          const store = useAppStore.getState();
+          store.clearUserData();
+          store.setPage('login');
         }
       }
       throw new Error('সেশন মেয়াদোত্তীর্ণ হয়েছে। দয়া করে আবার লগইন করুন।');
@@ -41,16 +43,47 @@ async function fetchAPI(endpoint: string, options?: RequestInit) {
 export const api = {
   // Authentication
   logout: async () => {
-    try {
-      const { signOut } = await import('next-auth/react');
-      await signOut({ redirect: false });
-    } catch {
-      // NextAuth signOut may fail, continue anyway
-    }
     if (typeof window !== 'undefined') {
+      // Dispatch logout start event to prevent SessionChecker from re-authenticating
+      window.dispatchEvent(new CustomEvent('auth:logout-start'));
+
+      // Clear Zustand state FIRST to prevent any stale state
       const { useAppStore } = await import('./store');
-      useAppStore.getState().setUser(null);
+      useAppStore.getState().clearUserData();
       useAppStore.getState().setPage('login');
+
+      // Then clear the NextAuth session cookie
+      try {
+        const { signOut } = await import('next-auth/react');
+        await signOut({ redirect: false });
+      } catch {
+        // NextAuth signOut may fail, continue anyway
+      }
+
+      // Clear persisted store data (except siteSettings) to prevent stale data
+      try {
+        const stored = localStorage.getItem('bangla-escrow-store');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          // Keep siteSettings, clear everything else
+          const cleaned = {
+            ...parsed,
+            state: {
+              ...parsed?.state,
+              user: null,
+              isAuthenticated: false,
+              currentPage: 'login',
+              selectedUserId: null,
+            },
+          };
+          localStorage.setItem('bangla-escrow-store', JSON.stringify(cleaned));
+        }
+      } catch {
+        // If localStorage cleanup fails, just continue
+      }
+
+      // Dispatch logout complete event
+      window.dispatchEvent(new CustomEvent('auth:logout-complete'));
     }
   },
 

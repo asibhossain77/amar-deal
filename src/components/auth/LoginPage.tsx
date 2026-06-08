@@ -39,6 +39,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      // Clear any stale session data before attempting login
       const result = await signIn('credentials', {
         email,
         password,
@@ -49,6 +50,9 @@ export default function LoginPage() {
         setError('ইমেইল বা পাসওয়ার্ড ভুল হয়েছে');
         return;
       }
+
+      // Small delay to let NextAuth set the cookie
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       const res = await fetch('/api/users');
       if (res.ok) {

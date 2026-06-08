@@ -346,3 +346,40 @@ Stage Summary:
   6. Sidebar avatar/name - own profile (from previous task)
 - Fixed click event propagation issue in table rows
 - Fixed PublicProfilePage not re-fetching when navigating between profiles
+
+---
+Task ID: 13
+Agent: Main Agent
+Task: Fix account settings view-only issue and account switching bug
+
+Work Log:
+- Diagnosed privacy settings format mismatch: API returns `{ settings: { ratingVisibility, ... } }` but frontend reads `data.ratingVisibility` directly, causing all privacy settings to always show as "private" (ব্যক্তিগত)
+- Fixed `loadPrivacySettings` in AccountSettingsPage to read from `data.settings || data` instead of `data` directly
+- Fixed stale closure bug in `loadProfile` - it used `user` from closure without including it in deps array, now uses functional `setUser((prev) => ...)` pattern
+- Fixed stale closure bug in `handleProfileSave` - same issue, now uses functional `setUser((prev) => ...)`
+- Added `clearUserData` method to Zustand store that clears user, auth state, selected items, and cached data
+- Updated `setUser` in Zustand store to support functional updates: `setUser((prev) => prev ? {...prev, ...new} : new)`
+- Made `api.logout()` more robust:
+  - Dispatches `auth:logout-start` custom event to prevent SessionChecker from re-authenticating
+  - Clears Zustand state FIRST before calling signOut (prevents race conditions)
+  - Cleans up localStorage persisted data (keeps siteSettings, clears user/auth/page state)
+  - Dispatches `auth:logout-complete` event after cleanup
+- Updated AuthProvider SessionChecker:
+  - Added `isLoggingOutRef` to prevent re-authentication during logout
+  - Listens for `auth:logout-start` and `auth:logout-complete` custom events
+  - Uses `clearUserData()` instead of just `setUser(null)` on unauthenticated
+  - Only clears data when transitioning from authenticated to unauthenticated
+- Updated fetchAPI 401 handler to use `clearUserData()` + `setPage('login')` instead of just `setUser(null)`
+- Updated LoginPage to add a small delay after signIn to let NextAuth set the cookie before fetching user data
+- Added missing fields to /api/users GET endpoint: username, country, languagePreference, isVerified, buyerRating, sellerRating, totalReviews, completedDeals, successfulTransactions, trustScore, disputeRate, currentSubscriptionId
+- ESLint passes with zero errors
+
+Stage Summary:
+- Privacy settings now properly load from API (was showing "ব্যক্তিগত/private" always due to format mismatch)
+- Profile update now works without stale closure issues
+- Account switching (logout → login as different user) is now robust with:
+  - Event-based logout coordination between api.logout() and SessionChecker
+  - Full state cleanup on logout (clearUserData + localStorage)
+  - Prevention of re-authentication during logout process
+  - 401 errors now properly redirect to login page
+- /api/users now returns all necessary user fields (username, isVerified, trustScore, etc.)

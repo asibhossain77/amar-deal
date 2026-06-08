@@ -29,8 +29,9 @@ interface AppState {
   
   // Auth
   user: AppUser | null;
-  setUser: (user: AppUser | null) => void;
+  setUser: (user: AppUser | null | ((prev: AppUser | null) => AppUser | null)) => void;
   isAuthenticated: boolean;
+  clearUserData: () => void;
   
   // Selected items
   selectedTransactionId: string | null;
@@ -68,8 +69,25 @@ export const useAppStore = create<AppState>()(
       
       // Auth
       user: null,
-      setUser: (user) => set({ user, isAuthenticated: !!user }),
+      setUser: (userOrUpdater) => set((state) => {
+        const user = typeof userOrUpdater === 'function' 
+          ? userOrUpdater(state.user) 
+          : userOrUpdater;
+        return { user, isAuthenticated: !!user };
+      }),
       isAuthenticated: false,
+      clearUserData: () => set({
+        user: null,
+        isAuthenticated: false,
+        selectedTransactionId: null,
+        selectedDisputeId: null,
+        selectedPaymentTransactionId: null,
+        selectedUserId: null,
+        transactions: [],
+        notifications: [],
+        disputes: [],
+        sidebarOpen: false,
+      }),
       
       // Selected items
       selectedTransactionId: null,
