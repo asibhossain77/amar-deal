@@ -24,10 +24,10 @@ export async function GET(
       where: { id },
       include: {
         buyer: {
-          select: { id: true, name: true, email: true, avatar: true },
+          select: { id: true, name: true, email: true, avatar: true, isVerified: true, username: true },
         },
         seller: {
-          select: { id: true, name: true, email: true, avatar: true },
+          select: { id: true, name: true, email: true, avatar: true, isVerified: true, username: true },
         },
         payments: {
           include: {
@@ -225,10 +225,10 @@ export async function PUT(
       data: { status: newStatus },
       include: {
         buyer: {
-          select: { id: true, name: true, email: true, avatar: true },
+          select: { id: true, name: true, email: true, avatar: true, isVerified: true, username: true },
         },
         seller: {
-          select: { id: true, name: true, email: true, avatar: true },
+          select: { id: true, name: true, email: true, avatar: true, isVerified: true, username: true },
         },
       },
     });

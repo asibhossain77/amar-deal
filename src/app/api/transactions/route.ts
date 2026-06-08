@@ -38,10 +38,10 @@ export async function GET(request: NextRequest) {
         where: whereClause,
         include: {
           buyer: {
-            select: { id: true, name: true, email: true, avatar: true },
+            select: { id: true, name: true, email: true, avatar: true, isVerified: true, username: true },
           },
           seller: {
-            select: { id: true, name: true, email: true, avatar: true },
+            select: { id: true, name: true, email: true, avatar: true, isVerified: true, username: true },
           },
         },
         orderBy: { createdAt: "desc" },
@@ -199,10 +199,10 @@ export async function POST(request: NextRequest) {
       },
       include: {
         buyer: {
-          select: { id: true, name: true, email: true, avatar: true },
+          select: { id: true, name: true, email: true, avatar: true, isVerified: true, username: true },
         },
         seller: {
-          select: { id: true, name: true, email: true, avatar: true },
+          select: { id: true, name: true, email: true, avatar: true, isVerified: true, username: true },
         },
       },
     });

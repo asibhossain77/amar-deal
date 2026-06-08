@@ -20,6 +20,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, FileText, Inbox } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
+import UserLink, { UserLinkMini } from '@/components/shared/UserLink';
 
 type FilterTab = 'all' | 'active' | 'completed' | 'disputed' | 'cancelled';
 
@@ -58,6 +59,20 @@ function getUserRole(transaction: Transaction, userId: string): string {
   if (transaction.buyerId === userId) return 'ক্রেতা';
   if (transaction.sellerId === userId) return 'বিক্রেতা';
   return '';
+}
+
+function getCounterparty(transaction: Transaction, userId: string): { user: Transaction['buyer'] | Transaction['seller']; role: string } | null {
+  if (transaction.buyerId === userId && transaction.seller) {
+    return { user: transaction.seller, role: 'বিক্রেতা' };
+  }
+  if (transaction.sellerId === userId && transaction.buyer) {
+    return { user: transaction.buyer, role: 'ক্রেতা' };
+  }
+  // For admin or other cases, show both
+  if (transaction.buyer && transaction.seller) {
+    return { user: transaction.seller, role: 'বিক্রেতা' };
+  }
+  return null;
 }
 
 export default function TransactionsPage() {
@@ -192,7 +207,7 @@ export default function TransactionsPage() {
                           <TableRow>
                             <TableHead>শিরোনাম</TableHead>
                             <TableHead>পরিমাণ</TableHead>
-                            <TableHead>ভূমিকা</TableHead>
+                            <TableHead>প্রতিপক্ষ</TableHead>
                             <TableHead>অবস্থা</TableHead>
                             <TableHead>তারিখ</TableHead>
                           </TableRow>
@@ -211,9 +226,17 @@ export default function TransactionsPage() {
                                 {formatBDT(transaction.amount)}
                               </TableCell>
                               <TableCell>
-                                <span className="text-sm">
-                                  {user ? getUserRole(transaction, user.id) : ''}
-                                </span>
+                                {user ? (() => {
+                                  const counterparty = getCounterparty(transaction, user.id);
+                                  return counterparty ? (
+                                    <div className="flex items-center gap-1">
+                                      <UserLinkMini user={counterparty.user!} />
+                                      <span className="text-[10px] text-muted-foreground">({counterparty.role})</span>
+                                    </div>
+                                  ) : (
+                                    <span className="text-sm text-muted-foreground">{getUserRole(transaction, user.id)}</span>
+                                  );
+                                })() : ''}
                               </TableCell>
                               <TableCell>
                                 <Badge
@@ -258,9 +281,18 @@ export default function TransactionsPage() {
                           <span className="font-bold text-primary">
                             {formatBDT(transaction.amount)}
                           </span>
-                          <span className="text-xs text-muted-foreground">
-                            {user ? getUserRole(transaction, user.id) : ''}
-                          </span>
+                          {user ? (() => {
+                            const counterparty = getCounterparty(transaction, user.id);
+                            return counterparty ? (
+                              <div className="flex items-center gap-1">
+                                <UserLinkMini user={counterparty.user!} />
+                              </div>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">
+                                {getUserRole(transaction, user.id)}
+                              </span>
+                            );
+                          })() : null}
                         </div>
                         <p className="text-xs text-muted-foreground">
                           {formatDate(transaction.createdAt)}

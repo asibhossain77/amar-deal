@@ -35,6 +35,7 @@ export default function UserLink({ user, showAvatar = true, showBadge = true, si
     <button
       onClick={handleClick}
       className={`inline-flex items-center gap-1.5 hover:text-primary transition-colors group ${className}`}
+      title={`${user.name} এর প্রোফাইল দেখুন`}
     >
       {showAvatar && (
         <Avatar className={avatarSize}>
@@ -81,6 +82,7 @@ export function UserLinkMini({ user, className = '' }: { user: AppUser | { id: s
     <button
       onClick={handleClick}
       className={`inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80 hover:underline transition-colors ${className}`}
+      title={`${user.name} এর প্রোফাইল দেখুন`}
     >
       {user.name}
       {user.isVerified && (

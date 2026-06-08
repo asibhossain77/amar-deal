@@ -40,6 +40,8 @@ import {
   AlertTriangle,
   CreditCard,
   ChevronRight,
+  ExternalLink,
+  Eye,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import UserLink from '@/components/shared/UserLink';
@@ -85,6 +87,7 @@ export default function TransactionDetailPage() {
     setPage,
     selectedTransactionId,
     setSelectedPaymentTransactionId,
+    setSelectedUserId,
   } = useAppStore();
   const { toast } = useToast();
 
@@ -281,7 +284,24 @@ export default function TransactionDetailPage() {
               <p className="text-sm font-medium text-muted-foreground">ক্রেতা</p>
               <div className="flex items-center gap-2">
                 {transaction.buyer ? (
-                  <UserLink user={transaction.buyer} showAvatar size="sm" showBadge={false} />
+                  <>
+                    <UserLink user={transaction.buyer} showAvatar size="sm" showBadge={false} />
+                    {!isBuyer && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 hover:bg-primary/10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedUserId(transaction.buyer!.id);
+                          setPage('public-profile');
+                        }}
+                        title="প্রোফাইল দেখুন"
+                      >
+                        <Eye className="h-3.5 w-3.5 text-primary" />
+                      </Button>
+                    )}
+                  </>
                 ) : (
                   <div className="flex items-center gap-2">
                     <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
@@ -299,7 +319,24 @@ export default function TransactionDetailPage() {
               <p className="text-sm font-medium text-muted-foreground">বিক্রেতা</p>
               <div className="flex items-center gap-2">
                 {transaction.seller ? (
-                  <UserLink user={transaction.seller} showAvatar size="sm" showBadge={false} />
+                  <>
+                    <UserLink user={transaction.seller} showAvatar size="sm" showBadge={false} />
+                    {!isSeller && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 hover:bg-primary/10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedUserId(transaction.seller!.id);
+                          setPage('public-profile');
+                        }}
+                        title="প্রোফাইল দেখুন"
+                      >
+                        <Eye className="h-3.5 w-3.5 text-primary" />
+                      </Button>
+                    )}
+                  </>
                 ) : (
                   <div className="flex items-center gap-2">
                     <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center">

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { ArrowLeftRight, CheckCircle, Clock, AlertTriangle, Bell, ArrowRight, LayoutDashboard } from 'lucide-react';
+import { ArrowLeftRight, CheckCircle, Clock, AlertTriangle, Bell, ArrowRight, LayoutDashboard, ExternalLink } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
 import { useAppStore } from '@/lib/store';
 import { api } from '@/lib/api';
@@ -31,6 +31,7 @@ import {
   formatDate,
   timeAgo,
 } from '@/lib/helpers';
+import UserLink, { UserLinkMini } from '@/components/shared/UserLink';
 
 interface Stats {
   total: number;
@@ -214,6 +215,7 @@ export default function DashboardPage() {
                 <TableRow>
                   <TableHead>শিরোনাম</TableHead>
                   <TableHead>পরিমাণ</TableHead>
+                  <TableHead className="hidden sm:table-cell">প্রতিপক্ষ</TableHead>
                   <TableHead>অবস্থা</TableHead>
                   <TableHead className="hidden sm:table-cell">তারিখ</TableHead>
                 </TableRow>
@@ -229,6 +231,16 @@ export default function DashboardPage() {
                       {tx.title}
                     </TableCell>
                     <TableCell className="text-foreground">{formatBDT(tx.amount)}</TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      {(() => {
+                        const isBuyer = tx.buyerId === user?.id;
+                        const counterparty = isBuyer ? tx.seller : tx.buyer;
+                        if (counterparty) {
+                          return <UserLinkMini user={counterparty} />;
+                        }
+                        return <span className="text-xs text-muted-foreground">—</span>;
+                      })()}
+                    </TableCell>
                     <TableCell>
                       <Badge
                         variant="secondary"

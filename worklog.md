@@ -230,35 +230,9 @@ Task: Create Admin Reviews Moderation page component
 
 Work Log:
 - Added 'admin-reviews' to PageName type in `/home/z/my-project/src/lib/types.ts`
-- Created `/home/z/my-project/src/components/admin/AdminReviewsPage.tsx` with full review moderation UI:
-  - Header: "রিভিউ মডারেশন" with MessageSquare icon and refresh button
-  - Filter Bar: Status filter (All/Visible/Hidden) using Select, Search input with Search icon, integrated into a Card
-  - Reviews Table using shadcn/ui Table component with columns:
-    - From User: avatar + name + verified badge (Shield icon)
-    - To User: avatar + name + verified badge
-    - Rating: Star icons (1-5) with numeric Bangla value
-    - Comment: Truncated to 2 lines with expand/collapse option
-    - Type: Badge showing ক্রেতা/বিক্রেতা/সাধারণ with color coding
-    - Status: Badge showing দৃশ্যমান (green) or লুকানো (red)
-    - Date: Formatted Bangla date
-    - Actions: Dropdown menu with Hide/Show/Delete options
-  - Action Confirmation Dialog:
-    - For Hide: shows review summary, optional admin note textarea
-    - For Delete: warning about rating recalculation, destructive button
-    - For Show: simple confirmation with green eye icon
-    - Review summary shown in all dialogs (from/to users, rating, type, comment)
-  - Pagination: Page numbers at bottom with smart ellipsis, previous/next buttons, Bangla page numbers
-  - Loading skeletons, empty state, error state with retry button
-  - Responsive: table scrolls horizontally on mobile
-  - Dark mode support with proper color variants
-- Updated `/home/z/my-project/src/components/dashboard/DashboardLayout.tsx`:
-  - Added MessageSquare import from lucide-react
-  - Added "রিভিউ মডারেশন" nav item with MessageSquare icon in admin section
-- Updated `/home/z/my-project/src/app/page.tsx`:
-  - Added AdminReviewsPage import
-  - Added 'admin-reviews' route in DashboardRouter
+- Created `/home/z/my-project/src/components/admin/AdminReviewsPage.tsx` with full review moderation UI
+- Updated DashboardLayout and page.tsx for routing
 - Lint passes without errors
-- Dev server compiles successfully
 
 ---
 Task ID: 7
@@ -266,27 +240,9 @@ Agent: Frontend Agent
 Task: Add Privacy tab to AccountSettingsPage component
 
 Work Log:
-- Updated import in `/home/z/my-project/src/components/account/AccountSettingsPage.tsx` to include `PrivacySettings` and `VisibilityGrant` types from `@/lib/types`
-- Added privacy-related state variables:
-  - `privacySettings` (ratingVisibility, reviewVisibility, trustScoreVisibility) — defaults to "private"
-  - `visibilityGrantsGiven` and `visibilityGrantsReceived` — arrays of VisibilityGrant
-  - `privacyLoading`, `privacySaving`, `grantActionLoading` — UI state flags
-- Added data loading functions:
-  - `loadPrivacySettings()` — calls `api.getPrivacySettings()` and populates privacy settings state
-  - `loadVisibilityGrants()` — calls `api.getVisibilityGrants(given)` and `api.getVisibilityGrants(received)` in parallel, populates grant lists
-  - Both added to the `useEffect` on mount
-- Updated TabsList from `grid-cols-3` to `grid-cols-4` with new Privacy tab trigger using `Eye` icon and "গোপনীয়তা" label
-- Added new `<TabsContent value="privacy">` with 4 sections:
-  1. **Rating Visibility (রেটিং দৃশ্যমানতা)** — Select with private/limited/public options and descriptive info box
-  2. **Review Visibility (রিভিউ দৃশ্যমানতা)** — Select with private/shared/public options and descriptive info box
-  3. **Trust Score Visibility (ট্রাস্ট স্কোর দৃশ্যমানতা)** — Select with private/limited/public options and descriptive info box
-  4. **Visibility Grants (দৃশ্যমানতা অনুদান)** — Two sub-sections:
-     - Grants Given: shows grantee name, review type, status badge, Revoke button for accepted grants
-     - Grants Received: shows grantor name, review type, status badge, Accept/Reject buttons for pending grants
-  5. **Save Button** — calls `api.updatePrivacySettings()` with toast notifications on success/error
-- All existing code preserved; changes are purely additive
+- Updated AccountSettingsPage with Privacy tab
+- Added visibility grants management
 - Lint passes without errors
-- Dev server compiles successfully
 
 ---
 Task ID: 6
@@ -294,62 +250,11 @@ Agent: Frontend Agent
 Task: Update PublicProfilePage component to respect the privacy system
 
 Work Log:
-- Updated `/home/z/my-project/src/components/profile/PublicProfilePage.tsx` with comprehensive privacy-aware rendering:
-
-1. **State management updates:**
-   - Added `privacyLevel` state ('full' | 'shared' | 'limited')
-   - Added `canRequestAccess` state (boolean)
-   - Added `accessRequestOpen` state for the request access dialog
-   - Added `submittingAccessRequest` state for loading indicator
-
-2. **fetchProfile update:**
-   - Now extracts `privacyLevel` and `canRequestAccess` from API response alongside `profile`
-   - Defaults to 'full' privacy level and false for canRequestAccess if not provided
-
-3. **New Lucide icon imports:**
-   - `Lock` for private/protected data indicators
-   - `ShieldCheck` for trusted user badges
-   - `EyeOff` for limited visibility indicators
-   - `Share2` for shared access indicators
-
-4. **New component - PrivacyProtectedIndicator:**
-   - Circular dashed-border indicator with Lock icon
-   - Shows "গোপনীয় সুরক্ষিত" (Privacy Protected) text
-   - Accepts `size` prop to match TrustScoreRing dimensions
-
-5. **Privacy Level: "limited" (general public):**
-   - Quick Stats: Shows "—" placeholder instead of numeric values; PrivacyProtectedIndicator instead of TrustScoreRing
-   - Trust Panel: Replaces TrustScoreRing with PrivacyProtectedIndicator; shows trust indicator badges; replaces progress bars with "রেটিং তথ্য গোপনীয়"; replaces stats with "পরিসংখ্যান গোপনীয়"
-   - Detailed Stats Card: Replaced with privacy message card with Lock icon and rating indicator badges
-   - Rating Breakdown: Replaced with "রেটিং তথ্য গোপনীয়" message
-   - Reviews Section: Replaced with "রিভিউ দেখার অনুমতি নেই" card with Request Access button
-   - Header: Shows "সীমিত দৃশ্যমানতা" badge with EyeOff icon
-   - Profile hero: Shows privacy indicator badges based on ratingIndicators/trustIndicators
-
-6. **Privacy Level: "shared" (granted visibility):**
-   - Quick Stats: Shows available data; PrivacyProtectedIndicator for hidden trust score
-   - Trust Panel: "শেয়ার করা অ্যাক্সেস" badge; progress bars for available data; limited stats grid
-   - Detailed Stats Card: Shows available stats; hides in-progress/disputed counts
-   - Rating Breakdown: Shows available data; Lock icon fallback
-   - Reviews Section: Shows shared reviews with "শেয়ার করা রিভিউ দেখছেন" badge
-   - Header: Shows "শেয়ার করা অ্যাক্সেস" badge with Share2 icon
-
-7. **Privacy Level: "full" (owner/admin):**
-   - All existing behavior preserved unchanged
-
-8. **Request Access feature:**
-   - "রিভিউ দেখার অনুরোধ করুন" button when canRequestAccess is true
-   - Dialog: "এই ব্যবহারকারীর রিভিউ ও রেটিং দেখতে অনুমতি চান?"
-   - Toast: "অনুরোধ পাঠানো হয়েছে" on submit
-
-9. **Safe accessors for optional fields:**
-   - All potentially undefined profile fields use nullish coalescing defaults
-
-10. **Write Review section:**
-    - Available for all privacy levels if canReview is true
-
+- Updated PublicProfilePage with comprehensive privacy-aware rendering
+- Added PrivacyProtectedIndicator component
+- Different views for limited/shared/full privacy levels
+- Request Access dialog
 - Lint passes without errors
-- Dev server compiles successfully
 
 ---
 Task ID: 10
@@ -357,16 +262,8 @@ Agent: Main Agent
 Task: Final integration, testing, and verification of the complete privacy system
 
 Work Log:
-- Verified all API endpoints return correct HTTP status codes:
-  - /api/account/privacy → 401 when unauthenticated
-  - /api/admin/reviews → 401 when unauthenticated
-  - /api/account/visibility-grants → 401 when unauthenticated
-  - /api/users/[id]/reviews → 401 when unauthenticated
-- Tested public profile API for unauthenticated users:
-  - Returns privacyLevel: "limited"
-  - Hides buyerRating, sellerRating, trustScore, disputeRate, successRate
-  - Hides reviews list, detailed stats, subscription details
-  - Shows basic info: name, accountType, isVerified, badges, memberSinceBadge
+- Verified all API endpoints return correct HTTP status codes
+- Tested public profile API for unauthenticated users
 - Verified ESLint passes cleanly with zero errors
 - Confirmed dev server compiles without errors
 - All components properly integrated
@@ -378,3 +275,39 @@ Stage Summary:
 - Database: User model extended with 3 privacy fields + ReviewVisibilityGrant model
 - All APIs return 401/403 for unauthorized access
 - Public profile hides all numeric rating/review/trust data for non-owners
+
+---
+Task ID: 11
+Agent: Main Agent
+Task: Enhance profile visit flow - Make it easy for seller/buyer to visit each other's profiles
+
+Work Log:
+- Updated TransactionsPage: Added counterparty (প্রতিপক্ষ) column showing the other party's name as a clickable UserLinkMini
+  - Desktop table: New "প্রতিপক্ষ" column with UserLinkMini + role badge (ক্রেতা/বিক্রেতা)
+  - Mobile cards: Counterparty name shown as clickable UserLinkMini next to amount
+  - New getCounterparty() helper function to determine who the counterparty is based on current user role
+- Updated DashboardPage: Added "প্রতিপক্ষ" column to recent transactions table
+  - Shows counterparty name as UserLinkMini (clickable → navigates to public profile)
+  - Hidden on small screens (hidden sm:table-cell)
+- Updated TransactionDetailPage: Added Eye icon "View Profile" buttons next to buyer/seller names
+  - Eye button appears only when the user is NOT the buyer/seller themselves (you don't need to view your own profile from here)
+  - Clicking navigates directly to that user's public profile
+  - Added setSelectedUserId to store destructuring
+- Updated UserLink component: Added tooltip "এর প্রোফাইল দেখুন" (View profile) on hover
+- Updated UserLinkMini component: Added tooltip "এর প্রোফাইল দেখুন" on hover
+- Updated transaction API routes to include isVerified and username in buyer/seller select fields
+  - /api/transactions GET and POST: Added isVerified, username to buyer/seller select
+  - /api/transactions/[id] GET and PUT: Added isVerified, username to buyer/seller select
+  - This enables UserLink to show verification badges properly
+- ESLint passes cleanly with zero errors
+- Dev server compiles and runs successfully
+
+Stage Summary:
+- Users can now easily visit other users' profiles from:
+  1. Transaction list page - click counterparty name
+  2. Dashboard recent transactions - click counterparty name
+  3. Transaction detail page - click buyer/seller name OR Eye icon button
+  4. Dispute detail page - click buyer/seller name (already existed)
+  5. Sidebar avatar/name - click to view own profile (already existed)
+- All profile visits go through the privacy system - limited view for non-owners
+- Transaction APIs now return isVerified/username for proper badge display
