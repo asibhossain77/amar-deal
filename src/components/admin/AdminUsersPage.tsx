@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { Users, Search, UserCog } from 'lucide-react';
+import { Users, Search, UserCog, Eye } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PageHeader from '@/components/shared/PageHeader';
 import { Input } from '@/components/ui/input';
@@ -19,8 +19,11 @@ import { api } from '@/lib/api';
 import { formatDate } from '@/lib/helpers';
 import type { AppUser } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { useAppStore } from '@/lib/store';
 
 export default function AdminUsersPage() {
+  const { setSelectedUserId, setPage } = useAppStore();
   const [users, setUsers] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -150,6 +153,7 @@ export default function AdminUsersPage() {
                     <TableHead>ভূমিকা</TableHead>
                     <TableHead>অবস্থা</TableHead>
                     <TableHead>নিবন্ধন তারিখ</TableHead>
+                    <TableHead>প্রোফাইল</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -186,6 +190,20 @@ export default function AdminUsersPage() {
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {formatDate(user.createdAt)}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="gap-1 text-primary hover:bg-primary/10"
+                          onClick={() => {
+                            setSelectedUserId(user.id);
+                            setPage('public-profile');
+                          }}
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          দেখুন
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

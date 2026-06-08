@@ -277,10 +277,11 @@ export default function PublicProfilePage() {
     if (!selectedUserId) return;
     setLoading(true);
     setError(null);
+    setProfile(null);
     try {
       const data = await api.getPublicProfile(selectedUserId);
       setProfile(data.profile);
-      setPrivacyLevel(data.privacyLevel || 'full');
+      setPrivacyLevel(data.privacyLevel || 'limited');
       setCanRequestAccess(data.canRequestAccess || false);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'প্রোফাইল লোড করতে ত্রুটি হয়েছে');
@@ -292,6 +293,13 @@ export default function PublicProfilePage() {
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
+
+  // Also re-fetch when navigating to this page (selectedUserId might have changed)
+  useEffect(() => {
+    if (selectedUserId) {
+      fetchProfile();
+    }
+  }, [selectedUserId, fetchProfile]);
 
   const handleUserClick = (userId: string) => {
     setSelectedUserId(userId);

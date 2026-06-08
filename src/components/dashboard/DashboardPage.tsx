@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { ArrowLeftRight, CheckCircle, Clock, AlertTriangle, Bell, ArrowRight, LayoutDashboard, ExternalLink } from 'lucide-react';
+import { ArrowLeftRight, CheckCircle, Clock, AlertTriangle, Bell, ArrowRight, LayoutDashboard, ExternalLink, Eye } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
 import { useAppStore } from '@/lib/store';
 import { api } from '@/lib/api';
@@ -41,7 +41,7 @@ interface Stats {
 }
 
 export default function DashboardPage() {
-  const { user, setPage, setSelectedTransactionId, setTransactions, setNotifications } = useAppStore();
+  const { user, setPage, setSelectedUserId, setSelectedTransactionId, setTransactions, setNotifications } = useAppStore();
   const [transactions, setLocalTransactions] = useState<Transaction[]>([]);
   const [notifications, setLocalNotifications] = useState<AppNotification[]>([]);
   const [stats, setStats] = useState<Stats>({ total: 0, active: 0, completed: 0, disputed: 0 });
@@ -236,7 +236,24 @@ export default function DashboardPage() {
                         const isBuyer = tx.buyerId === user?.id;
                         const counterparty = isBuyer ? tx.seller : tx.buyer;
                         if (counterparty) {
-                          return <UserLinkMini user={counterparty} />;
+                          return (
+                            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                              <UserLinkMini user={counterparty} />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 hover:bg-primary/10"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedUserId(counterparty.id);
+                                  setPage('public-profile');
+                                }}
+                                title="প্রোফাইল দেখুন"
+                              >
+                                <Eye className="h-3 w-3 text-primary" />
+                              </Button>
+                            </div>
+                          );
                         }
                         return <span className="text-xs text-muted-foreground">—</span>;
                       })()}

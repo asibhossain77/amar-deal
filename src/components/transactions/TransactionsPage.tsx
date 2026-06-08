@@ -18,7 +18,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, FileText, Inbox } from 'lucide-react';
+import { Plus, FileText, Inbox, Eye } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
 import UserLink, { UserLinkMini } from '@/components/shared/UserLink';
 
@@ -76,7 +76,7 @@ function getCounterparty(transaction: Transaction, userId: string): { user: Tran
 }
 
 export default function TransactionsPage() {
-  const { user, setPage, setSelectedTransactionId, transactions, setTransactions } = useAppStore();
+  const { user, setPage, setSelectedUserId, setSelectedTransactionId, transactions, setTransactions } = useAppStore();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
 
@@ -229,9 +229,22 @@ export default function TransactionsPage() {
                                 {user ? (() => {
                                   const counterparty = getCounterparty(transaction, user.id);
                                   return counterparty ? (
-                                    <div className="flex items-center gap-1">
+                                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                                       <UserLinkMini user={counterparty.user!} />
                                       <span className="text-[10px] text-muted-foreground">({counterparty.role})</span>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6 hover:bg-primary/10 ml-0.5"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setSelectedUserId(counterparty.user!.id);
+                                          setPage('public-profile');
+                                        }}
+                                        title="প্রোফাইল দেখুন"
+                                      >
+                                        <Eye className="h-3 w-3 text-primary" />
+                                      </Button>
                                     </div>
                                   ) : (
                                     <span className="text-sm text-muted-foreground">{getUserRole(transaction, user.id)}</span>
@@ -284,8 +297,21 @@ export default function TransactionsPage() {
                           {user ? (() => {
                             const counterparty = getCounterparty(transaction, user.id);
                             return counterparty ? (
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                                 <UserLinkMini user={counterparty.user!} />
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 hover:bg-primary/10"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedUserId(counterparty.user!.id);
+                                    setPage('public-profile');
+                                  }}
+                                  title="প্রোফাইল দেখুন"
+                                >
+                                  <Eye className="h-3 w-3 text-primary" />
+                                </Button>
                               </div>
                             ) : (
                               <span className="text-xs text-muted-foreground">

@@ -311,3 +311,38 @@ Stage Summary:
   5. Sidebar avatar/name - click to view own profile (already existed)
 - All profile visits go through the privacy system - limited view for non-owners
 - Transaction APIs now return isVerified/username for proper badge display
+
+---
+Task ID: 12
+Agent: Main Agent
+Task: Fix profile visit flow - users cannot view other users' profiles
+
+Work Log:
+- Diagnosed multiple issues preventing users from viewing other users' profiles
+- Issue 1: UserLink clicks inside clickable table rows were being overridden by the table row onClick handler
+  - Fix: Added `onClick={(e) => e.stopPropagation()}` to the wrapper div around UserLinkMini in TransactionsPage and DashboardPage
+  - Added explicit Eye icon buttons next to counterparty names that call `setSelectedUserId` and `setPage('public-profile')` directly
+- Issue 2: PublicProfilePage did not re-fetch when selectedUserId changed or when navigating to the page
+  - Fix: Added an additional useEffect that watches `selectedUserId` and calls `fetchProfile()`
+  - Changed default privacyLevel from 'full' to 'limited' in fetchProfile
+  - Added `setProfile(null)` before fetching to clear stale data
+- Issue 3: No way to view user profiles from the admin panel
+  - Fix: Added "প্রোফাইল" column with Eye button to AdminUsersPage table
+  - Each user row now has a "দেখুন" (View) button that navigates to the public profile
+- Added `setSelectedUserId` to store destructuring in TransactionsPage and DashboardPage
+- Added `Eye` import from lucide-react to DashboardPage, TransactionsPage, AdminUsersPage
+- Added `useAppStore` import to AdminUsersPage
+- ESLint passes with zero errors
+- API tested: GET /api/users/[id]/public-profile returns 200 with correct data
+- Dev server compiles without errors
+
+Stage Summary:
+- Users can now view other users' profiles via:
+  1. Transaction list page - Eye button next to counterparty name (both desktop and mobile)
+  2. Dashboard recent transactions - Eye button next to counterparty name
+  3. Transaction detail page - Eye button next to buyer/seller name (from previous task)
+  4. Dispute detail page - clickable buyer/seller names (from previous task)
+  5. Admin user management page - "দেখুন" button for each user (NEW)
+  6. Sidebar avatar/name - own profile (from previous task)
+- Fixed click event propagation issue in table rows
+- Fixed PublicProfilePage not re-fetching when navigating between profiles
