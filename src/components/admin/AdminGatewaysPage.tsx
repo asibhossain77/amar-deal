@@ -15,6 +15,7 @@ import {
   Phone,
   Building2,
   CreditCard,
+  X,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PageHeader from '@/components/shared/PageHeader';
@@ -651,10 +652,10 @@ export default function AdminGatewaysPage() {
                     />
                     <button
                       type="button"
-                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white text-xs hover:bg-red-600"
+                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600"
                       onClick={() => setForm((prev) => ({ ...prev, logo: '' }))}
                     >
-                      ✕
+                      <X className="h-3 w-3" />
                     </button>
                   </div>
                 ) : null}

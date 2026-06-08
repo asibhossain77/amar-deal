@@ -60,7 +60,9 @@ import {
   Eye,
   BarChart3,
   Zap,
+  Globe,
 } from 'lucide-react';
+import { BadgeIcon, VerificationBadge } from '@/components/shared/BadgeIcon';
 import { useToast } from '@/hooks/use-toast';
 
 // ─── Star Rating Component ─────────────────────────
@@ -162,10 +164,10 @@ function BadgeCard({ badge, onClick }: { badge: EarnedBadge; onClick?: () => voi
       }`}
     >
       <div
-        className="flex items-center justify-center w-10 h-10 rounded-full text-lg shrink-0"
+        className="flex items-center justify-center w-10 h-10 rounded-full shrink-0"
         style={{ backgroundColor: badge.earned ? badge.color + '20' : '#9ca3af20', color: badge.earned ? badge.color : '#9ca3af' }}
       >
-        {badge.icon}
+        <BadgeIcon icon={badge.icon} size="md" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
@@ -207,9 +209,7 @@ function ReviewCard({ review, onUserClick }: { review: PublicReview; onUserClick
               {review.fromUser.name}
             </button>
             {review.fromUser.isVerified && (
-              <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white text-[8px]">
-                ✓
-              </span>
+              <VerificationBadge size="sm" />
             )}
             <StarRating rating={review.rating} size="sm" />
             <span className="text-xs text-muted-foreground">{toBanglaNumber(review.rating)}.০</span>
@@ -540,8 +540,8 @@ export default function PublicProfilePage() {
                 </AvatarFallback>
               </Avatar>
               {profile.isVerified && (
-                <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs ring-2 ring-background shadow">
-                  ✓
+                <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-blue-500 text-white flex items-center justify-center ring-2 ring-background shadow">
+                  <VerificationBadge size="sm" />
                 </div>
               )}
             </div>
@@ -570,8 +570,9 @@ export default function PublicProfilePage() {
                   {getMemberSinceLabel(profile.memberSinceBadge)}
                 </Badge>
                 {profile.country && (
-                  <Badge variant="outline" className="text-xs">
-                    🌍 {profile.country}
+                  <Badge variant="outline" className="text-xs gap-1">
+                    <Globe className="w-3 h-3" />
+                    {profile.country}
                   </Badge>
                 )}
               </div>
@@ -674,10 +675,10 @@ export default function PublicProfilePage() {
               <CardContent>
                 <div className="flex items-center gap-3 p-3 rounded-xl" style={{ backgroundColor: profile.currentPlan.badgeColor + '15' }}>
                   <div
-                    className="flex items-center justify-center w-12 h-12 rounded-full text-2xl"
+                    className="flex items-center justify-center w-12 h-12 rounded-full"
                     style={{ backgroundColor: profile.currentPlan.badgeColor + '25', color: profile.currentPlan.badgeColor }}
                   >
-                    {profile.currentPlan.badgeIcon}
+                    <BadgeIcon icon={profile.currentPlan.badgeIcon} size="lg" />
                   </div>
                   <div>
                     <p className="font-semibold text-foreground">{profile.currentPlan.name}</p>
@@ -718,8 +719,10 @@ export default function PublicProfilePage() {
               <Separator />
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">ভেরিফিকেশন</span>
-                <span className={`font-medium ${profile.isVerified ? 'text-green-600' : 'text-muted-foreground'}`}>
-                  {profile.isVerified ? '✓ ভেরিফাইড' : 'ভেরিফাইড নয়'}
+                <span className={`font-medium flex items-center gap-1 ${profile.isVerified ? 'text-green-600' : 'text-muted-foreground'}`}>
+                  {profile.isVerified ? (
+                    <><CheckCircle className="w-3.5 h-3.5" /> ভেরিফাইড</>
+                  ) : 'ভেরিফাইড নয়'}
                 </span>
               </div>
               <Separator />

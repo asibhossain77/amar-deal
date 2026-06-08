@@ -3,6 +3,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { BadgeIcon, PlanIcon, VerificationBadge } from '@/components/shared/BadgeIcon';
 import type { SubscriptionPlan } from '@/lib/types';
 
 interface BadgeDisplayProps {
@@ -41,8 +42,8 @@ export function getVerificationBadge(isVerified?: boolean) {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] cursor-help">
-            ✓
+          <span className="cursor-help">
+            <VerificationBadge size="sm" />
           </span>
         </TooltipTrigger>
         <TooltipContent>
@@ -59,9 +60,10 @@ export default function BadgeDisplay({ plan, size = 'md', showLabel = true, clas
     return (
       <Badge
         variant="outline"
-        className={`text-xs border-0 bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 ${className}`}
+        className={`text-xs border-0 bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 gap-1 ${className}`}
       >
-        ⭐ Basic
+        <PlanIcon slug="basic" size="sm" />
+        Basic
       </Badge>
     );
   }
@@ -73,9 +75,9 @@ export default function BadgeDisplay({ plan, size = 'md', showLabel = true, clas
   };
 
   const iconSize = {
-    sm: 'text-xs',
-    md: 'text-sm',
-    lg: 'text-base',
+    sm: 'sm' as const,
+    md: 'sm' as const,
+    lg: 'md' as const,
   };
 
   return (
@@ -84,10 +86,10 @@ export default function BadgeDisplay({ plan, size = 'md', showLabel = true, clas
         <TooltipTrigger asChild>
           <Badge
             variant="outline"
-            className={`${sizeClasses[size]} ${getPlanBadgeStyle(plan.slug, plan.badgeColor)} cursor-help font-medium ${className}`}
+            className={`${sizeClasses[size]} ${getPlanBadgeStyle(plan.slug, plan.badgeColor)} cursor-help font-medium gap-1 ${className}`}
           >
-            <span className={iconSize[size]}>{plan.badgeIcon}</span>
-            {showLabel && <span className="ml-1">{plan.name}</span>}
+            <BadgeIcon icon={plan.badgeIcon} size={iconSize[size]} />
+            {showLabel && <span>{plan.name}</span>}
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
@@ -110,7 +112,7 @@ export function BadgeDisplayMini({ plan, className = '' }: { plan?: Subscription
             className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs cursor-help ${className}`}
             style={{ backgroundColor: plan.badgeColor + '20', color: plan.badgeColor }}
           >
-            {plan.badgeIcon}
+            <BadgeIcon icon={plan.badgeIcon} size="sm" />
           </span>
         </TooltipTrigger>
         <TooltipContent>

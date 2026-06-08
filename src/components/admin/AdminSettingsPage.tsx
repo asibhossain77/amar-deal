@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { 
   Settings, Loader2, Save, RotateCcw, Globe, Image as ImageIcon, 
   Shield, Search, Upload, X, Eye, Info, Trash2, CheckCircle2,
-  Monitor, Smartphone, Palette, FileText, Copyright, Wrench
+  Monitor, Smartphone, Palette, FileText, Copyright, Wrench, AlertTriangle
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import PageHeader from '@/components/shared/PageHeader';
@@ -643,8 +643,9 @@ export default function AdminSettingsPage() {
               {settings.maintenance_mode === 'true' && (
                 <div className="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800 flex items-center gap-2">
                   <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                  <p className="text-xs text-amber-700 dark:text-amber-400">
-                    ⚠ মেইনটেন্যান্স মোড সক্রিয় আছে। সাধারণ ব্যবহারকারীরা সাইট অ্যাক্সেস করতে পারবেন না।
+                  <p className="text-xs text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                    মেইনটেন্যান্স মোড সক্রিয় আছে। সাধারণ ব্যবহারকারীরা সাইট অ্যাক্সেস করতে পারবেন না।
                   </p>
                 </div>
               )}
@@ -672,14 +673,14 @@ export default function AdminSettingsPage() {
                   <ImageIcon className="h-3.5 w-3.5 text-primary shrink-0" />
                   <div className="min-w-0">
                     <p className="text-muted-foreground">লোগো</p>
-                    <p className="font-medium">{settings.site_logo ? '✓ আপলোড করা হয়েছে' : '✗ নেই'}</p>
+                    <p className="font-medium flex items-center gap-1">{settings.site_logo ? <><CheckCircle2 className="w-3 h-3 text-green-600" /> আপলোড করা হয়েছে</> : <><X className="w-3 h-3 text-red-500" /> নেই</>}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
                   <Monitor className="h-3.5 w-3.5 text-primary shrink-0" />
                   <div className="min-w-0">
                     <p className="text-muted-foreground">ফেভিকন</p>
-                    <p className="font-medium">{settings.site_favicon ? '✓ আপলোড করা হয়েছে' : '✗ নেই'}</p>
+                    <p className="font-medium flex items-center gap-1">{settings.site_favicon ? <><CheckCircle2 className="w-3 h-3 text-green-600" /> আপলোড করা হয়েছে</> : <><X className="w-3 h-3 text-red-500" /> নেই</>}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">

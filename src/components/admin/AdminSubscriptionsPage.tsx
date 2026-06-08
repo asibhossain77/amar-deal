@@ -67,6 +67,7 @@ import { api } from '@/lib/api';
 import { formatBDT, formatDate, toBanglaNumber } from '@/lib/helpers';
 import { useToast } from '@/hooks/use-toast';
 import BadgeDisplay from '@/components/shared/BadgeDisplay';
+import { BadgeIcon } from '@/components/shared/BadgeIcon';
 import type { SubscriptionPlan, UserSubscription } from '@/lib/types';
 
 // ─── Plan Form Data ──────────────────────────────────────────
@@ -100,7 +101,7 @@ const EMPTY_PLAN_FORM: PlanFormData = {
   name: '',
   slug: '',
   description: '',
-  badgeIcon: '⭐',
+  badgeIcon: 'star',
   badgeColor: '#6B7280',
   monthlyPrice: 0,
   yearlyPrice: 0,
@@ -354,7 +355,7 @@ export default function AdminSubscriptionsPage() {
       name: plan.name,
       slug: plan.slug,
       description: plan.description || '',
-      badgeIcon: plan.badgeIcon || '⭐',
+      badgeIcon: plan.badgeIcon || 'star',
       badgeColor: plan.badgeColor || '#6B7280',
       monthlyPrice: plan.monthlyPrice,
       yearlyPrice: plan.yearlyPrice,
@@ -599,13 +600,13 @@ export default function AdminSubscriptionsPage() {
                         <TableRow key={plan.id} className={!plan.isActive ? 'opacity-60' : ''}>
                           <TableCell>
                             <div
-                              className="flex h-9 w-9 items-center justify-center rounded-lg text-lg"
+                              className="flex h-9 w-9 items-center justify-center rounded-lg"
                               style={{
                                 backgroundColor: plan.badgeColor + '20',
                                 color: plan.badgeColor,
                               }}
                             >
-                              {plan.badgeIcon || '⭐'}
+                              <BadgeIcon icon={plan.badgeIcon || 'star'} size="md" />
                             </div>
                           </TableCell>
                           <TableCell>
@@ -938,7 +939,7 @@ export default function AdminSubscriptionsPage() {
                     <Label htmlFor="plan-badge-icon">ব্যাজ আইকন</Label>
                     <Input
                       id="plan-badge-icon"
-                      placeholder="⭐"
+                      placeholder="star, diamond, crown..."
                       value={planForm.badgeIcon}
                       onChange={(e) => setPlanForm((prev) => ({ ...prev, badgeIcon: e.target.value }))}
                     />
@@ -985,7 +986,7 @@ export default function AdminSubscriptionsPage() {
                       border: `1px solid ${planForm.badgeColor}40`,
                     }}
                   >
-                    <span>{planForm.badgeIcon || '⭐'}</span>
+                    <BadgeIcon icon={planForm.badgeIcon || 'star'} size="md" />
                     <span>{planForm.name || 'প্ল্যানের নাম'}</span>
                   </div>
                 </div>

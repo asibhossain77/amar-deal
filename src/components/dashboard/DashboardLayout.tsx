@@ -40,6 +40,7 @@ import { getInitials } from '@/lib/helpers';
 import { signOut } from 'next-auth/react';
 import { useTheme } from 'next-themes';
 import { BadgeDisplayMini } from '@/components/shared/BadgeDisplay';
+import { VerificationBadge } from '@/components/shared/BadgeIcon';
 import UserLink from '@/components/shared/UserLink';
 
 interface NavItem {
@@ -221,7 +222,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   {user.name}
                 </button>
                 {user.isVerified && (
-                  <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-blue-500 text-white text-[8px] shrink-0">✓</span>
+                  <VerificationBadge size="sm" />
                 )}
               </div>
               <div className="flex items-center gap-1.5">

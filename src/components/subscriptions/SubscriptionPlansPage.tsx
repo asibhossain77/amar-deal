@@ -553,8 +553,9 @@ export default function SubscriptionPlansPage() {
                     {/* Recommended ribbon */}
                     {isRecommended && (
                       <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 z-20">
-                        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold px-4 py-1.5 rounded-b-lg shadow-lg">
-                          🌟 সুপারিশকৃত
+                        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold px-4 py-1.5 rounded-b-lg shadow-lg flex items-center gap-1.5">
+                          <Sparkles className="w-3 h-3" />
+                          সুপারিশকৃত
                         </div>
                       </div>
                     )}
@@ -562,8 +563,9 @@ export default function SubscriptionPlansPage() {
                     {/* Popular badge */}
                     {isPopular && (
                       <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 z-20">
-                        <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs font-bold px-4 py-1.5 rounded-b-lg shadow-lg">
-                          🔥 সবচেয়ে জনপ্রিয়
+                        <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs font-bold px-4 py-1.5 rounded-b-lg shadow-lg flex items-center gap-1.5">
+                          <TrendingUp className="w-3 h-3" />
+                          সবচেয়ে জনপ্রিয়
                         </div>
                       </div>
                     )}
@@ -1072,8 +1074,9 @@ export default function SubscriptionPlansPage() {
                     </Label>
                   </RadioGroup>
                   {dialogBilling === 'yearly' && getSavings(selectedPlan) > 0 && (
-                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium text-center">
-                      🎉 {formatBDT(getSavings(selectedPlan))} সাশ্রয়!
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium text-center flex items-center justify-center gap-1">
+                      <Zap className="w-3 h-3" />
+                      {formatBDT(getSavings(selectedPlan))} সাশ্রয়!
                     </p>
                   )}
                 </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Palette, RotateCcw, Save, Loader2, Eye, Info, Check, Smartphone, Monitor } from 'lucide-react';
+import { Palette, RotateCcw, Save, Loader2, Eye, Info, Check, Smartphone, Monitor, AlertTriangle, CreditCard } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import PageHeader from '@/components/shared/PageHeader';
 import { Input } from '@/components/ui/input';
@@ -428,9 +428,10 @@ export default function AdminGatewayThemePage() {
                   </div>
 
                   {hasChanges && (
-                    <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
+                    <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800 flex items-center gap-2">
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
                       <p className="text-xs text-amber-700 dark:text-amber-400">
-                        ⚠ আপনি পরিবর্তন করেছেন যা এখনো সংরক্ষণ করেননি।
+                        আপনি পরিবর্তন করেছেন যা এখনো সংরক্ষণ করেননি।
                       </p>
                     </div>
                   )}
@@ -524,7 +525,8 @@ export default function AdminGatewayThemePage() {
 
                         {/* Preview: Submit Button */}
                         <button className="gateway-submit-btn w-full text-xs py-2 rounded-lg flex items-center justify-center gap-1.5">
-                          💳 পেমেন্ট জমা দিন
+                          <CreditCard className="w-3.5 h-3.5" />
+                          পেমেন্ট জমা দিন
                         </button>
 
                         {/* Preview: Badges */}

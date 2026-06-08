@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Seeding database...");
+  console.log('[START] Seeding database...');
 
   // Create admin user
   const adminPassword = await bcrypt.hash("admin123", 12);
@@ -449,8 +449,8 @@ async function main() {
     });
   }
 
-  console.log("✅ Seed completed successfully!");
-  console.log("\n📋 Demo Accounts:");
+  console.log('[OK] Seed completed successfully!');
+  console.log('\n[INFO] Demo Accounts:');
   console.log("  Admin:  admin@banglaescrow.com / admin123");
   console.log("  Buyer:  buyer@example.com / buyer123");
   console.log("  Seller: seller@example.com / seller123");
@@ -459,7 +459,7 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error("❌ Seed failed:", e);
+    console.error('[ERROR] Seed failed:', e);
     process.exit(1);
   })
   .finally(async () => {

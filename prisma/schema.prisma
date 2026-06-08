@@ -204,7 +204,7 @@ model SubscriptionPlan {
   name            String                        // "Basic", "Premium", "Verified Pro", "Business", "Trusted Elite"
   slug            String   @unique              // "basic", "premium", "verified-pro", "business", "trusted-elite"
   description     String                        // Plan description
-  badgeIcon       String                        // Emoji or icon identifier for the badge
+  badgeIcon       String                        // Icon identifier for the badge (e.g. 'star', 'diamond', 'crown')
   badgeColor      String   @default("#6BBF59")  // Badge accent color
   monthlyPrice    Float    @default(0)          // 0 = free
   yearlyPrice     Float    @default(0)          // 0 = free

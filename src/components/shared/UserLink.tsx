@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getInitials } from '@/lib/helpers';
 import { BadgeDisplayMini } from '@/components/shared/BadgeDisplay';
+import { VerificationBadge } from '@/components/shared/BadgeIcon';
 
 interface UserLinkProps {
   user: AppUser | { id: string; name: string; username?: string; avatar?: string; isVerified?: boolean; currentPlan?: unknown };
@@ -28,6 +29,7 @@ export default function UserLink({ user, showAvatar = true, showBadge = true, si
 
   const avatarSize = { sm: 'h-6 w-6', md: 'h-8 w-8', lg: 'h-10 w-10' }[size];
   const textSize = { sm: 'text-xs', md: 'text-sm', lg: 'text-base' }[size];
+  const verifySize = { sm: 'sm' as const, md: 'md' as const, lg: 'lg' as const }[size];
 
   return (
     <button
@@ -49,8 +51,8 @@ export default function UserLink({ user, showAvatar = true, showBadge = true, si
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white text-[8px] shrink-0">
-                ✓
+              <span>
+                <VerificationBadge size={verifySize} />
               </span>
             </TooltipTrigger>
             <TooltipContent>ভেরিফাইড অ্যাকাউন্ট</TooltipContent>
@@ -82,9 +84,7 @@ export function UserLinkMini({ user, className = '' }: { user: AppUser | { id: s
     >
       {user.name}
       {user.isVerified && (
-        <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-blue-500 text-white text-[7px] shrink-0">
-          ✓
-        </span>
+        <VerificationBadge size="sm" />
       )}
     </button>
   );

@@ -8,7 +8,7 @@ async function main() {
       name: 'Basic',
       slug: 'basic',
       description: 'স্ট্যান্ডার্ড ফিচার সহ বেসিক অ্যাকাউন্ট',
-      badgeIcon: '⭐',
+      badgeIcon: 'star',
       badgeColor: '#9CA3AF',
       monthlyPrice: 0,
       yearlyPrice: 0,
@@ -33,7 +33,7 @@ async function main() {
       name: 'Premium',
       slug: 'premium',
       description: 'প্রিমিয়াম ব্যাজ এবং অতিরিক্ত সুবিধা সহ উন্নত অ্যাকাউন্ট',
-      badgeIcon: '💎',
+      badgeIcon: 'diamond',
       badgeColor: '#8B5CF6',
       monthlyPrice: 299,
       yearlyPrice: 2999,
@@ -58,7 +58,7 @@ async function main() {
       name: 'Verified Pro',
       slug: 'verified-pro',
       description: 'ভেরিফাইড প্রো ব্যাজ, ফিচার্ড প্রোফাইল এবং উচ্চতর লেনদেন সীমা',
-      badgeIcon: '✅',
+      badgeIcon: 'shield-check',
       badgeColor: '#10B981',
       monthlyPrice: 599,
       yearlyPrice: 5999,
@@ -83,7 +83,7 @@ async function main() {
       name: 'Business',
       slug: 'business',
       description: 'বিজনেস ব্যাজ, কোম্পানি প্রোফাইল, বিজনেস ভেরিফিকেশন এবং অ্যাডভান্সড অ্যানালিটিক্স',
-      badgeIcon: '🏢',
+      badgeIcon: 'building',
       badgeColor: '#3B82F6',
       monthlyPrice: 999,
       yearlyPrice: 9999,
@@ -108,7 +108,7 @@ async function main() {
       name: 'Trusted Elite',
       slug: 'trusted-elite',
       description: 'এলিট ব্যাজ, সর্বোচ্চ দৃশ্যমানতা, VIP সাপোর্ট এবং এক্সক্লুসিভ ফিচার',
-      badgeIcon: '👑',
+      badgeIcon: 'crown',
       badgeColor: '#F59E0B',
       monthlyPrice: 1999,
       yearlyPrice: 19999,
@@ -139,7 +139,7 @@ async function main() {
     });
   }
 
-  console.log('✅ Subscription plans seeded');
+  console.log('[OK] Subscription plans seeded');
 
   // Seed admin user if not exists
   const existingAdmin = await db.user.findUnique({ where: { email: 'admin@banglaescrow.com' } });
@@ -154,7 +154,7 @@ async function main() {
         isActive: true,
       },
     });
-    console.log('✅ Admin user seeded');
+    console.log('[OK] Admin user seeded');
   }
 
   // Seed buyer user if not exists
@@ -177,7 +177,7 @@ async function main() {
         disputeRate: 0.05,
       },
     });
-    console.log('✅ Buyer user seeded');
+    console.log('[OK] Buyer user seeded');
   }
 
   // Seed seller user if not exists
@@ -200,10 +200,10 @@ async function main() {
         disputeRate: 0.03,
       },
     });
-    console.log('✅ Seller user seeded');
+    console.log('[OK] Seller user seeded');
   }
 
-  console.log('🎉 All seed data complete');
+  console.log('[DONE] All seed data complete');
 }
 
 main()

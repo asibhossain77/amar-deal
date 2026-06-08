@@ -64,6 +64,7 @@ import { api } from '@/lib/api';
 import { toBanglaNumber, getInitials } from '@/lib/helpers';
 import { useToast } from '@/hooks/use-toast';
 import BadgeDisplay, { getPlanBadgeStyle } from '@/components/shared/BadgeDisplay';
+import { BadgeIcon } from '@/components/shared/BadgeIcon';
 import type { SubscriptionPlan, AppUser } from '@/lib/types';
 
 // ─── Badge Overview Card ─────────────────────────────────────
@@ -79,14 +80,14 @@ function BadgePlanCard({ plan }: { plan: SubscriptionPlan }) {
         <div className="flex items-start gap-4">
           {/* Badge Icon */}
           <div
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-2xl shadow-sm"
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl shadow-sm"
             style={{
               backgroundColor: plan.badgeColor + '20',
               color: plan.badgeColor,
               border: `1px solid ${plan.badgeColor}30`,
             }}
           >
-            {plan.badgeIcon || '⭐'}
+            <BadgeIcon icon={plan.badgeIcon || 'star'} size="lg" />
           </div>
 
           {/* Info */}
@@ -201,7 +202,7 @@ function UserRow({
                 {assignablePlans.map((plan) => (
                   <SelectItem key={plan.id} value={plan.id}>
                     <span className="flex items-center gap-1.5">
-                      <span>{plan.badgeIcon}</span>
+                      <BadgeIcon icon={plan.badgeIcon} size="sm" />
                       <span>{plan.name}</span>
                     </span>
                   </SelectItem>
@@ -342,7 +343,7 @@ function BulkAssignRow({
                 {assignablePlans.map((plan) => (
                   <SelectItem key={plan.id} value={plan.id}>
                     <span className="flex items-center gap-1.5">
-                      <span>{plan.badgeIcon}</span>
+                      <BadgeIcon icon={plan.badgeIcon} size="sm" />
                       <span>{plan.name}</span>
                     </span>
                   </SelectItem>
@@ -730,13 +731,13 @@ export default function AdminBadgesPage() {
                       <TableRow key={plan.id}>
                         <TableCell>
                           <div
-                            className="flex h-9 w-9 items-center justify-center rounded-lg text-lg"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg"
                             style={{
                               backgroundColor: plan.badgeColor + '20',
                               color: plan.badgeColor,
                             }}
                           >
-                            {plan.badgeIcon || '⭐'}
+                            <BadgeIcon icon={plan.badgeIcon || 'star'} size="md" />
                           </div>
                         </TableCell>
                         <TableCell>
