@@ -32,6 +32,10 @@ model User {
   disputeRate        Float    @default(0)
   isVerified         Boolean  @default(false)
 
+  // Account type & activity
+  accountType         String   @default("both") // "buyer", "seller", "both"
+  lastActive          DateTime @default(now())
+
   // Subscription
   currentSubscriptionId String?
 
@@ -45,6 +49,10 @@ model User {
   adminLogs            AdminLog[]
   gatewayTransactions  GatewayTransaction[]
   subscriptions        UserSubscription[]
+  receivedReviews      Review[] @relation("ReviewRecipient")
+  givenReviews         Review[] @relation("ReviewAuthor")
+  reports              Report[] @relation("ReportedUser")
+  reportsFiled         Report[] @relation("ReportAuthor")
 }
 
 model Transaction {
@@ -65,6 +73,7 @@ model Transaction {
   disputes        Dispute[]
   notifications   Notification[]
   gatewayTransactions GatewayTransaction[]
+  reviews             Review[]
 }
 
 model Payment {
@@ -242,4 +251,38 @@ model UserSubscription {
 
   user            User              @relation(fields: [userId], references: [id])
   plan            SubscriptionPlan  @relation(fields: [planId], references: [id])
+}
+
+// ─── Review & Report System ─────────────────────────
+
+model Review {
+  id              String   @id @default(cuid())
+  fromUserId      String                        // Who wrote the review
+  toUserId        String                        // Who received the review
+  transactionId   String?                       // Optional: linked transaction
+  rating          Int                            // 1-5 stars
+  comment         String?                        // Review text
+  reviewType      String   @default("general")  // "buyer", "seller", "general"
+  isPublic        Boolean  @default(true)        // Show on public profile
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  fromUser        User     @relation("ReviewAuthor", fields: [fromUserId], references: [id])
+  toUser          User     @relation("ReviewRecipient", fields: [toUserId], references: [id])
+  transaction     Transaction? @relation(fields: [transactionId], references: [id])
+}
+
+model Report {
+  id              String   @id @default(cuid())
+  reporterId      String                        // Who filed the report
+  reportedUserId  String                        // Who is being reported
+  reason          String                        // Report reason
+  description     String?                       // Additional details
+  status          String   @default("pending")  // pending, reviewed, dismissed, actioned
+  adminNote       String?                       // Admin response
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  reporter        User     @relation("ReportAuthor", fields: [reporterId], references: [id])
+  reportedUser    User     @relation("ReportedUser", fields: [reportedUserId], references: [id])
 }

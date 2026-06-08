@@ -39,6 +39,8 @@ interface AppState {
   setSelectedDisputeId: (id: string | null) => void;
   selectedPaymentTransactionId: string | null;
   setSelectedPaymentTransactionId: (id: string | null) => void;
+  selectedUserId: string | null;
+  setSelectedUserId: (id: string | null) => void;
   
   // Data cache
   transactions: Transaction[];
@@ -102,6 +104,7 @@ export const useAppStore = create<AppState>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
         currentPage: state.currentPage,
+        selectedUserId: state.selectedUserId,
         siteSettings: state.siteSettings,
       }),
     }

@@ -101,6 +101,14 @@ export const api = {
     fetchAPI('/account/security', { method: 'PUT', body: JSON.stringify({ action: 'changePhone', newPhone }) }),
   getReputation: () => fetchAPI('/account/reputation'),
   
+  // Public Profile
+  getPublicProfile: (userId: string) => fetchAPI(`/users/${userId}/public-profile`),
+  submitReview: (userId: string, data: { rating: number; comment?: string; reviewType?: string; transactionId?: string }) =>
+    fetchAPI(`/users/${userId}/reviews`, { method: 'POST', body: JSON.stringify(data) }),
+  getUserReviews: (userId: string) => fetchAPI(`/users/${userId}/reviews`),
+  reportUser: (userId: string, data: { reason: string; description?: string }) =>
+    fetchAPI(`/users/${userId}/report`, { method: 'POST', body: JSON.stringify(data) }),
+  
   // Subscriptions (Public)
   getSubscriptionPlans: () => fetchAPI('/subscriptions/plans'),
   getSubscriptionStatus: () => fetchAPI('/subscriptions/manage'),

@@ -42,6 +42,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import UserLink from '@/components/shared/UserLink';
 
 const statusTimeline: TransactionStatus[] = [
   'pending_payment',
@@ -279,13 +280,16 @@ export default function TransactionDetailPage() {
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">ক্রেতা</p>
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">{transaction.buyer?.name || 'ক্রেতা'}</p>
-                  <p className="text-xs text-muted-foreground">{transaction.buyer?.email}</p>
-                </div>
+                {transaction.buyer ? (
+                  <UserLink user={transaction.buyer} showAvatar size="sm" showBadge={false} />
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                      <User className="h-3 w-3 text-primary" />
+                    </div>
+                    <span className="text-sm font-medium">ক্রেতা</span>
+                  </div>
+                )}
                 {isBuyer && (
                   <Badge variant="secondary" className="text-[10px] ml-1">আপনি</Badge>
                 )}
@@ -294,13 +298,16 @@ export default function TransactionDetailPage() {
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">বিক্রেতা</p>
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                  <User className="h-4 w-4 text-green-700" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">{transaction.seller?.name || 'বিক্রেতা'}</p>
-                  <p className="text-xs text-muted-foreground">{transaction.seller?.email}</p>
-                </div>
+                {transaction.seller ? (
+                  <UserLink user={transaction.seller} showAvatar size="sm" showBadge={false} />
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center">
+                      <User className="h-3 w-3 text-green-700" />
+                    </div>
+                    <span className="text-sm font-medium">বিক্রেতা</span>
+                  </div>
+                )}
                 {isSeller && (
                   <Badge variant="secondary" className="text-[10px] ml-1">আপনি</Badge>
                 )}

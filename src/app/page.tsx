@@ -32,6 +32,7 @@ import AdminSubscriptionsPage from '@/components/admin/AdminSubscriptionsPage';
 import AdminBadgesPage from '@/components/admin/AdminBadgesPage';
 import AccountSettingsPage from '@/components/account/AccountSettingsPage';
 import SubscriptionPlansPage from '@/components/subscriptions/SubscriptionPlansPage';
+import PublicProfilePage from '@/components/profile/PublicProfilePage';
 import AboutPage from '@/components/pages/AboutPage';
 import HowItWorksPage from '@/components/pages/HowItWorksPage';
 import { Loader2, AlertTriangle } from 'lucide-react';
@@ -187,6 +188,8 @@ function DashboardRouter() {
       return <ErrorBoundary><ProfilePage /></ErrorBoundary>;
     case 'account-settings':
       return <ErrorBoundary><AccountSettingsPage /></ErrorBoundary>;
+    case 'public-profile':
+      return <ErrorBoundary><PublicProfilePage /></ErrorBoundary>;
     case 'subscription-plans':
       return <ErrorBoundary><SubscriptionPlansPage /></ErrorBoundary>;
     case 'notifications':

@@ -48,7 +48,8 @@ export type PageName =
   | 'admin-gateway-payments'
   | 'admin-gateway-theme'
   | 'admin-subscriptions'
-  | 'admin-badges';
+  | 'admin-badges'
+  | 'public-profile';
 
 export interface AppUser {
   id: string;
@@ -201,6 +202,96 @@ export interface GatewayTransaction {
   gateway?: PaymentGateway;
   user?: AppUser;
   transaction?: Transaction;
+}
+
+// ─── Public Profile Types ─────────────────────────
+
+export interface EarnedBadge {
+  key: string;
+  label: string;
+  description: string;
+  icon: string;
+  earned: boolean;
+  color: string;
+}
+
+export interface PublicReview {
+  id: string;
+  rating: number;
+  comment?: string;
+  reviewType: string;
+  createdAt: string;
+  fromUser: {
+    id: string;
+    name: string;
+    username?: string;
+    avatar?: string;
+    isVerified: boolean;
+  };
+}
+
+export interface PublicProfile {
+  id: string;
+  name: string;
+  username?: string;
+  avatar?: string;
+  accountType: string;
+  isVerified: boolean;
+  country?: string;
+  createdAt: string;
+  lastActive: string;
+  buyerRating: number;
+  sellerRating: number;
+  overallRating: number;
+  totalReviews: number;
+  positiveReviewPercentage: number;
+  completedDeals: number;
+  successfulTransactions: number;
+  trustScore: number;
+  disputeRate: number;
+  successRate: number;
+  currentPlan: SubscriptionPlan | null;
+  currentSubscription: { id: string; status: string; startDate: string; endDate?: string } | null;
+  earnedBadges: EarnedBadge[];
+  stats: {
+    totalTransactions: number;
+    completedTransactions: number;
+    inProgressTransactions: number;
+    disputedTransactions: number;
+    buyerTransactionCount: number;
+    sellerTransactionCount: number;
+  };
+  memberSinceBadge: string;
+  accountAgeDays: number;
+  reviews: PublicReview[];
+  canReview: boolean;
+  hasReviewed: boolean;
+}
+
+export interface Review {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  transactionId?: string;
+  rating: number;
+  comment?: string;
+  reviewType: string;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+  fromUser?: AppUser;
+}
+
+export interface Report {
+  id: string;
+  reporterId: string;
+  reportedUserId: string;
+  reason: string;
+  description?: string;
+  status: string;
+  adminNote?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ─── Subscription & Badge Types ─────────────────────────

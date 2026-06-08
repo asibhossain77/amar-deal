@@ -8,6 +8,7 @@ import { api } from '@/lib/api';
 import type { Dispute, DisputeMessage } from '@/lib/types';
 import { disputeStatusLabels, formatBDT, formatDate, timeAgo, getInitials } from '@/lib/helpers';
 import { useToast } from '@/hooks/use-toast';
+import UserLink from '@/components/shared/UserLink';
 import {
   Card,
   CardContent,
@@ -201,16 +202,20 @@ export default function DisputeDetailPage() {
             <Separator />
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">ক্রেতা</span>
-              <span className="text-sm font-medium text-foreground">
-                {dispute.buyer?.name || 'ক্রেতা'}
-              </span>
+              {dispute.buyer ? (
+                <UserLink user={dispute.buyer} showAvatar={false} size="sm" showBadge={false} />
+              ) : (
+                <span className="text-sm font-medium text-foreground">ক্রেতা</span>
+              )}
             </div>
             <Separator />
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">বিক্রেতা</span>
-              <span className="text-sm font-medium text-foreground">
-                {dispute.seller?.name || 'বিক্রেতা'}
-              </span>
+              {dispute.seller ? (
+                <UserLink user={dispute.seller} showAvatar={false} size="sm" showBadge={false} />
+              ) : (
+                <span className="text-sm font-medium text-foreground">বিক্রেতা</span>
+              )}
             </div>
             <Separator />
             <div className="flex justify-between items-start">
@@ -421,26 +426,34 @@ export default function DisputeDetailPage() {
         <CardContent className="p-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-xs font-bold text-primary">
-                  {getInitials(dispute.buyer?.name || 'ক্রেতা')}
-                </span>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">{dispute.buyer?.name || 'ক্রেতা'}</p>
-                <p className="text-xs text-muted-foreground">ক্রেতা</p>
-              </div>
+              {dispute.buyer ? (
+                <UserLink user={dispute.buyer} showAvatar size="sm" showBadge={false} />
+              ) : (
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-xs font-bold text-primary">{getInitials('ক্রেতা')}</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">ক্রেতা</p>
+                    <p className="text-xs text-muted-foreground">ক্রেতা</p>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                <span className="text-xs font-bold text-foreground">
-                  {getInitials(dispute.seller?.name || 'বিক্রেতা')}
-                </span>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">{dispute.seller?.name || 'বিক্রেতা'}</p>
-                <p className="text-xs text-muted-foreground">বিক্রেতা</p>
-              </div>
+              {dispute.seller ? (
+                <UserLink user={dispute.seller} showAvatar size="sm" showBadge={false} />
+              ) : (
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                    <span className="text-xs font-bold text-foreground">{getInitials('বিক্রেতা')}</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">বিক্রেতা</p>
+                    <p className="text-xs text-muted-foreground">বিক্রেতা</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>

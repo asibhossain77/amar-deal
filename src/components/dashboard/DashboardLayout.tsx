@@ -40,6 +40,7 @@ import { getInitials } from '@/lib/helpers';
 import { signOut } from 'next-auth/react';
 import { useTheme } from 'next-themes';
 import { BadgeDisplayMini } from '@/components/shared/BadgeDisplay';
+import UserLink from '@/components/shared/UserLink';
 
 interface NavItem {
   label: string;
@@ -91,7 +92,7 @@ function ThemeToggle() {
 }
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
-  const { currentPage, setPage, user, setSidebarOpen, siteSettings } = useAppStore();
+  const { currentPage, setPage, user, setSidebarOpen, siteSettings, setSelectedUserId } = useAppStore();
   const isAdmin = user?.role === 'admin';
   const siteName = getSiteName(siteSettings.site_name);
   const siteTagline = getSiteTagline(siteSettings.site_tagline);
@@ -201,14 +202,24 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <div className="border-t border-border px-4 py-4">
         {user && (
           <div className="flex items-center gap-3 mb-3">
-            <Avatar className="h-9 w-9">
-              <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
-                {getInitials(user.name)}
-              </AvatarFallback>
-            </Avatar>
+            <button
+              onClick={() => { setSelectedUserId(user.id); setPage('public-profile'); }}
+              className="shrink-0 hover:opacity-80 transition-opacity"
+            >
+              <Avatar className="h-9 w-9">
+                <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+                  {getInitials(user.name)}
+                </AvatarFallback>
+              </Avatar>
+            </button>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
-                <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
+                <button
+                  onClick={() => { setSelectedUserId(user.id); setPage('public-profile'); }}
+                  className="text-sm font-medium text-foreground truncate hover:text-primary transition-colors text-left"
+                >
+                  {user.name}
+                </button>
                 {user.isVerified && (
                   <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-blue-500 text-white text-[8px] shrink-0">✓</span>
                 )}
