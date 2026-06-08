@@ -61,6 +61,7 @@ const adminNavItems: NavItem[] = [
   { label: 'গেটওয়ে থিম সেটিংস', icon: Palette, page: 'admin-gateway-theme', adminOnly: true },
   { label: 'বিরোধ ব্যবস্থাপনা', icon: Scale, page: 'admin-disputes', adminOnly: true },
   { label: 'কার্যক্রম লগ', icon: FileText, page: 'admin-logs', adminOnly: true },
+  { label: 'ওয়েবসাইট সেটিংস', icon: Settings, page: 'admin-settings', adminOnly: true },
 ];
 
 function ThemeToggle() {
@@ -80,8 +81,9 @@ function ThemeToggle() {
 }
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
-  const { currentPage, setPage, user, setSidebarOpen } = useAppStore();
+  const { currentPage, setPage, user, setSidebarOpen, siteSettings } = useAppStore();
   const isAdmin = user?.role === 'admin';
+  const siteName = siteSettings.site_name || 'বাংলা এসক্রো';
 
   const handleNav = (page: PageName) => {
     setPage(page);
@@ -93,11 +95,15 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     <div className="flex h-full flex-col bg-card transition-theme">
       {/* Header */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-border">
-        <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary text-primary-foreground shadow-sm">
-          <Shield className="w-5 h-5" />
-        </div>
+        {siteSettings.site_logo ? (
+          <img src={siteSettings.site_logo} alt={siteName} className="h-9 w-9 object-contain rounded-xl" />
+        ) : (
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary text-primary-foreground shadow-sm">
+            <Shield className="w-5 h-5" />
+          </div>
+        )}
         <div>
-          <h1 className="text-base font-bold text-foreground">বাংলা এসক্রো</h1>
+          <h1 className="text-base font-bold text-foreground">{siteName}</h1>
           <p className="text-[11px] text-muted-foreground">নিরাপদ লেনদেনের প্ল্যাটফর্ম</p>
         </div>
       </div>
@@ -198,7 +204,8 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { sidebarOpen, setSidebarOpen } = useAppStore();
+  const { sidebarOpen, setSidebarOpen, siteSettings } = useAppStore();
+  const siteName = siteSettings.site_name || 'বাংলা এসক্রো';
 
   return (
     <div className="flex h-screen bg-background transition-theme">
@@ -222,10 +229,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Mobile top bar */}
         <header className="md:hidden flex items-center justify-between px-4 py-3 bg-card border-b border-border shadow-sm">
           <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
-              <Shield className="w-4 h-4" />
-            </div>
-            <span className="font-bold text-foreground text-sm">বাংলা এসক্রো</span>
+            {siteSettings.site_logo ? (
+              <img src={siteSettings.site_logo} alt={siteName} className="h-8 w-8 object-contain rounded-lg" />
+            ) : (
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
+                <Shield className="w-4 h-4" />
+              </div>
+            )}
+            <span className="font-bold text-foreground text-sm">{siteName}</span>
           </div>
           <div className="flex items-center gap-1">
             <ThemeToggle />

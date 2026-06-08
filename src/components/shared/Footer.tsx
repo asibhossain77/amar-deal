@@ -4,7 +4,12 @@ import { Shield } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 
 export default function Footer() {
-  const { setPage } = useAppStore();
+  const { setPage, siteSettings } = useAppStore();
+
+  const siteName = siteSettings.site_name || 'বাংলা এসক্রো';
+  const siteLogo = siteSettings.site_logo;
+  const siteTagline = siteSettings.site_tagline || 'বাংলাদেশের সবচেয়ে বিশ্বস্ত এসক্রো পরিষেবা। ক্রেতা ও বিক্রেতা উভয়ের জন্য নিরাপদ লেনদেন নিশ্চিত করুন।';
+  const siteCopyright = siteSettings.site_copyright || '© ২০২৪ বাংলা এসক্রো। সর্বস্বত্ব সংরক্ষিত।';
 
   return (
     <footer className="bg-muted border-t border-border mt-auto transition-theme">
@@ -13,16 +18,19 @@ export default function Footer() {
           {/* Logo & Description */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <Shield className="w-4 h-4 text-primary-foreground" />
-              </div>
+              {siteLogo ? (
+                <img src={siteLogo} alt={siteName} className="h-8 w-8 object-contain rounded" />
+              ) : (
+                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                  <Shield className="w-4 h-4 text-primary-foreground" />
+                </div>
+              )}
               <span className="text-base font-bold text-foreground">
-                বাংলা এসক্রো
+                {siteName}
               </span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              বাংলাদেশের সবচেয়ে বিশ্বস্ত এসক্রো পরিষেবা। ক্রেতা ও বিক্রেতা
-              উভয়ের জন্য নিরাপদ লেনদেন নিশ্চিত করুন।
+              {siteTagline}
             </p>
           </div>
 
@@ -90,7 +98,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="mt-8 pt-6 border-t border-border text-center">
           <p className="text-sm text-muted-foreground">
-            &copy; ২০২৪ বাংলা এসক্রো। সর্বস্বত্ব সংরক্ষিত।
+            {siteCopyright}
           </p>
         </div>
       </div>

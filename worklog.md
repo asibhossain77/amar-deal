@@ -79,3 +79,59 @@ Stage Summary:
 - All CSS animations and transitions working
 - Dark mode properly supported throughout
 
+---
+Task ID: 9
+Agent: Main Agent
+Task: Add comprehensive Website Settings section to Admin Panel with dynamic branding
+
+Work Log:
+- Updated Zustand store (store.ts):
+  - Added SiteSettings interface with 10 fields (site_name, site_tagline, site_logo, site_favicon, site_banner, site_login_bg, site_copyright, seo_meta_title, seo_meta_description, maintenance_mode)
+  - Added DEFAULT_SITE_SETTINGS constant
+  - Added siteSettings + setSiteSettings to store state
+  - Persisted siteSettings in localStorage for instant load
+- Updated API service (api.ts):
+  - Added getSiteSettings() for public branding
+  - Added getAdminSiteSettings() for admin
+  - Added updateAdminSiteSettings() for saving
+  - Added deleteSiteImage() for image deletion
+- Rewrote backend settings API routes:
+  - /api/settings/route.ts: GET with ?category=site for public branding, ?category=payment_accounts for payment settings
+  - /api/settings/admin/route.ts: GET (admin), PUT (admin), DELETE (admin) for site settings CRUD
+  - Added image validation: type check (PNG/JPG/SVG/WebP), size limit (2MB base64), MIME type extraction
+  - Added admin logging for all setting changes
+- Completely rewrote AdminSettingsPage.tsx:
+  - 4-tab layout: Branding / Images / SEO / Advanced
+  - Tab 1 (Branding): site_name, site_tagline, site_copyright with live preview
+  - Tab 2 (Images): Logo, Favicon, Banner, Login Background uploads
+  - Tab 3 (SEO): Meta title/description with Google search preview
+  - Tab 4 (Advanced): Maintenance mode toggle, settings summary
+  - ImageUploadField component with drag-and-drop, upload progress, preview, delete
+  - Unsaved changes warning
+  - Save/Reset buttons
+- Updated Header.tsx: Dynamic site name + logo from store
+- Updated Footer.tsx: Dynamic site name, logo, tagline, copyright from store
+- Updated LoginPage.tsx: Dynamic site name, logo, custom background image
+- Updated RegisterPage.tsx: Dynamic site name, logo, custom background image
+- Updated DashboardLayout.tsx: Dynamic site name + logo in sidebar (desktop + mobile)
+- Added "ওয়েবসাইট সেটিংস" nav item to admin sidebar
+- Created SiteSettingsLoader.tsx component:
+  - Loads settings from /api/settings?category=site on mount
+  - Updates document.title dynamically
+  - Updates favicon dynamically
+  - Refreshes settings every 60 seconds
+  - Integrated into page.tsx (app entry point)
+- Lint passes clean
+- API tested: GET /api/settings?category=site returns all settings
+- Page compiles: HTTP 200
+
+Stage Summary:
+- Complete database-driven website branding system
+- Admin can change site name, tagline, logo, favicon, banner, login background, copyright, SEO metadata, maintenance mode
+- All changes apply dynamically across entire website without code edits
+- Image uploads support drag-and-drop with type/size validation
+- Site settings auto-refresh every 60 seconds
+- Document title and favicon update dynamically
+- Login/Register pages support custom background images
+- All existing SiteSetting DB model used as key-value store (no schema changes needed)
+

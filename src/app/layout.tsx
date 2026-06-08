@@ -23,6 +23,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="bn" suppressHydrationWarning>
+      <head>
+        {/* Dynamic favicon will be set by client-side script */}
+        <link rel="icon" href="/logo.svg" />
+      </head>
       <body
         className={`${hindSiliguri.variable} antialiased bg-background text-foreground`}
         style={{ fontFamily: "var(--font-hind-siliguri), sans-serif" }}

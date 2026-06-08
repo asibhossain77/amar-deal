@@ -32,6 +32,7 @@ import AboutPage from '@/components/pages/AboutPage';
 import HowItWorksPage from '@/components/pages/HowItWorksPage';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SiteSettingsLoader from '@/components/shared/SiteSettingsLoader';
 
 // Error Boundary Component
 class ErrorBoundary extends Component<
@@ -227,6 +228,7 @@ function DashboardRouter() {
 export default function Home() {
   return (
     <AuthProvider>
+      <SiteSettingsLoader />
       <PageRouter />
     </AuthProvider>
   );

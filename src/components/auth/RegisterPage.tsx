@@ -7,10 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { User, Mail, Lock, Phone, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { User, Mail, Lock, Phone, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
 
 export default function RegisterPage() {
-  const { setUser, setPage } = useAppStore();
+  const { setUser, setPage, siteSettings } = useAppStore();
+
+  const siteName = siteSettings.site_name || 'বাংলা এসক্রো';
+  const siteLogo = siteSettings.site_logo;
+  const loginBg = siteSettings.site_login_bg;
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -26,7 +30,6 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
-    // Validate fields
     if (!name.trim()) {
       setError('পুরো নাম লিখুন');
       return;
@@ -51,7 +54,6 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      // Register the user
       const registerRes = await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,7 +72,6 @@ export default function RegisterPage() {
         return;
       }
 
-      // Auto-login after successful registration
       const loginResult = await signIn('credentials', {
         email: email.trim(),
         password,
@@ -78,12 +79,10 @@ export default function RegisterPage() {
       });
 
       if (loginResult?.error) {
-        // Registration succeeded but auto-login failed - go to login page
         setPage('login');
         return;
       }
 
-      // Fetch user data
       const userRes = await fetch('/api/users');
       if (userRes.ok) {
         const userData = await userRes.json();
@@ -100,18 +99,41 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
+    <div 
+      className="min-h-screen flex items-center justify-center bg-background px-4 py-8"
+      style={loginBg ? {
+        backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${loginBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      } : {}}
+    >
       <div className="w-full max-w-md">
-        <Card className="shadow-lg border-border">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setPage('home')}
+          className={`mb-4 gap-2 rounded-lg ${loginBg ? 'text-white hover:text-white hover:bg-white/10' : 'text-muted-foreground hover:text-foreground'}`}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          হোমে ফিরে যান
+        </Button>
+        <Card className={`shadow-lg ${loginBg ? 'border-white/20 bg-white/95 dark:bg-card/95 backdrop-blur-md' : 'border-border'}`}>
           <CardHeader className="text-center pb-2">
-            <div className="mx-auto mb-4 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-              <User className="w-6 h-6 text-primary" />
+            <div className="mx-auto mb-4 flex items-center justify-center">
+              {siteLogo ? (
+                <img src={siteLogo} alt={siteName} className="h-12 w-12 object-contain rounded-xl" />
+              ) : (
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <User className="w-6 h-6 text-primary" />
+                </div>
+              )}
             </div>
             <CardTitle className="text-2xl font-bold text-foreground">
               নিবন্ধন করুন
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              নতুন অ্যাকাউন্ট তৈরি করুন
+              {siteName}-এ নতুন অ্যাকাউন্ট তৈরি করুন
             </CardDescription>
           </CardHeader>
           <CardContent>

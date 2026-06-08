@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Shield, Menu, LogOut, LayoutDashboard, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
@@ -32,8 +32,11 @@ function ThemeToggle() {
 }
 
 export default function Header() {
-  const { currentPage, setPage, user, isAuthenticated, setUser } = useAppStore();
+  const { currentPage, setPage, user, isAuthenticated, setUser, siteSettings } = useAppStore();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const siteName = siteSettings.site_name || 'বাংলা এসক্রো';
+  const siteLogo = siteSettings.site_logo;
 
   const handleNavClick = (page: typeof navLinks[number]['page']) => {
     setPage(page);
@@ -46,6 +49,21 @@ export default function Header() {
     await signOut({ redirect: false });
   };
 
+  const renderLogo = (size: 'lg' | 'sm') => {
+    const iconSize = size === 'lg' ? 'w-9 h-9' : 'w-8 h-8';
+    const shieldSize = size === 'lg' ? 'w-5 h-5' : 'w-4 h-4';
+    const imgSize = size === 'lg' ? 'h-7 w-7' : 'h-5 w-5';
+    const textSize = size === 'lg' ? 'text-lg' : 'text-base';
+
+    return siteLogo ? (
+      <img src={siteLogo} alt={siteName} className={`${imgSize} object-contain rounded`} />
+    ) : (
+      <div className={`${iconSize} bg-primary rounded-xl flex items-center justify-center shadow-sm`}>
+        <Shield className={`${shieldSize} text-primary-foreground`} />
+      </div>
+    );
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-theme">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -55,11 +73,9 @@ export default function Header() {
             onClick={() => handleNavClick('home')}
             className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
           >
-            <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-sm">
-              <Shield className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="text-lg font-bold text-foreground">
-              বাংলা এসক্রো
+            {renderLogo('lg')}
+            <span className={`text-lg font-bold text-foreground`}>
+              {siteName}
             </span>
           </button>
 
@@ -141,11 +157,9 @@ export default function Header() {
               <SheetContent side="right" className="w-72">
                 <SheetTitle className="text-left">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                      <Shield className="w-4 h-4 text-primary-foreground" />
-                    </div>
+                    {renderLogo('sm')}
                     <span className="text-base font-bold text-foreground">
-                      বাংলা এসক্রো
+                      {siteName}
                     </span>
                   </div>
                 </SheetTitle>

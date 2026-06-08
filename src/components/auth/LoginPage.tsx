@@ -7,10 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Mail, Lock, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2, ArrowLeft, Shield } from 'lucide-react';
 
 export default function LoginPage() {
-  const { setUser, setPage } = useAppStore();
+  const { setUser, setPage, siteSettings } = useAppStore();
+
+  const siteName = siteSettings.site_name || 'বাংলা এসক্রো';
+  const siteLogo = siteSettings.site_logo;
+  const loginBg = siteSettings.site_login_bg;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +26,6 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
 
-    // Validate fields
     if (!email.trim()) {
       setError('ইমেইল লিখুন');
       return;
@@ -46,7 +49,6 @@ export default function LoginPage() {
         return;
       }
 
-      // Fetch user data after successful login
       const res = await fetch('/api/users');
       if (res.ok) {
         const data = await res.json();
@@ -63,27 +65,41 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
+    <div 
+      className="min-h-screen flex items-center justify-center bg-background px-4 py-8"
+      style={loginBg ? {
+        backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${loginBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      } : {}}
+    >
       <div className="w-full max-w-md">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setPage('home')}
-          className="mb-4 gap-2 text-muted-foreground hover:text-foreground rounded-lg"
+          className={`mb-4 gap-2 rounded-lg ${loginBg ? 'text-white hover:text-white hover:bg-white/10' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <ArrowLeft className="h-4 w-4" />
           হোমে ফিরে যান
         </Button>
-        <Card className="card-modern shadow-lg border-border">
+        <Card className={`card-modern shadow-lg ${loginBg ? 'border-white/20 bg-white/95 dark:bg-card/95 backdrop-blur-md' : 'border-border'}`}>
           <CardHeader className="text-center pb-2">
-            <div className="mx-auto mb-4 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-              <Lock className="w-6 h-6 text-primary" />
+            <div className="mx-auto mb-4 flex items-center justify-center">
+              {siteLogo ? (
+                <img src={siteLogo} alt={siteName} className="h-12 w-12 object-contain rounded-xl" />
+              ) : (
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <Lock className="w-6 h-6 text-primary" />
+                </div>
+              )}
             </div>
             <CardTitle className="text-2xl font-bold text-foreground">
               লগইন করুন
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              আপনার অ্যাকাউন্টে প্রবেশ করুন
+              {siteName}-এ আপনার অ্যাকাউন্টে প্রবেশ করুন
             </CardDescription>
           </CardHeader>
           <CardContent>

@@ -2,6 +2,34 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { PageName, AppUser, Transaction, Dispute, Notification } from './types';
 
+// ─── Site Settings Interface ─────────────────────────────
+export interface SiteSettings {
+  site_name: string;
+  site_tagline: string;
+  site_logo: string;          // base64 or URL
+  site_favicon: string;       // base64 or URL
+  site_banner: string;        // base64 or URL
+  site_login_bg: string;      // base64 or URL for login page background
+  site_copyright: string;
+  seo_meta_title: string;
+  seo_meta_description: string;
+  maintenance_mode: string;   // 'true' or 'false'
+}
+
+export const DEFAULT_SITE_SETTINGS: SiteSettings = {
+  site_name: 'বাংলা এসক্রো',
+  site_tagline: 'বাংলাদেশের সবচেয়ে বিশ্বস্ত এসক্রো পরিষেবা। ক্রেতা ও বিক্রেতা উভয়ের জন্য নিরাপদ লেনদেন নিশ্চিত করুন।',
+  site_logo: '',
+  site_favicon: '',
+  site_banner: '',
+  site_login_bg: '',
+  site_copyright: '© ২০২৪ বাংলা এসক্রো। সর্বস্বত্ব সংরক্ষিত।',
+  seo_meta_title: 'বাংলা এসক্রো - নিরাপদ লেনদেনের প্ল্যাটফর্ম',
+  seo_meta_description: 'বাংলাদেশের সবচেয়ে বিশ্বস্ত এসক্রো পরিষেবা। ক্রেতা ও বিক্রেতা উভয়ের জন্য নিরাপদ লেনদেন নিশ্চিত করুন।',
+  maintenance_mode: 'false',
+};
+
+// ─── App State Interface ─────────────────────────────────
 interface AppState {
   // Navigation
   currentPage: PageName;
@@ -31,6 +59,10 @@ interface AppState {
   // UI
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
+
+  // Site Settings
+  siteSettings: SiteSettings;
+  setSiteSettings: (settings: Partial<SiteSettings>) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -64,14 +96,21 @@ export const useAppStore = create<AppState>()(
       // UI
       sidebarOpen: false,
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
+
+      // Site Settings
+      siteSettings: DEFAULT_SITE_SETTINGS,
+      setSiteSettings: (settings) => set((state) => ({
+        siteSettings: { ...state.siteSettings, ...settings },
+      })),
     }),
     {
       name: 'bangla-escrow-store',
-      // Only persist auth-related fields and navigation
+      // Only persist auth-related fields, navigation, and site settings
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
         currentPage: state.currentPage,
+        siteSettings: state.siteSettings,
       }),
     }
   )

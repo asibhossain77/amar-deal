@@ -117,4 +117,14 @@ export const api = {
     fetchAPI('/gateway-transactions', { method: 'POST', body: JSON.stringify(data) }),
   verifyGatewayTransaction: (id: string, data: { status: string; adminNote?: string }) =>
     fetchAPI(`/gateway-transactions/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  // Site Settings (Public - for branding)
+  getSiteSettings: () => fetchAPI('/settings?category=site'),
+
+  // Site Settings (Admin)
+  getAdminSiteSettings: () => fetchAPI('/settings/admin?category=site'),
+  updateAdminSiteSettings: (data: Record<string, string>) =>
+    fetchAPI('/settings/admin?category=site', { method: 'PUT', body: JSON.stringify(data) }),
+  deleteSiteImage: (key: string) =>
+    fetchAPI('/settings/admin?category=site', { method: 'DELETE', body: JSON.stringify({ key }) }),
 };
