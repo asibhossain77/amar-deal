@@ -158,3 +158,32 @@ Stage Summary:
 - Mobile hamburger menu properly implemented
 - Three-zone layout (logo/nav/auth) confirmed working
 - All changes lint-free and no runtime errors
+
+---
+Task ID: 3
+Agent: Main
+Task: Fix deployment errors - login CSRF issue, duplicate React keys, password reset
+
+Work Log:
+- Diagnosed login failure: LoginPage.tsx was calling signOut() before signIn(), which invalidated the CSRF token and caused 401 errors
+- Fixed LoginPage.tsx: Removed the signOut() call before signIn(), removed unused signOut and Shield imports
+- Fixed duplicate React key warnings in DashboardLayout.tsx sidebar:
+  - Changed key from item.page to item.label (unique within groups)
+  - Fixed রেটিং ও রিভিউ nav item: page changed from 'notifications' to 'public-profile'
+  - Fixed রিপোর্ট admin nav item: page changed from 'admin-logs' to 'admin-reviews'
+- Added NEXTAUTH_URL=http://localhost:3000 to .env file (was missing, causing NEXTAUTH_URL warning)
+- Reset all test user passwords to 'password123' via bcrypt (previous hashes were corrupted)
+- Verified all fixes with agent browser:
+  - Home page loads correctly with all sections
+  - No console errors on home page
+  - Login works correctly (POST /api/auth/callback/credentials returns 200)
+  - Dashboard loads after login with user data
+  - No duplicate key warnings in console
+- Lint check: no errors
+
+Stage Summary:
+- Login was broken due to CSRF token invalidation from signOut() call before signIn()
+- Fixed by removing the signOut() call, which was unnecessary before login
+- Sidebar duplicate key warnings fixed by using unique label-based keys
+- All test user passwords reset to 'password123'
+- Application now works end-to-end: home page → login → dashboard

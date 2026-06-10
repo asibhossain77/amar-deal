@@ -1,14 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn, signOut } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
 import { useAppStore } from '@/lib/store';
 import { getSiteName } from '@/lib/site-defaults';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Mail, Lock, Eye, EyeOff, Loader2, ArrowLeft, Shield } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
   const { setUser, setPage, siteSettings } = useAppStore();
@@ -39,17 +39,6 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Clear any stale session data before attempting login
-      // Sign out first to ensure old session cookie is cleared
-      try {
-        await signOut({ redirect: false });
-      } catch {
-        // signOut might fail if no session, that's fine
-      }
-
-      // Small delay to ensure signOut completes
-      await new Promise(resolve => setTimeout(resolve, 200));
-
       const result = await signIn('credentials', {
         email,
         password,

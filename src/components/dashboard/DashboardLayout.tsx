@@ -86,7 +86,7 @@ const userNavGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { label: 'KYC যাচাইকরণ', icon: ShieldCheck, page: 'account-settings' },
-      { label: 'রেটিং ও রিভিউ', icon: Star, page: 'notifications' },
+      { label: 'রেটিং ও রিভিউ', icon: Star, page: 'public-profile' },
       { label: 'বিজ্ঞপ্তি', icon: Bell, page: 'notifications' },
       { label: 'সহায়তা', icon: LifeBuoy, page: 'dashboard' },
       { label: 'অ্যাকাউন্ট সেটিংস', icon: UserCog, page: 'account-settings' },
@@ -121,7 +121,7 @@ const adminNavGroups: NavGroup[] = [
     collapsible: true,
     defaultOpen: false,
     items: [
-      { label: 'রিপোর্ট', icon: BarChart3, page: 'admin-logs' },
+      { label: 'রিপোর্ট', icon: BarChart3, page: 'admin-reviews' },
       { label: 'গেটওয়ে থিম', icon: Palette, page: 'admin-gateway-theme' },
       { label: 'কার্যক্রম লগ', icon: FileText, page: 'admin-logs' },
       { label: 'ওয়েবসাইট সেটিংস', icon: Settings, page: 'admin-settings' },
@@ -197,7 +197,7 @@ function NavGroupSection({
               const Icon = item.icon;
               return (
                 <button
-                  key={item.page}
+                  key={item.label}
                   onClick={() => onNav(item.page)}
                   className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[12px] font-medium transition-all duration-100 ${
                     isActive
