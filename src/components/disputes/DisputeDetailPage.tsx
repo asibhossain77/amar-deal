@@ -203,7 +203,7 @@ export default function DisputeDetailPage() {
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">ক্রেতা</span>
               {dispute.buyer ? (
-                <UserLink user={dispute.buyer} showAvatar={false} size="sm" showBadge={false} />
+                <UserLink user={dispute.buyer} showAvatar={false} size="sm"  />
               ) : (
                 <span className="text-sm font-medium text-foreground">ক্রেতা</span>
               )}
@@ -212,7 +212,7 @@ export default function DisputeDetailPage() {
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">বিক্রেতা</span>
               {dispute.seller ? (
-                <UserLink user={dispute.seller} showAvatar={false} size="sm" showBadge={false} />
+                <UserLink user={dispute.seller} showAvatar={false} size="sm"  />
               ) : (
                 <span className="text-sm font-medium text-foreground">বিক্রেতা</span>
               )}
@@ -232,9 +232,9 @@ export default function DisputeDetailPage() {
             {dispute.resolution && (
               <>
                 <Separator />
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                  <p className="text-xs font-medium text-green-700 mb-1">সমাধান</p>
-                  <p className="text-sm text-green-800">{dispute.resolution}</p>
+                <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800/40 rounded-lg p-3">
+                  <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">সমাধান</p>
+                  <p className="text-sm text-green-800 dark:text-green-300">{dispute.resolution}</p>
                 </div>
               </>
             )}
@@ -274,7 +274,7 @@ export default function DisputeDetailPage() {
                       <div
                         className={`max-w-[80%] sm:max-w-[70%] ${
                           fromAdmin
-                            ? 'bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-center'
+                            ? 'bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-xl px-4 py-3 text-center'
                             : fromBuyer
                             ? 'bg-primary/10 border border-primary/20 rounded-xl rounded-tl-sm px-4 py-3'
                             : 'bg-muted border border-border rounded-xl rounded-tr-sm px-4 py-3'
@@ -356,7 +356,7 @@ export default function DisputeDetailPage() {
 
       {/* Admin Resolution Section */}
       {user?.role === 'admin' && !isResolved && (
-        <Card className="card-modern border-amber-200 bg-amber-50/30">
+        <Card className="card-modern border-amber-200 dark:border-amber-800/40 bg-amber-50/30 dark:bg-amber-950/20">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -427,7 +427,7 @@ export default function DisputeDetailPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3">
               {dispute.buyer ? (
-                <UserLink user={dispute.buyer} showAvatar size="sm" showBadge={false} />
+                <UserLink user={dispute.buyer} showAvatar size="sm"  />
               ) : (
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -442,7 +442,7 @@ export default function DisputeDetailPage() {
             </div>
             <div className="flex items-center gap-3">
               {dispute.seller ? (
-                <UserLink user={dispute.seller} showAvatar size="sm" showBadge={false} />
+                <UserLink user={dispute.seller} showAvatar size="sm"  />
               ) : (
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">

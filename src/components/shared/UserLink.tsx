@@ -6,18 +6,16 @@ import type { AppUser } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getInitials } from '@/lib/helpers';
-import { BadgeDisplayMini } from '@/components/shared/BadgeDisplay';
 import { VerificationBadge } from '@/components/shared/BadgeIcon';
 
 interface UserLinkProps {
-  user: AppUser | { id: string; name: string; username?: string; avatar?: string; isVerified?: boolean; currentPlan?: unknown };
+  user: AppUser | { id: string; name: string; username?: string; avatar?: string; isVerified?: boolean };
   showAvatar?: boolean;
-  showBadge?: boolean;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
-export default function UserLink({ user, showAvatar = true, showBadge = true, size = 'md', className = '' }: UserLinkProps) {
+export default function UserLink({ user, showAvatar = true, size = 'md', className = '' }: UserLinkProps) {
   const { setSelectedUserId, setPage } = useAppStore();
 
   const handleClick = (e: React.MouseEvent) => {
@@ -59,9 +57,6 @@ export default function UserLink({ user, showAvatar = true, showBadge = true, si
             <TooltipContent>ভেরিফাইড অ্যাকাউন্ট</TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      )}
-      {showBadge && 'currentPlan' in user && user.currentPlan && (
-        <BadgeDisplayMini plan={user.currentPlan as React.ComponentProps<typeof BadgeDisplayMini>['plan']} />
       )}
     </button>
   );

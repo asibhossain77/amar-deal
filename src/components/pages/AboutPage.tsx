@@ -138,13 +138,13 @@ export default function AboutPage() {
               <h3 className="mb-1 font-semibold text-foreground">নিরাপদ লেনদেন</h3>
               <p className="text-sm text-muted-foreground">অর্থ এসক্রোতে থাকে যতক্ষণ কাজ সম্পন্ন না হয়</p>
             </div>
-            <div className="rounded-xl border border-green-100 bg-green-50/50 p-6 text-center">
-              <Star className="mx-auto mb-3 h-8 w-8 text-green-600" />
+            <div className="rounded-xl border border-green-100 dark:border-green-800/40 bg-green-50/50 dark:bg-green-950/30 p-6 text-center">
+              <Star className="mx-auto mb-3 h-8 w-8 text-green-600 dark:text-green-400" />
               <h3 className="mb-1 font-semibold text-foreground">যাচাইকৃত পেমেন্ট</h3>
               <p className="text-sm text-muted-foreground">প্রতিটি পেমেন্ট প্রশাসক দ্বারা যাচাইকৃত</p>
             </div>
-            <div className="rounded-xl border border-purple-100 bg-purple-50/50 p-6 text-center">
-              <EyeOff className="mx-auto mb-3 h-8 w-8 text-purple-600" />
+            <div className="rounded-xl border border-purple-100 dark:border-purple-800/40 bg-purple-50/50 dark:bg-purple-950/30 p-6 text-center">
+              <EyeOff className="mx-auto mb-3 h-8 w-8 text-purple-600 dark:text-purple-400" />
               <h3 className="mb-1 font-semibold text-foreground">বিরোধ নিষ্পত্তি</h3>
               <p className="text-sm text-muted-foreground">যেকোনো বিরোধে নিরপেক্ষ সমাধান</p>
             </div>

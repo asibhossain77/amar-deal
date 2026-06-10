@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, signOut } from 'next-auth/react';
 import { useAppStore } from '@/lib/store';
 import { getSiteName } from '@/lib/site-defaults';
 import { Button } from '@/components/ui/button';
@@ -40,6 +40,16 @@ export default function LoginPage() {
 
     try {
       // Clear any stale session data before attempting login
+      // Sign out first to ensure old session cookie is cleared
+      try {
+        await signOut({ redirect: false });
+      } catch {
+        // signOut might fail if no session, that's fine
+      }
+
+      // Small delay to ensure signOut completes
+      await new Promise(resolve => setTimeout(resolve, 200));
+
       const result = await signIn('credentials', {
         email,
         password,
@@ -52,7 +62,7 @@ export default function LoginPage() {
       }
 
       // Small delay to let NextAuth set the cookie
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       const res = await fetch('/api/users');
       if (res.ok) {

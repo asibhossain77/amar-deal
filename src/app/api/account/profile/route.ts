@@ -38,7 +38,9 @@ export async function GET() {
         trustScore: true,
         disputeRate: true,
         isVerified: true,
-        currentSubscriptionId: true,
+        verificationStatus: true,
+        buyerReviewCount: true,
+        sellerReviewCount: true,
       },
     });
 
@@ -49,38 +51,26 @@ export async function GET() {
       );
     }
 
-    // Get current subscription and plan
-    let subscription = null;
-    let plan = null;
-
-    if (user.currentSubscriptionId) {
-      subscription = await db.userSubscription.findUnique({
-        where: { id: user.currentSubscriptionId },
-      });
-      if (subscription) {
-        plan = await db.subscriptionPlan.findUnique({
-          where: { id: subscription.planId },
-        });
-      }
-    }
-
     // Build reputation object
     const reputation = {
       buyerRating: user.buyerRating,
       sellerRating: user.sellerRating,
+      buyerReviewCount: user.buyerReviewCount,
+      sellerReviewCount: user.sellerReviewCount,
       totalReviews: user.totalReviews,
       completedDeals: user.completedDeals,
       successfulTransactions: user.successfulTransactions,
       trustScore: user.trustScore,
       disputeRate: user.disputeRate,
       isVerified: user.isVerified,
+      verificationStatus: user.verificationStatus,
+      totalTransactions: 0,
+      disputedCount: 0,
     };
 
     return NextResponse.json({
       user,
       reputation,
-      subscription,
-      plan,
     });
   } catch (error) {
     console.error("Get profile error:", error);

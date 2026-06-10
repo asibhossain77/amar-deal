@@ -15,6 +15,9 @@ const SITE_SETTING_KEYS = [
   'seo_meta_title',
   'seo_meta_description',
   'maintenance_mode',
+  'contact_address',
+  'contact_phone',
+  'contact_email',
 ];
 
 // Allowed keys for payment settings
@@ -96,6 +99,9 @@ export async function GET(request: NextRequest) {
           seo_meta_title: settingsMap.seo_meta_title || SITE_DEFAULTS.seo_meta_title,
           seo_meta_description: settingsMap.seo_meta_description || SITE_DEFAULTS.seo_meta_description,
           maintenance_mode: settingsMap.maintenance_mode || SITE_DEFAULTS.maintenance_mode,
+          contact_address: settingsMap.contact_address || SITE_DEFAULTS.contact_address,
+          contact_phone: settingsMap.contact_phone || SITE_DEFAULTS.contact_phone,
+          contact_email: settingsMap.contact_email || SITE_DEFAULTS.contact_email,
         },
       });
     }

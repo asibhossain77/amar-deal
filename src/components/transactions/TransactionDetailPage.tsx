@@ -285,7 +285,7 @@ export default function TransactionDetailPage() {
               <div className="flex items-center gap-2">
                 {transaction.buyer ? (
                   <>
-                    <UserLink user={transaction.buyer} showAvatar size="sm" showBadge={false} />
+                    <UserLink user={transaction.buyer} showAvatar size="sm"  />
                     {!isBuyer && (
                       <Button
                         variant="ghost"
@@ -320,7 +320,7 @@ export default function TransactionDetailPage() {
               <div className="flex items-center gap-2">
                 {transaction.seller ? (
                   <>
-                    <UserLink user={transaction.seller} showAvatar size="sm" showBadge={false} />
+                    <UserLink user={transaction.seller} showAvatar size="sm"  />
                     {!isSeller && (
                       <Button
                         variant="ghost"
@@ -427,9 +427,9 @@ export default function TransactionDetailPage() {
               </div>
               {/* Show disputed/cancelled separately if applicable */}
               {(isDisputed || isCancelled) && (
-                <div className="mt-4 flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
-                  <span className="text-sm font-medium text-red-700">
+                <div className="mt-4 flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/40">
+                  <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                  <span className="text-sm font-medium text-red-700 dark:text-red-400">
                     {transactionStatusLabels[transaction.status]}
                   </span>
                 </div>

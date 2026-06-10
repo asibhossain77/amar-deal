@@ -57,7 +57,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
-        token.role = (user as { role: string }).role;
+        token.role = (user as unknown as { role: string }).role;
       }
       // Re-fetch user role on session update to keep it in sync
       if (trigger === 'update') {
@@ -90,5 +90,5 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/",
   },
-  secret: process.env.NEXTAUTH_SECRET || "bangla-escrow-secret-key-2024",
+  secret: process.env.NEXTAUTH_SECRET || "amar-deal-secret-key-2024",
 };

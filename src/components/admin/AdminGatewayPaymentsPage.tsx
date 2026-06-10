@@ -325,9 +325,9 @@ export default function AdminGatewayPaymentsPage() {
 
                         {/* User Note */}
                         {txn.note && (
-                          <div className="rounded-md bg-blue-50 border border-blue-200 p-2 text-sm">
-                            <span className="text-blue-600 font-medium">ব্যবহারকারী মন্তব্য: </span>
-                            <span className="text-blue-800">{txn.note}</span>
+                          <div className="rounded-md bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/40 p-2 text-sm">
+                            <span className="text-blue-600 dark:text-blue-400 font-medium">ব্যবহারকারী মন্তব্য: </span>
+                            <span className="text-blue-800 dark:text-blue-300">{txn.note}</span>
                           </div>
                         )}
 

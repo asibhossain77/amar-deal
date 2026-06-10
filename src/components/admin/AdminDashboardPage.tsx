@@ -13,49 +13,49 @@ const statCards = [
     key: 'totalUsers' as const,
     label: 'মোট ব্যবহারকারী',
     icon: Users,
-    colorClass: 'bg-primary/10 text-primary border-primary/20',
-    iconBg: 'bg-primary/10',
+    colorClass: 'bg-primary/10 dark:bg-primary/15 text-primary border-primary/20 dark:border-primary/25',
+    iconBg: 'bg-primary/10 dark:bg-primary/20',
     valueColor: 'text-primary',
   },
   {
     key: 'totalTransactions' as const,
     label: 'মোট লেনদেন',
     icon: ArrowLeftRight,
-    colorClass: 'bg-purple-50 text-purple-600 border-purple-200',
-    iconBg: 'bg-purple-100',
-    valueColor: 'text-purple-700',
+    colorClass: 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800/40',
+    iconBg: 'bg-purple-100 dark:bg-purple-900/40',
+    valueColor: 'text-purple-700 dark:text-purple-400',
   },
   {
     key: 'activeTransactions' as const,
     label: 'চলমান লেনদেন',
     icon: Clock,
-    colorClass: 'bg-amber-50 text-amber-600 border-amber-200',
-    iconBg: 'bg-amber-100',
-    valueColor: 'text-amber-700',
+    colorClass: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800/40',
+    iconBg: 'bg-amber-100 dark:bg-amber-900/40',
+    valueColor: 'text-amber-700 dark:text-amber-400',
   },
   {
     key: 'pendingTransactions' as const,
     label: 'অপেক্ষমাণ লেনদেন',
     icon: Hourglass,
-    colorClass: 'bg-orange-50 text-orange-600 border-orange-200',
-    iconBg: 'bg-orange-100',
-    valueColor: 'text-orange-700',
+    colorClass: 'bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-800/40',
+    iconBg: 'bg-orange-100 dark:bg-orange-900/40',
+    valueColor: 'text-orange-700 dark:text-orange-400',
   },
   {
     key: 'completedTransactions' as const,
     label: 'সম্পন্ন লেনদেন',
     icon: CheckCircle,
-    colorClass: 'bg-green-50 text-green-600 border-green-200',
-    iconBg: 'bg-green-100',
-    valueColor: 'text-green-700',
+    colorClass: 'bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800/40',
+    iconBg: 'bg-green-100 dark:bg-green-900/40',
+    valueColor: 'text-green-700 dark:text-green-400',
   },
   {
     key: 'disputedTransactions' as const,
     label: 'বিরোধিত লেনদেন',
     icon: AlertTriangle,
-    colorClass: 'bg-red-50 text-red-600 border-red-200',
-    iconBg: 'bg-red-100',
-    valueColor: 'text-red-700',
+    colorClass: 'bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800/40',
+    iconBg: 'bg-red-100 dark:bg-red-900/40',
+    valueColor: 'text-red-700 dark:text-red-400',
   },
 ];
 
@@ -153,17 +153,17 @@ export default function AdminDashboardPage() {
                 <span className="text-sm text-foreground">মোট ব্যবহারকারী</span>
                 <span className="font-semibold text-primary">{toBanglaNumber(stats.totalUsers)}</span>
               </div>
-              <div className="flex items-center justify-between rounded-lg bg-green-50 p-3">
+              <div className="flex items-center justify-between rounded-lg bg-green-50 dark:bg-green-950/30 p-3">
                 <span className="text-sm text-foreground">সম্পন্ন লেনদেন</span>
-                <span className="font-semibold text-green-700">{toBanglaNumber(stats.completedTransactions)}</span>
+                <span className="font-semibold text-green-700 dark:text-green-400">{toBanglaNumber(stats.completedTransactions)}</span>
               </div>
-              <div className="flex items-center justify-between rounded-lg bg-amber-50 p-3">
+              <div className="flex items-center justify-between rounded-lg bg-amber-50 dark:bg-amber-950/30 p-3">
                 <span className="text-sm text-foreground">চলমান লেনদেন</span>
-                <span className="font-semibold text-amber-700">{toBanglaNumber(stats.activeTransactions)}</span>
+                <span className="font-semibold text-amber-700 dark:text-amber-400">{toBanglaNumber(stats.activeTransactions)}</span>
               </div>
-              <div className="flex items-center justify-between rounded-lg bg-red-50 p-3">
+              <div className="flex items-center justify-between rounded-lg bg-red-50 dark:bg-red-950/30 p-3">
                 <span className="text-sm text-foreground">বিরোধিত লেনদেন</span>
-                <span className="font-semibold text-red-700">{toBanglaNumber(stats.disputedTransactions)}</span>
+                <span className="font-semibold text-red-700 dark:text-red-400">{toBanglaNumber(stats.disputedTransactions)}</span>
               </div>
             </div>
           ) : (

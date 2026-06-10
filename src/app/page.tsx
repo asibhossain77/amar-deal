@@ -11,7 +11,6 @@ import RegisterPage from '@/components/auth/RegisterPage';
 import ForgotPasswordPage from '@/components/auth/ForgotPasswordPage';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import DashboardPage from '@/components/dashboard/DashboardPage';
-import ProfilePage from '@/components/dashboard/ProfilePage';
 import NotificationsPage from '@/components/dashboard/NotificationsPage';
 import TransactionsPage from '@/components/transactions/TransactionsPage';
 import CreateTransactionPage from '@/components/transactions/CreateTransactionPage';
@@ -28,11 +27,9 @@ import AdminSettingsPage from '@/components/admin/AdminSettingsPage';
 import AdminGatewaysPage from '@/components/admin/AdminGatewaysPage';
 import AdminGatewayPaymentsPage from '@/components/admin/AdminGatewayPaymentsPage';
 import AdminGatewayThemePage from '@/components/admin/AdminGatewayThemePage';
-import AdminSubscriptionsPage from '@/components/admin/AdminSubscriptionsPage';
-import AdminBadgesPage from '@/components/admin/AdminBadgesPage';
+import AdminKYCPage from '@/components/admin/AdminKYCPage';
 import AdminReviewsPage from '@/components/admin/AdminReviewsPage';
 import AccountSettingsPage from '@/components/account/AccountSettingsPage';
-import SubscriptionPlansPage from '@/components/subscriptions/SubscriptionPlansPage';
 import PublicProfilePage from '@/components/profile/PublicProfilePage';
 import AboutPage from '@/components/pages/AboutPage';
 import HowItWorksPage from '@/components/pages/HowItWorksPage';
@@ -111,6 +108,21 @@ function PageRouter() {
     checkSession();
   }, []);
 
+  // Handle ?user= URL parameter for direct profile links
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get('user');
+    if (userId && isAuthenticated) {
+      useAppStore.getState().setSelectedUserId(userId);
+      useAppStore.getState().setPage('public-profile');
+      // Clean up the URL without reloading
+      const url = new URL(window.location.href);
+      url.searchParams.delete('user');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [isAuthenticated]);
+
   if (checking && (!isAuthenticated || !user)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -185,14 +197,10 @@ function DashboardRouter() {
   switch (currentPage) {
     case 'dashboard':
       return <ErrorBoundary><DashboardPage /></ErrorBoundary>;
-    case 'profile':
-      return <ErrorBoundary><ProfilePage /></ErrorBoundary>;
     case 'account-settings':
       return <ErrorBoundary><AccountSettingsPage /></ErrorBoundary>;
     case 'public-profile':
       return <ErrorBoundary><PublicProfilePage /></ErrorBoundary>;
-    case 'subscription-plans':
-      return <ErrorBoundary><SubscriptionPlansPage /></ErrorBoundary>;
     case 'notifications':
       return <ErrorBoundary><NotificationsPage /></ErrorBoundary>;
     case 'transactions':
@@ -227,10 +235,8 @@ function DashboardRouter() {
       return <ErrorBoundary><AdminGatewayPaymentsPage /></ErrorBoundary>;
     case 'admin-gateway-theme':
       return <ErrorBoundary><AdminGatewayThemePage /></ErrorBoundary>;
-    case 'admin-subscriptions':
-      return <ErrorBoundary><AdminSubscriptionsPage /></ErrorBoundary>;
-    case 'admin-badges':
-      return <ErrorBoundary><AdminBadgesPage /></ErrorBoundary>;
+    case 'admin-kyc':
+      return <ErrorBoundary><AdminKYCPage /></ErrorBoundary>;
     case 'admin-reviews':
       return <ErrorBoundary><AdminReviewsPage /></ErrorBoundary>;
     default:

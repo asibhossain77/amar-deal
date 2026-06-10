@@ -11,16 +11,19 @@
  */
 
 export const SITE_DEFAULTS = {
-  site_name: 'বাংলা এসক্রো',
-  site_tagline: 'বাংলাদেশের সবচেয়ে বিশ্বস্ত এসক্রো পরিষেবা। ক্রেতা ও বিক্রেতা উভয়ের জন্য নিরাপদ লেনদেন নিশ্চিত করুন।',
+  site_name: 'আমার ডিল',
+  site_tagline: 'বাংলাদেশের সবচেয়ে বিশ্বস্ত ডিল প্ল্যাটফর্ম। ক্রেতা ও বিক্রেতা উভয়ের জন্য নিরাপদ লেনদেন নিশ্চিত করুন।',
   site_logo: '',
   site_favicon: '',
   site_banner: '',
   site_login_bg: '',
-  site_copyright: '© ২০২৪ বাংলা এসক্রো। সর্বস্বত্ব সংরক্ষিত।',
-  seo_meta_title: 'বাংলা এসক্রো - নিরাপদ লেনদেনের প্ল্যাটফর্ম',
-  seo_meta_description: 'বাংলাদেশের সবচেয়ে বিশ্বস্ত এসক্রো পরিষেবা। ক্রেতা ও বিক্রেতা উভয়ের জন্য নিরাপদ লেনদেন নিশ্চিত করুন।',
+  site_copyright: '© ২০২৪ আমার ডিল। সর্বস্বত্ব সংরক্ষিত।',
+  seo_meta_title: 'আমার ডিল - নিরাপদ লেনদেনের প্ল্যাটফর্ম',
+  seo_meta_description: 'বাংলাদেশের সবচেয়ে বিশ্বস্ত ডিল প্ল্যাটফর্ম। ক্রেতা ও বিক্রেতা উভয়ের জন্য নিরাপদ লেনদেন নিশ্চিত করুন।',
   maintenance_mode: 'false',
+  contact_address: '১২৩, গুলশান এভিনিউ\nঢাকা-১২১২, বাংলাদেশ',
+  contact_phone: '+৮৮০ ১৭০০-০০০০০০',
+  contact_email: 'support@amardeal.com',
 } as const;
 
 /**
@@ -57,4 +60,25 @@ export function getSeoMetaTitle(seoTitle?: string | null): string {
  */
 export function getSeoMetaDescription(seoDescription?: string | null): string {
   return seoDescription || SITE_DEFAULTS.seo_meta_description;
+}
+
+/**
+ * Helper: Get contact address with fallback.
+ */
+export function getContactAddress(address?: string | null): string {
+  return address || SITE_DEFAULTS.contact_address;
+}
+
+/**
+ * Helper: Get contact phone with fallback.
+ */
+export function getContactPhone(phone?: string | null): string {
+  return phone || SITE_DEFAULTS.contact_phone;
+}
+
+/**
+ * Helper: Get contact email with fallback.
+ */
+export function getContactEmail(email?: string | null): string {
+  return email || SITE_DEFAULTS.contact_email;
 }

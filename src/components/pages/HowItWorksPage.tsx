@@ -35,8 +35,8 @@ const steps = [
     description:
       'ক্রেতা নির্দিষ্ট পেমেন্ট পদ্ধতিতে অর্থ প্রদান করেন এবং ট্রানজেকশন আইডি জমা দেন।',
     color: 'bg-amber-600',
-    lightBg: 'bg-amber-50',
-    borderColor: 'border-amber-200',
+    lightBg: 'bg-amber-50 dark:bg-amber-950/30',
+    borderColor: 'border-amber-200 dark:border-amber-800/40',
   },
   {
     number: 3,
@@ -45,8 +45,8 @@ const steps = [
     description:
       'আমাদের প্রশাসক ক্রেতার পেমেন্ট যাচাই করেন। যাচাই সফল হলে লেনদেন পরবর্তী ধাপে যায়।',
     color: 'bg-green-600',
-    lightBg: 'bg-green-50',
-    borderColor: 'border-green-200',
+    lightBg: 'bg-green-50 dark:bg-green-950/30',
+    borderColor: 'border-green-200 dark:border-green-800/40',
   },
   {
     number: 4,
@@ -55,8 +55,8 @@ const steps = [
     description:
       'বিক্রেতা চুক্তি অনুযায়ী কাজ সম্পাদন করেন। ক্রেতা কাজের অগ্রগতি ট্র্যাক করতে পারেন।',
     color: 'bg-purple-600',
-    lightBg: 'bg-purple-50',
-    borderColor: 'border-purple-200',
+    lightBg: 'bg-purple-50 dark:bg-purple-950/30',
+    borderColor: 'border-purple-200 dark:border-purple-800/40',
   },
   {
     number: 5,
@@ -65,8 +65,8 @@ const steps = [
     description:
       'বিক্রেতা কাজ সম্পন্ন করে সরবরাহ করেন। ক্রেতা কাজ যাচাই করেন।',
     color: 'bg-orange-600',
-    lightBg: 'bg-orange-50',
-    borderColor: 'border-orange-200',
+    lightBg: 'bg-orange-50 dark:bg-orange-950/30',
+    borderColor: 'border-orange-200 dark:border-orange-800/40',
   },
   {
     number: 6,

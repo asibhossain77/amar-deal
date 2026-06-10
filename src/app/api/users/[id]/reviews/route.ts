@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth, requireAdmin } from "@/lib/auth-helper";
 
-// GET /api/users/[id]/reviews - Get reviews for a user with privacy controls
+// GET /api/users/[id]/reviews - Get reviews for a user
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -25,7 +25,6 @@ export async function GET(
       where: { id: targetUserId },
       select: {
         id: true,
-        reviewVisibility: true,
       },
     });
 
@@ -65,57 +64,7 @@ export async function GET(
       });
     }
 
-    // 4. Non-owner, non-admin: check reviewVisibility
-    const reviewVisibility = targetUser.reviewVisibility; // "private" | "shared" | "public"
-
-    if (reviewVisibility === "private") {
-      return NextResponse.json(
-        { error: "এই ব্যবহারকারীর রিভিউ দেখার অনুমতি নেই" },
-        { status: 403 }
-      );
-    }
-
-    if (reviewVisibility === "shared") {
-      // Return only reviews where there's an accepted ReviewVisibilityGrant from targetUser to viewer
-      const acceptedGrants = await db.reviewVisibilityGrant.findMany({
-        where: {
-          grantorId: targetUserId,
-          granteeId: viewerId,
-          status: "accepted",
-        },
-        select: { reviewId: true },
-      });
-
-      const grantedReviewIds = acceptedGrants.map((g) => g.reviewId);
-
-      // Only return granted reviews that are not hidden
-      const reviews = await db.review.findMany({
-        where: {
-          id: { in: grantedReviewIds.length > 0 ? grantedReviewIds : ["__none__"] },
-          toUserId: targetUserId,
-          isHidden: false,
-        },
-        include: {
-          fromUser: {
-            select: {
-              id: true,
-              name: true,
-              username: true,
-              avatar: true,
-              isVerified: true,
-            },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-      });
-
-      return NextResponse.json({
-        reviews,
-        privacyLevel: "shared" as const,
-      });
-    }
-
-    // reviewVisibility === "public": return only non-hidden public reviews
+    // 4. Non-owner, non-admin: return only non-hidden public reviews
     const reviews = await db.review.findMany({
       where: {
         toUserId: targetUserId,
@@ -179,7 +128,6 @@ export async function POST(
       where: { id: toUserId },
       select: {
         id: true,
-        reviewVisibility: true,
       },
     });
 
@@ -231,15 +179,8 @@ export async function POST(
       );
     }
 
-    // Determine isPublic default based on target user's reviewVisibility
-    let isPublic: boolean;
-    if (isPublicOverride !== undefined) {
-      // Allow explicit override from the request body
-      isPublic = !!isPublicOverride;
-    } else {
-      // Default: if target has "private" reviewVisibility, isPublic defaults to false
-      isPublic = targetUser.reviewVisibility !== "private";
-    }
+    // Default: reviews are public
+    const isPublic = isPublicOverride !== undefined ? !!isPublicOverride : true;
 
     // Create the review
     const review = await db.review.create({
@@ -286,6 +227,8 @@ export async function POST(
       data: {
         buyerRating: Math.round(avgBuyerRating * 100) / 100,
         sellerRating: Math.round(avgSellerRating * 100) / 100,
+        buyerReviewCount: buyerReviews.length,
+        sellerReviewCount: sellerReviews.length,
         totalReviews: allReviews.length,
       },
     });

@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     const whereClause: {
-      OR?: { name: { contains: string }; email: { contains: string } }[];
+      OR?: Array<{ name: { contains: string } } | { email: { contains: string } }>;
       role?: string;
     } = {};
 

@@ -92,7 +92,9 @@ export async function GET() {
         successfulTransactions: true,
         trustScore: true,
         disputeRate: true,
-        currentSubscriptionId: true,
+        buyerReviewCount: true,
+        sellerReviewCount: true,
+        verificationStatus: true,
       },
     });
 

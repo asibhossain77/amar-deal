@@ -10,11 +10,10 @@ async function fetchAPI(endpoint: string, options?: RequestInit) {
   });
   
   if (!res.ok) {
-    // Handle session expiration - auto logout on 401 only for non-admin endpoints
-    // Admin endpoints properly return 401 when not authenticated
     if (res.status === 401) {
-      // Only auto-logout for user endpoints, not admin or settings
-      if (!endpoint.startsWith('/settings') && !endpoint.startsWith('/admin')) {
+      const safeEndpoints = ['/settings', '/admin', '/account', '/users/', '/kyc'];
+      const isSafeEndpoint = safeEndpoints.some(e => endpoint.startsWith(e));
+      if (!isSafeEndpoint) {
         if (typeof window !== 'undefined') {
           const { useAppStore } = await import('./store');
           const store = useAppStore.getState();
@@ -25,8 +24,6 @@ async function fetchAPI(endpoint: string, options?: RequestInit) {
       throw new Error('সেশন মেয়াদোত্তীর্ণ হয়েছে। দয়া করে আবার লগইন করুন।');
     }
     
-    // Handle forbidden - DO NOT auto-logout on 403, just show error
-    // 403 means user is authenticated but doesn't have permission
     if (res.status === 403) {
       const errorData = await res.json().catch(() => ({ error: 'অনুমতি নেই' }));
       throw new Error(errorData.error || 'এই কাজ করার অনুমতি আপনার নেই');
@@ -44,15 +41,12 @@ export const api = {
   // Authentication
   logout: async () => {
     if (typeof window !== 'undefined') {
-      // Dispatch logout start event to prevent SessionChecker from re-authenticating
       window.dispatchEvent(new CustomEvent('auth:logout-start'));
 
-      // Clear Zustand state FIRST to prevent any stale state
       const { useAppStore } = await import('./store');
       useAppStore.getState().clearUserData();
       useAppStore.getState().setPage('login');
 
-      // Then clear the NextAuth session cookie
       try {
         const { signOut } = await import('next-auth/react');
         await signOut({ redirect: false });
@@ -60,12 +54,10 @@ export const api = {
         // NextAuth signOut may fail, continue anyway
       }
 
-      // Clear persisted store data (except siteSettings) to prevent stale data
       try {
-        const stored = localStorage.getItem('bangla-escrow-store');
+        const stored = localStorage.getItem('amar-deal-store');
         if (stored) {
           const parsed = JSON.parse(stored);
-          // Keep siteSettings, clear everything else
           const cleaned = {
             ...parsed,
             state: {
@@ -76,13 +68,12 @@ export const api = {
               selectedUserId: null,
             },
           };
-          localStorage.setItem('bangla-escrow-store', JSON.stringify(cleaned));
+          localStorage.setItem('amar-deal-store', JSON.stringify(cleaned));
         }
       } catch {
         // If localStorage cleanup fails, just continue
       }
 
-      // Dispatch logout complete event
       window.dispatchEvent(new CustomEvent('auth:logout-complete'));
     }
   },
@@ -142,18 +133,17 @@ export const api = {
   reportUser: (userId: string, data: { reason: string; description?: string }) =>
     fetchAPI(`/users/${userId}/report`, { method: 'POST', body: JSON.stringify(data) }),
 
-  // Privacy Settings
-  getPrivacySettings: () => fetchAPI('/account/privacy'),
-  updatePrivacySettings: (data: { ratingVisibility?: string; reviewVisibility?: string; trustScoreVisibility?: string }) =>
-    fetchAPI('/account/privacy', { method: 'PUT', body: JSON.stringify(data) }),
+  // KYC Verification
+  submitKYC: (data: { documentType: string; documentNumber: string; documentFront: string; documentBack?: string; selfie?: string }) =>
+    fetchAPI('/kyc', { method: 'POST', body: JSON.stringify(data) }),
+  getKYCStatus: () => fetchAPI('/kyc'),
+  getKYCDocuments: () => fetchAPI('/kyc/documents'),
 
-  // Visibility Grants
-  getVisibilityGrants: (direction?: string, status?: string) =>
-    fetchAPI(`/account/visibility-grants${direction || status ? `?${direction ? `direction=${direction}` : ''}${direction && status ? '&' : ''}${status ? `status=${status}` : ''}` : ''}`),
-  createVisibilityGrant: (granteeId: string, reviewId: string) =>
-    fetchAPI('/account/visibility-grants', { method: 'POST', body: JSON.stringify({ granteeId, reviewId }) }),
-  respondToVisibilityGrant: (grantId: string, action: 'accept' | 'revoke' | 'reject') =>
-    fetchAPI('/account/visibility-grants', { method: 'PUT', body: JSON.stringify({ grantId, action }) }),
+  // Admin KYC
+  getAdminKYCSubmissions: (status?: string) =>
+    fetchAPI(`/admin/kyc${status ? `?status=${status}` : ''}`),
+  reviewKYC: (kycId: string, data: { status: 'approved' | 'rejected'; adminNote?: string }) =>
+    fetchAPI(`/admin/kyc/${kycId}`, { method: 'PUT', body: JSON.stringify(data) }),
 
   // Admin Reviews
   getAdminReviews: (filters?: { status?: string; userId?: string; page?: number; limit?: number }) =>
@@ -161,39 +151,12 @@ export const api = {
   moderateReview: (reviewId: string, action: 'hide' | 'show' | 'delete' | 'note', adminNote?: string) =>
     fetchAPI('/admin/reviews', { method: 'PUT', body: JSON.stringify({ reviewId, action, adminNote }) }),
   
-  // Subscriptions (Public)
-  getSubscriptionPlans: () => fetchAPI('/subscriptions/plans'),
-  getSubscriptionStatus: () => fetchAPI('/subscriptions/manage'),
-  subscribeToPlan: (data: { planId: string; billingCycle: 'monthly' | 'yearly'; paymentMethod?: string; transactionRef?: string }) =>
-    fetchAPI('/subscriptions/manage', { method: 'POST', body: JSON.stringify(data) }),
-  cancelSubscription: () =>
-    fetchAPI('/subscriptions/manage', { method: 'PUT', body: JSON.stringify({ action: 'cancel' }) }),
-  renewSubscription: () =>
-    fetchAPI('/subscriptions/manage', { method: 'PUT', body: JSON.stringify({ action: 'renew' }) }),
-  
   // Admin
   getAdminStats: () => fetchAPI('/admin'),
   getAdminUsers: () => fetchAPI('/admin/users'),
   toggleUserStatus: (id: string, isActive: boolean) => 
     fetchAPI('/admin/users', { method: 'PUT', body: JSON.stringify({ userId: id, isActive }) }),
   getAdminLogs: () => fetchAPI('/admin/logs'),
-  
-  // Admin Subscriptions
-  getAdminSubscriptions: (status?: string) =>
-    fetchAPI(`/admin/subscriptions${status ? `?status=${status}` : ''}`),
-  createSubscriptionPlan: (data: Record<string, unknown>) =>
-    fetchAPI('/subscriptions/plans/create', { method: 'POST', body: JSON.stringify(data) }),
-  updateSubscriptionPlan: (id: string, data: Record<string, unknown>) =>
-    fetchAPI(`/subscriptions/plans/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  deleteSubscriptionPlan: (id: string) =>
-    fetchAPI(`/subscriptions/plans/${id}`, { method: 'DELETE' }),
-  
-  // Admin Badges
-  getAdminBadges: () => fetchAPI('/admin/badges'),
-  assignBadge: (userId: string, planId: string) =>
-    fetchAPI('/admin/badges', { method: 'PUT', body: JSON.stringify({ userId, planId, action: 'assign' }) }),
-  revokeBadge: (userId: string, planId: string) =>
-    fetchAPI('/admin/badges', { method: 'PUT', body: JSON.stringify({ userId, planId, action: 'revoke' }) }),
   
   // Payment Gateways (Public)
   getActiveGateways: () => fetchAPI('/gateways'),

@@ -208,8 +208,8 @@ export default function DisputesPage() {
               </div>
 
               {submitError && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <p className="text-sm text-red-600">{submitError}</p>
+                <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/40 rounded-lg p-3">
+                  <p className="text-sm text-red-600 dark:text-red-400">{submitError}</p>
                 </div>
               )}
             </div>

@@ -63,7 +63,7 @@ export default function RootLayout({
           attribute="class"
           defaultTheme="light"
           enableSystem={false}
-          storageKey="bangla-escrow-theme"
+          storageKey="amar-deal-theme"
         >
           {children}
           <Toaster />

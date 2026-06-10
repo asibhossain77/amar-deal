@@ -19,10 +19,9 @@ export type DisputeStatus =
 
 export type UserRole = 'user' | 'admin';
 
-// Privacy visibility levels
-export type RatingVisibility = 'private' | 'limited' | 'public';
-export type ReviewVisibility = 'private' | 'shared' | 'public';
-export type TrustScoreVisibility = 'private' | 'limited' | 'public';
+export type VerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
+
+export type KYCDocumentType = 'national_id' | 'passport' | 'driving_license';
 
 export type PageName = 
   | 'home' 
@@ -32,9 +31,7 @@ export type PageName =
   | 'register' 
   | 'forgot-password'
   | 'dashboard' 
-  | 'profile'
   | 'account-settings'
-  | 'subscription-plans'
   | 'transactions' 
   | 'transaction-detail'
   | 'create-transaction'
@@ -42,6 +39,7 @@ export type PageName =
   | 'disputes'
   | 'dispute-detail'
   | 'notifications'
+  | 'public-profile'
   | 'admin-dashboard'
   | 'admin-users'
   | 'admin-transactions'
@@ -52,10 +50,8 @@ export type PageName =
   | 'admin-gateways'
   | 'admin-gateway-payments'
   | 'admin-gateway-theme'
-  | 'admin-subscriptions'
-  | 'admin-badges'
-  | 'admin-reviews'
-  | 'public-profile';
+  | 'admin-kyc'
+  | 'admin-reviews';
 
 export interface AppUser {
   id: string;
@@ -69,23 +65,18 @@ export interface AppUser {
   languagePreference?: string;
   isActive: boolean;
   isVerified?: boolean;
+  verificationStatus?: VerificationStatus;
   createdAt: string;
   // Reputation
   buyerRating?: number;
   sellerRating?: number;
+  buyerReviewCount?: number;
+  sellerReviewCount?: number;
   totalReviews?: number;
   completedDeals?: number;
   successfulTransactions?: number;
   trustScore?: number;
   disputeRate?: number;
-  // Privacy
-  ratingVisibility?: RatingVisibility;
-  reviewVisibility?: ReviewVisibility;
-  trustScoreVisibility?: TrustScoreVisibility;
-  // Subscription
-  currentSubscriptionId?: string;
-  currentSubscription?: UserSubscription;
-  currentPlan?: SubscriptionPlan;
 }
 
 export interface Transaction {
@@ -216,15 +207,6 @@ export interface GatewayTransaction {
 
 // ─── Public Profile Types ─────────────────────────
 
-export interface EarnedBadge {
-  key: string;
-  label: string;
-  description: string;
-  icon: string;
-  earned: boolean;
-  color: string;
-}
-
 export interface PublicReview {
   id: string;
   rating: number;
@@ -247,37 +229,15 @@ export interface PublicProfile {
   avatar?: string;
   accountType: string;
   isVerified: boolean;
-  country?: string;
+  verificationStatus: VerificationStatus;
   createdAt: string;
-  lastActive: string;
-  // Privacy-aware fields (may be hidden based on visibility settings)
-  privacyLevel?: 'full' | 'shared' | 'limited';
-  canRequestAccess?: boolean;
-  ratingIndicators?: string[];
-  trustIndicators?: string[];
-  buyerRating?: number;
-  sellerRating?: number;
-  overallRating?: number;
-  totalReviews?: number;
-  positiveReviewPercentage?: number;
-  completedDeals?: number;
-  successfulTransactions?: number;
-  trustScore?: number;
-  disputeRate?: number;
-  successRate?: number;
-  currentPlan: SubscriptionPlan | null;
-  currentSubscription: { id: string; status: string; startDate: string; endDate?: string } | null;
-  earnedBadges: EarnedBadge[];
-  stats?: {
-    totalTransactions: number;
-    completedTransactions: number;
-    inProgressTransactions: number;
-    disputedTransactions: number;
-    buyerTransactionCount: number;
-    sellerTransactionCount: number;
-  };
-  memberSinceBadge: string;
-  accountAgeDays?: number;
+  buyerRating: number;
+  sellerRating: number;
+  buyerReviewCount: number;
+  sellerReviewCount: number;
+  totalReviews: number;
+  completedDeals: number;
+  trustScore: number;
   reviews?: PublicReview[];
   canReview: boolean;
   hasReviewed: boolean;
@@ -307,45 +267,6 @@ export interface Report {
   adminNote?: string;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface VisibilityGrant {
-  id: string;
-  grantorId: string;
-  granteeId: string;
-  reviewId: string;
-  status: 'pending' | 'accepted' | 'revoked';
-  createdAt: string;
-  updatedAt: string;
-  grantor: {
-    id: string;
-    name: string;
-    username?: string;
-    avatar?: string;
-    isVerified: boolean;
-  };
-  grantee: {
-    id: string;
-    name: string;
-    username?: string;
-    avatar?: string;
-    isVerified: boolean;
-  };
-  review: {
-    id: string;
-    rating: number;
-    comment?: string;
-    reviewType: string;
-    createdAt: string;
-  };
-}
-
-export interface PrivacySettings {
-  ratingVisibility: RatingVisibility;
-  reviewVisibility: ReviewVisibility;
-  trustScoreVisibility: TrustScoreVisibility;
-  grantsGivenCount: number;
-  grantsReceivedCount: number;
 }
 
 export interface AdminReview {
@@ -379,68 +300,43 @@ export interface AdminReview {
   };
 }
 
-// ─── Subscription & Badge Types ─────────────────────────
+// ─── KYC Verification Types ─────────────────────────
 
-export interface SubscriptionPlan {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  badgeIcon: string;
-  badgeColor: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  isActive: boolean;
-  sortOrder: number;
-  // Feature flags
-  priorityListing: boolean;
-  premiumProfile: boolean;
-  featuredProfile: boolean;
-  higherDealLimits: boolean;
-  prioritySupport: boolean;
-  advancedAnalytics: boolean;
-  customProfileBanner: boolean;
-  featuredSellerStatus: boolean;
-  featuredBuyerStatus: boolean;
-  fasterDisputeResolution: boolean;
-  profileVerification: boolean;
-  vipSupport: boolean;
-  maximumVisibility: boolean;
-  exclusiveFeatures: boolean;
-  createdAt: string;
-  updatedAt: string;
-  subscriberCount?: number;
-}
-
-export interface UserSubscription {
+export interface KYCVerification {
   id: string;
   userId: string;
-  planId: string;
-  status: 'active' | 'expired' | 'cancelled' | 'pending';
-  billingCycle: 'monthly' | 'yearly';
-  startDate: string;
-  endDate?: string;
-  autoRenew: boolean;
-  paymentMethod?: string;
-  transactionRef?: string;
-  cancelledAt?: string;
-  createdAt: string;
-  updatedAt: string;
-  plan?: SubscriptionPlan;
-  user?: AppUser;
+  documentType: KYCDocumentType;
+  documentNumber: string;
+  documentFront: string;
+  documentBack?: string;
+  selfie?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  adminNote?: string;
+  submittedAt: string;
+  reviewedAt?: string;
+  reviewerId?: string;
+}
+
+export interface KYCSubmission {
+  documentType: KYCDocumentType;
+  documentNumber: string;
+  documentFront: string;
+  documentBack?: string;
+  selfie?: string;
 }
 
 export interface ReputationData {
   buyerRating: number;
   sellerRating: number;
+  buyerReviewCount: number;
+  sellerReviewCount: number;
   totalReviews: number;
   completedDeals: number;
   successfulTransactions: number;
   trustScore: number;
   disputeRate: number;
   isVerified: boolean;
-  memberSinceBadge: string;
-  memberSinceLabel: string;
+  verificationStatus: VerificationStatus;
   totalTransactions: number;
   disputedCount: number;
 }

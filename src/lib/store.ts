@@ -15,6 +15,9 @@ export interface SiteSettings {
   seo_meta_title: string;
   seo_meta_description: string;
   maintenance_mode: string;   // 'true' or 'false'
+  contact_address: string;
+  contact_phone: string;
+  contact_email: string;
 }
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
@@ -54,6 +57,8 @@ interface AppState {
   // UI
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
+  scrollTarget: string | null;
+  setScrollTarget: (target: string | null) => void;
 
   // Site Settings
   siteSettings: SiteSettings;
@@ -96,6 +101,8 @@ export const useAppStore = create<AppState>()(
       setSelectedDisputeId: (id) => set({ selectedDisputeId: id }),
       selectedPaymentTransactionId: null,
       setSelectedPaymentTransactionId: (id) => set({ selectedPaymentTransactionId: id }),
+      selectedUserId: null,
+      setSelectedUserId: (id) => set({ selectedUserId: id }),
       
       // Data cache
       transactions: [],
@@ -108,6 +115,8 @@ export const useAppStore = create<AppState>()(
       // UI
       sidebarOpen: false,
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
+      scrollTarget: null as string | null,
+      setScrollTarget: (target) => set({ scrollTarget: target }),
 
       // Site Settings
       siteSettings: DEFAULT_SITE_SETTINGS,
@@ -116,13 +125,13 @@ export const useAppStore = create<AppState>()(
       })),
     }),
     {
-      name: 'bangla-escrow-store',
-      // Only persist auth-related fields, navigation, and site settings
+      name: 'amar-deal-store',
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
         currentPage: state.currentPage,
         selectedUserId: state.selectedUserId,
+        scrollTarget: state.scrollTarget,
         siteSettings: state.siteSettings,
       }),
     }

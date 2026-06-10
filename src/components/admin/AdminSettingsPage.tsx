@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { 
   Settings, Loader2, Save, RotateCcw, Globe, Image as ImageIcon, 
   Shield, Search, Upload, X, Eye, Info, Trash2, CheckCircle2,
-  Monitor, Smartphone, Palette, FileText, Copyright, Wrench, AlertTriangle
+  Monitor, Smartphone, Palette, FileText, Copyright, Wrench, AlertTriangle,
+  Phone, Mail, MapPin
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import PageHeader from '@/components/shared/PageHeader';
@@ -18,9 +19,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
+import { useAppStore } from '@/lib/store';
 import type { SiteSettings } from '@/lib/store';
 import { DEFAULT_SITE_SETTINGS } from '@/lib/store';
-import { getSiteName, getSiteCopyright, getSeoMetaTitle, getSeoMetaDescription, SITE_DEFAULTS } from '@/lib/site-defaults';
+import { getSiteName, getSiteCopyright, getSeoMetaTitle, getSeoMetaDescription, getContactAddress, getContactPhone, getContactEmail, SITE_DEFAULTS } from '@/lib/site-defaults';
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp'];
@@ -221,6 +223,7 @@ export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('branding');
+  const { setSiteSettings: setGlobalSiteSettings } = useAppStore();
   const [settings, setSettings] = useState<SiteSettings>({ ...DEFAULT_SITE_SETTINGS });
   const [savedSettings, setSavedSettings] = useState<SiteSettings>({ ...DEFAULT_SITE_SETTINGS });
 
@@ -251,8 +254,10 @@ export default function AdminSettingsPage() {
   const handleSave = async () => {
     try {
       setSaving(true);
-      await api.updateAdminSiteSettings(settings as Record<string, string>);
+      await api.updateAdminSiteSettings(settings as unknown as Record<string, string>);
       setSavedSettings({ ...settings });
+      // Update global store so all pages reflect changes immediately
+      setGlobalSiteSettings(settings);
       toast({
         title: 'সফল!',
         description: 'ওয়েবসাইট সেটিংস সফলভাবে আপডেট হয়েছে',
@@ -356,7 +361,7 @@ export default function AdminSettingsPage() {
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 gap-1">
+        <TabsList className="w-full grid grid-cols-3 sm:grid-cols-5 gap-1">
           <TabsTrigger value="branding" className="gap-1.5 text-xs sm:text-sm">
             <Globe className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">ব্র্যান্ডিং</span>
@@ -371,6 +376,11 @@ export default function AdminSettingsPage() {
             <Search className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">SEO</span>
             <span className="sm:hidden">SEO</span>
+          </TabsTrigger>
+          <TabsTrigger value="contact" className="gap-1.5 text-xs sm:text-sm">
+            <Phone className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">যোগাযোগ</span>
+            <span className="sm:hidden">যোগাযোগ</span>
           </TabsTrigger>
           <TabsTrigger value="advanced" className="gap-1.5 text-xs sm:text-sm">
             <Wrench className="h-3.5 w-3.5" />
@@ -616,7 +626,113 @@ export default function AdminSettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* ═══ TAB 4: Advanced ═══ */}
+        {/* ═══ TAB 4: Contact ═══ */}
+        <TabsContent value="contact" className="space-y-4 mt-4">
+          <Card className="card-modern">
+            <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
+              <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+                <Phone className="h-4 w-4 text-primary" />
+                যোগাযোগ তথ্য
+              </CardTitle>
+              <CardDescription className="text-xs">কন্টাক্ট পেজে প্রদর্শিত ঠিকানা, ফোন ও ইমেইল পরিচালনা করুন</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 p-3 sm:p-4 pt-0">
+              <div className="space-y-2">
+                <Label htmlFor="contact_address" className="text-sm font-semibold flex items-center gap-1.5">
+                  <MapPin className="h-3.5 w-3.5" />
+                  ঠিকানা
+                </Label>
+                <Textarea
+                  id="contact_address"
+                  placeholder="যেমন: ১২৩, গুলশান এভিনিউ&#10;ঢাকা-১২১২, বাংলাদেশ"
+                  value={settings.contact_address}
+                  onChange={(e) => updateField('contact_address', e.target.value)}
+                  rows={3}
+                  className="resize-none"
+                />
+                <p className="text-[10px] text-muted-foreground">কন্টাক্ট পেজে ঠিকানা হিসেবে দেখাবে</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="contact_phone" className="text-sm font-semibold flex items-center gap-1.5">
+                  <Phone className="h-3.5 w-3.5" />
+                  ফোন নম্বর
+                </Label>
+                <Input
+                  id="contact_phone"
+                  placeholder="যেমন: +৮৮০ ১৭০০-০০০০০০"
+                  value={settings.contact_phone}
+                  onChange={(e) => updateField('contact_phone', e.target.value)}
+                  className="min-h-[44px]"
+                />
+                <p className="text-[10px] text-muted-foreground">কন্টাক্ট পেজে ফোন নম্বর হিসেবে দেখাবে</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="contact_email" className="text-sm font-semibold flex items-center gap-1.5">
+                  <Mail className="h-3.5 w-3.5" />
+                  ইমেইল ঠিকানা
+                </Label>
+                <Input
+                  id="contact_email"
+                  type="email"
+                  placeholder="যেমন: support@amardeal.com"
+                  value={settings.contact_email}
+                  onChange={(e) => updateField('contact_email', e.target.value)}
+                  className="min-h-[44px]"
+                />
+                <p className="text-[10px] text-muted-foreground">কন্টাক্ট পেজে ইমেইল হিসেবে দেখাবে</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Contact Preview */}
+          <Card className="card-modern border-primary/20">
+            <CardHeader className="p-3 sm:p-4 pb-2">
+              <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
+                <Eye className="h-4 w-4" />
+                কন্টাক্ট প্রিভিউ
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-3 sm:p-4 pt-0">
+              <div className="border rounded-xl overflow-hidden bg-background">
+                <div className="p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                      <MapPin className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-foreground">ঠিকানা</p>
+                      <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">
+                        {getContactAddress(settings.contact_address)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                      <Phone className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-foreground">ফোন</p>
+                      <p className="text-xs text-muted-foreground">{getContactPhone(settings.contact_phone)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                      <Mail className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-foreground">ইমেইল</p>
+                      <p className="text-xs text-muted-foreground">{getContactEmail(settings.contact_email)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ═══ TAB 5: Advanced ═══ */}
         <TabsContent value="advanced" className="space-y-4 mt-4">
           {/* Maintenance Mode */}
           <Card className="card-modern">

@@ -4,38 +4,30 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   User,
   Shield,
-  Award,
-  Save,
+  CheckCircle2,
   Camera,
   Eye,
   EyeOff,
   Lock,
   Mail,
   Phone,
-  Globe,
-  Languages,
-  Star,
-  TrendingUp,
-  CheckCircle2,
-  AlertTriangle,
   LogOut,
-  Monitor,
-  Smartphone,
-  Bell,
-  ChevronRight,
   Loader2,
   Hash,
   BadgeCheck,
-  Target,
-  BarChart3,
-  Sprout,
-  BookOpen,
-  Zap,
-  Trophy,
-  Medal,
   Settings,
+  Clock,
+  AlertTriangle,
+  Upload,
+  FileText,
+  XCircle,
+  RefreshCw,
+  Smartphone,
+  Monitor,
+  ShieldCheck,
+  IdCard,
 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,7 +36,6 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
-import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -63,99 +54,42 @@ import {
 } from '@/components/ui/dialog';
 import { useAppStore } from '@/lib/store';
 import { api } from '@/lib/api';
-import { formatDate, getInitials, toBanglaNumber, formatBDT } from '@/lib/helpers';
-import type { ReputationData, SubscriptionPlan, UserSubscription, PrivacySettings, VisibilityGrant } from '@/lib/types';
+import { formatDate, getInitials, toBanglaNumber } from '@/lib/helpers';
 import PageHeader from '@/components/shared/PageHeader';
-import BadgeDisplay from '@/components/shared/BadgeDisplay';
 import { useToast } from '@/hooks/use-toast';
 
-// ─── Country Options ─────────────────────────────────
-const COUNTRIES = [
-  { value: 'BD', label: 'বাংলাদেশ' },
-  { value: 'IN', label: 'ভারত' },
-  { value: 'PK', label: 'পাকিস্তান' },
-  { value: 'NP', label: 'নেপাল' },
-  { value: 'LK', label: 'শ্রীলঙ্কা' },
-  { value: 'MM', label: 'মিয়ানমার' },
-  { value: 'MY', label: 'মালয়েশিয়া' },
-  { value: 'SA', label: 'সৌদি আরব' },
-  { value: 'AE', label: 'সংযুক্ত আরব আমিরাত' },
-  { value: 'US', label: 'যুক্তরাষ্ট্র' },
-  { value: 'GB', label: 'যুক্তরাজ্য' },
-  { value: 'OTHER', label: 'অন্যান্য' },
+// ─── Document Type Options ──────────────────────────────
+const DOCUMENT_TYPES = [
+  { value: 'national_id', label: 'জাতীয় পরিচয়পত্র (NID)' },
+  { value: 'passport', label: 'পাসপোর্ট' },
+  { value: 'driving_license', label: 'ড্রাইভিং লাইসেন্স' },
 ];
 
-const LANGUAGES = [
-  { value: 'bn', label: 'বাংলা' },
-  { value: 'en', label: 'English' },
-];
-
-// ─── Member Badge Mapping ──────────────────────────────
-const MEMBER_BADGE_MAP: Record<string, { icon: React.ReactNode; label: string; color: string; bg: string }> = {
-  new: { icon: <Sprout className="w-4 h-4" />, label: 'নতুন', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-950/50' },
-  beginner: { icon: <BookOpen className="w-4 h-4" />, label: 'শুরু', color: 'text-sky-600 dark:text-sky-400', bg: 'bg-sky-100 dark:bg-sky-950/50' },
-  intermediate: { icon: <Zap className="w-4 h-4" />, label: 'মধ্যম', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-950/50' },
-  experienced: { icon: <Trophy className="w-4 h-4" />, label: 'অভিজ্ঞ', color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-950/50' },
-  veteran: { icon: <Medal className="w-4 h-4" />, label: 'প্রবীণ', color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-100 dark:bg-rose-950/50' },
-};
-
-// ─── Circular Progress Component ─────────────────────────
-function CircularProgress({ value, size = 120, strokeWidth = 10 }: { value: number; size?: number; strokeWidth?: number }) {
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (value / 100) * circumference;
-  const center = size / 2;
-
-  const getColor = (v: number) => {
-    if (v >= 80) return '#22c55e';
-    if (v >= 60) return '#3b82f6';
-    if (v >= 40) return '#f59e0b';
-    return '#ef4444';
-  };
-
-  return (
-    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle cx={center} cy={center} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} className="text-muted/30" />
-        <circle
-          cx={center} cy={center} r={radius} fill="none"
-          stroke={getColor(value)}
-          strokeWidth={strokeWidth}
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-          className="transition-all duration-1000 ease-out"
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold text-foreground">{toBanglaNumber(value)}</span>
-        <span className="text-[10px] text-muted-foreground">স্কোর</span>
-      </div>
-    </div>
-  );
+// ─── Password Strength Calculator ─────────────────────────
+function getPasswordStrength(pwd: string) {
+  if (!pwd) return { score: 0, label: '', color: '', textColor: '' };
+  let score = 0;
+  if (pwd.length >= 6) score += 20;
+  if (pwd.length >= 8) score += 20;
+  if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score += 20;
+  if (/\d/.test(pwd)) score += 20;
+  if (/[^a-zA-Z\d]/.test(pwd)) score += 20;
+  if (score <= 20) return { score, label: 'দুর্বল', color: 'bg-red-500', textColor: 'text-red-500' };
+  if (score <= 40) return { score, label: 'মাঝারি', color: 'bg-orange-500', textColor: 'text-orange-500' };
+  if (score <= 60) return { score, label: 'ভালো', color: 'bg-yellow-500', textColor: 'text-yellow-500' };
+  if (score <= 80) return { score, label: 'শক্তিশালী', color: 'bg-green-500', textColor: 'text-green-500' };
+  return { score, label: 'অত্যন্ত শক্তিশালী', color: 'bg-emerald-500', textColor: 'text-emerald-500' };
 }
 
-// ─── Star Rating Display ──────────────────────────────
-function StarRating({ rating, max = 5 }: { rating: number; max?: number }) {
-  return (
-    <div className="flex items-center gap-0.5">
-      {Array.from({ length: max }, (_, i) => (
-        <Star
-          key={i}
-          className={`w-4 h-4 transition-colors ${
-            i < Math.floor(rating)
-              ? 'text-amber-400 fill-amber-400'
-              : i < rating
-                ? 'text-amber-400 fill-amber-400/50'
-                : 'text-muted/40'
-          }`}
-        />
-      ))}
-      <span className="ml-1.5 text-sm font-medium text-foreground">
-        {toBanglaNumber(parseFloat(rating.toFixed(1)))}
-      </span>
-    </div>
-  );
+// ─── KYC Verification Type ──────────────────────────────
+interface KYCVerificationData {
+  id: string;
+  documentType: string;
+  documentNumber: string;
+  status: 'pending' | 'approved' | 'rejected';
+  adminNote?: string;
+  submittedAt: string;
+  reviewedAt?: string;
 }
 
 // ─── Profile Form State ──────────────────────────────
@@ -164,33 +98,33 @@ interface ProfileFormState {
   username: string;
   email: string;
   phone: string;
-  country: string;
-  languagePreference: string;
   avatar: string;
 }
 
+// ═══════════════════════════════════════════════════════════
+//  MAIN COMPONENT
+// ═══════════════════════════════════════════════════════════
 export default function AccountSettingsPage() {
   const { user, setUser } = useAppStore();
   const { toast } = useToast();
 
-  // ─── State ──────────────────────────────────
+  // ─── Core State ──────────────────────────────────
   const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Profile
+  // ─── Profile State ──────────────────────────────
   const [profile, setProfile] = useState<ProfileFormState>({
     name: '',
     username: '',
     email: '',
     phone: '',
-    country: 'BD',
-    languagePreference: 'bn',
     avatar: '',
   });
   const [avatarPreview, setAvatarPreview] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Security
+  // ─── Security State ─────────────────────────────
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -198,48 +132,45 @@ export default function AccountSettingsPage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const [loggingOutAll, setLoggingOutAll] = useState(false);
 
-  // Email change dialog
+  // ─── Email Dialog State ─────────────────────────
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [newEmail, setNewEmail] = useState('');
   const [emailPassword, setEmailPassword] = useState('');
   const [changingEmail, setChangingEmail] = useState(false);
 
-  // Phone change dialog
+  // ─── Phone Dialog State ─────────────────────────
   const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
   const [newPhone, setNewPhone] = useState('');
   const [changingPhone, setChangingPhone] = useState(false);
 
-  // Security notifications
-  const [securityNotifications, setSecurityNotifications] = useState(true);
-
-  // Reputation
-  const [reputation, setReputation] = useState<ReputationData | null>(null);
-
-  // Subscription
-  const [currentPlan, setCurrentPlan] = useState<SubscriptionPlan | null>(null);
-  const [subscription, setSubscription] = useState<UserSubscription | null>(null);
-
-  // Privacy
-  const [privacySettings, setPrivacySettings] = useState<{
-    ratingVisibility: string;
-    reviewVisibility: string;
-    trustScoreVisibility: string;
-  }>({
-    ratingVisibility: 'private',
-    reviewVisibility: 'private',
-    trustScoreVisibility: 'private',
+  // ─── KYC / Verification State ──────────────────
+  const [verificationStatus, setVerificationStatus] = useState<string>('unverified');
+  const [kycVerification, setKycVerification] = useState<KYCVerificationData | null>(null);
+  const [kycLoading, setKycLoading] = useState(false);
+  const [kycSubmitting, setKycSubmitting] = useState(false);
+  const [showKycForm, setShowKycForm] = useState(false);
+  const [kycForm, setKycForm] = useState({
+    documentType: '',
+    documentNumber: '',
+    documentFront: '',
+    documentBack: '',
+    selfie: '',
   });
-  const [visibilityGrantsGiven, setVisibilityGrantsGiven] = useState<VisibilityGrant[]>([]);
-  const [visibilityGrantsReceived, setVisibilityGrantsReceived] = useState<VisibilityGrant[]>([]);
-  const [privacyLoading, setPrivacyLoading] = useState(false);
-  const [privacySaving, setPrivacySaving] = useState(false);
-  const [grantActionLoading, setGrantActionLoading] = useState<string | null>(null);
+  const [documentFrontName, setDocumentFrontName] = useState('');
+  const [documentBackName, setDocumentBackName] = useState('');
+  const [selfieName, setSelfieName] = useState('');
+  const documentFrontRef = useRef<HTMLInputElement>(null);
+  const documentBackRef = useRef<HTMLInputElement>(null);
+  const selfieRef = useRef<HTMLInputElement>(null);
 
-  // File input ref
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // ─── Password Strength ─────────────────────────
+  const pwdStrength = getPasswordStrength(newPassword);
 
-  // ─── Load Data ──────────────────────────────
+  // ═══════════════════════════════════════════════════════════
+  //  DATA LOADING
+  // ═══════════════════════════════════════════════════════════
   const loadProfile = useCallback(async () => {
     try {
       setLoading(true);
@@ -250,21 +181,11 @@ export default function AccountSettingsPage() {
         username: u.username || '',
         email: u.email || '',
         phone: u.phone || '',
-        country: u.country || 'BD',
-        languagePreference: u.languagePreference || 'bn',
         avatar: u.avatar || '',
       });
       setAvatarPreview(u.avatar || '');
-
-      if (data.subscription) {
-        setSubscription(data.subscription);
-      }
-      if (data.plan || data.currentPlan) {
-        setCurrentPlan(data.plan || data.currentPlan);
-      }
-      // Also update store user - use functional update to avoid stale closure
       if (u.name && u.email) {
-        setUser((prev) => prev ? { ...prev, ...u } as typeof prev : u as typeof prev);
+        setUser((prev) => (prev ? { ...prev, ...u } as typeof prev : u as typeof prev));
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'প্রোফাইল লোড করতে সমস্যা হয়েছে';
@@ -274,54 +195,57 @@ export default function AccountSettingsPage() {
     }
   }, [toast, setUser]);
 
-  const loadReputation = useCallback(async () => {
+  const loadKYCStatus = useCallback(async () => {
     try {
-      const data = await api.getReputation();
-      setReputation(data);
+      setKycLoading(true);
+      const data = await api.getKYCStatus();
+      const verification = data.verification || null;
+      const status = data.userStatus?.verificationStatus || data.verificationStatus || 'unverified';
+      setKycVerification(verification);
+      setVerificationStatus(status);
+      // If unverified or rejected, show form by default
+      if (status === 'unverified' || status === 'rejected') {
+        setShowKycForm(true);
+      } else {
+        setShowKycForm(false);
+      }
     } catch {
-      // Silently fail - reputation tab can show defaults
-    }
-  }, []);
-
-  const loadPrivacySettings = useCallback(async () => {
-    try {
-      setPrivacyLoading(true);
-      const data = await api.getPrivacySettings();
-      // API returns { settings: { ratingVisibility, reviewVisibility, trustScoreVisibility }, ... }
-      const s = data.settings || data;
-      setPrivacySettings({
-        ratingVisibility: s.ratingVisibility || 'private',
-        reviewVisibility: s.reviewVisibility || 'private',
-        trustScoreVisibility: s.trustScoreVisibility || 'private',
-      });
-    } catch {
-      // Silently fail - privacy tab will show defaults
+      // Silently fail — default to unverified
+      setVerificationStatus('unverified');
+      setShowKycForm(true);
     } finally {
-      setPrivacyLoading(false);
-    }
-  }, []);
-
-  const loadVisibilityGrants = useCallback(async () => {
-    try {
-      const [givenData, receivedData] = await Promise.all([
-        api.getVisibilityGrants('given'),
-        api.getVisibilityGrants('received'),
-      ]);
-      setVisibilityGrantsGiven(Array.isArray(givenData) ? givenData : givenData?.grants || []);
-      setVisibilityGrantsReceived(Array.isArray(receivedData) ? receivedData : receivedData?.grants || []);
-    } catch {
-      // Silently fail - grants will show empty
+      setKycLoading(false);
     }
   }, []);
 
   useEffect(() => {
     loadProfile();
-    loadReputation();
-    loadPrivacySettings();
-    loadVisibilityGrants();
-  }, [loadProfile, loadReputation, loadPrivacySettings, loadVisibilityGrants]);
+    loadKYCStatus();
+  }, [loadProfile, loadKYCStatus]);
 
-  // ─── Handlers ───────────────────────────────
+  // ═══════════════════════════════════════════════════════════
+  //  PROFILE HANDLERS
+  // ═══════════════════════════════════════════════════════════
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'ত্রুটি', description: 'শুধুমাত্র ছবি ফাইল আপলোড করুন', variant: 'destructive' });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: 'ত্রুটি', description: 'ছবি ২MB এর বেশি হতে পারবে না', variant: 'destructive' });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      setAvatarPreview(result);
+      setProfile((p) => ({ ...p, avatar: result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleProfileSave = async () => {
     if (!profile.name.trim()) {
       toast({ title: 'ত্রুটি', description: 'নাম খালি রাখা যাবে না', variant: 'destructive' });
@@ -332,69 +256,19 @@ export default function AccountSettingsPage() {
       await api.updateAccountProfile({
         name: profile.name,
         username: profile.username || undefined,
-        phone: profile.phone || undefined,
-        country: profile.country,
-        languagePreference: profile.languagePreference,
         avatar: profile.avatar || undefined,
       });
       toast({ title: 'সফল!', description: 'প্রোফাইল সফলভাবে আপডেট হয়েছে' });
-      // Update store using functional update to avoid stale closure
-      setUser((prev) => prev ? { ...prev, name: profile.name, username: profile.username, phone: profile.phone, country: profile.country, languagePreference: profile.languagePreference, avatar: profile.avatar } as typeof prev : prev);
+      setUser((prev) =>
+        prev
+          ? { ...prev, name: profile.name, username: profile.username, avatar: profile.avatar } as typeof prev
+          : prev
+      );
     } catch (err) {
       const message = err instanceof Error ? err.message : 'আপডেট করতে সমস্যা হয়েছে';
       toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast({ title: 'ত্রুটি', description: 'শুধুমাত্র ছবি ফাইল আপলোড করুন', variant: 'destructive' });
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      toast({ title: 'ত্রুটি', description: 'ছবি ২MB এর বেশি হতে পারবে না', variant: 'destructive' });
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = reader.result as string;
-      setAvatarPreview(result);
-      setProfile((p) => ({ ...p, avatar: result }));
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleChangePassword = async () => {
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      toast({ title: 'ত্রুটি', description: 'সকল ফিল্ড পূরণ করুন', variant: 'destructive' });
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast({ title: 'ত্রুটি', description: 'নতুন পাসওয়ার্ড মিলছে না', variant: 'destructive' });
-      return;
-    }
-    if (newPassword.length < 6) {
-      toast({ title: 'ত্রুটি', description: 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে', variant: 'destructive' });
-      return;
-    }
-    try {
-      setChangingPassword(true);
-      await api.changePassword(currentPassword, newPassword);
-      toast({ title: 'সফল!', description: 'পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে' });
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'পাসওয়ার্ড পরিবর্তন করতে সমস্যা হয়েছে';
-      toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
-    } finally {
-      setChangingPassword(false);
     }
   };
 
@@ -439,38 +313,147 @@ export default function AccountSettingsPage() {
     }
   };
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECURITY HANDLERS
+  // ═══════════════════════════════════════════════════════════
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast({ title: 'ত্রুটি', description: 'সকল ফিল্ড পূরণ করুন', variant: 'destructive' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: 'ত্রুটি', description: 'নতুন পাসওয়ার্ড মিলছে না', variant: 'destructive' });
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast({ title: 'ত্রুটি', description: 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে', variant: 'destructive' });
+      return;
+    }
+    try {
+      setChangingPassword(true);
+      await api.changePassword(currentPassword, newPassword);
+      toast({ title: 'সফল!', description: 'পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে' });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'পাসওয়ার্ড পরিবর্তন করতে সমস্যা হয়েছে';
+      toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
   const handleLogoutAllDevices = async () => {
     try {
+      setLoggingOutAll(true);
       await api.logout();
       toast({ title: 'সফল!', description: 'সকল ডিভাইস থেকে লগআউট হয়েছে' });
     } catch {
       toast({ title: 'ত্রুটি', description: 'লগআউট করতে সমস্যা হয়েছে', variant: 'destructive' });
+    } finally {
+      setLoggingOutAll(false);
     }
   };
 
-  // ─── Password Strength ─────────────────────────
-  const getPasswordStrength = (pwd: string) => {
-    if (!pwd) return { score: 0, label: '', color: '' };
-    let score = 0;
-    if (pwd.length >= 6) score += 20;
-    if (pwd.length >= 8) score += 20;
-    if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score += 20;
-    if (/\d/.test(pwd)) score += 20;
-    if (/[^a-zA-Z\d]/.test(pwd)) score += 20;
-    if (score <= 20) return { score, label: 'দুর্বল', color: 'bg-red-500' };
-    if (score <= 40) return { score, label: 'মাঝারি', color: 'bg-orange-500' };
-    if (score <= 60) return { score, label: 'ভালো', color: 'bg-yellow-500' };
-    if (score <= 80) return { score, label: 'শক্তিশালী', color: 'bg-green-500' };
-    return { score, label: 'অত্যন্ত শক্তিশালী', color: 'bg-emerald-500' };
+  // ═══════════════════════════════════════════════════════════
+  //  KYC HANDLERS
+  // ═══════════════════════════════════════════════════════════
+  const handleKYCImageUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: 'documentFront' | 'documentBack' | 'selfie'
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'ত্রুটি', description: 'শুধুমাত্র ছবি ফাইল আপলোড করুন', variant: 'destructive' });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: 'ত্রুটি', description: 'ছবি ২MB এর বেশি হতে পারবে না', variant: 'destructive' });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      setKycForm((prev) => ({ ...prev, [field]: result }));
+    };
+    reader.readAsDataURL(file);
+
+    const nameMap: Record<string, React.Dispatch<React.SetStateAction<string>>> = {
+      documentFront: setDocumentFrontName,
+      documentBack: setDocumentBackName,
+      selfie: setSelfieName,
+    };
+    nameMap[field]?.(file.name);
   };
 
-  const pwdStrength = getPasswordStrength(newPassword);
+  const handleSubmitKYC = async () => {
+    if (!kycForm.documentType) {
+      toast({ title: 'ত্রুটি', description: 'ডকুমেন্টের ধরন নির্বাচন করুন', variant: 'destructive' });
+      return;
+    }
+    if (!kycForm.documentNumber.trim()) {
+      toast({ title: 'ত্রুটি', description: 'ডকুমেন্ট নম্বর দিন', variant: 'destructive' });
+      return;
+    }
+    if (!kycForm.documentFront) {
+      toast({ title: 'ত্রুটি', description: 'ডকুমেন্টের সামনের ছবি আপলোড করুন', variant: 'destructive' });
+      return;
+    }
+    try {
+      setKycSubmitting(true);
+      await api.submitKYC({
+        documentType: kycForm.documentType,
+        documentNumber: kycForm.documentNumber,
+        documentFront: kycForm.documentFront,
+        documentBack: kycForm.documentBack || undefined,
+        selfie: kycForm.selfie || undefined,
+      });
+      toast({ title: 'সফল!', description: 'যাচাইকরণ নথি সফলভাবে জমা হয়েছে' });
+      setVerificationStatus('pending');
+      setShowKycForm(false);
+      // Reload KYC status
+      await loadKYCStatus();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'KYC জমা দিতে সমস্যা হয়েছে';
+      toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
+    } finally {
+      setKycSubmitting(false);
+    }
+  };
 
-  // ─── Loading State ─────────────────────────────
+  const handleResubmitKYC = () => {
+    setKycForm({
+      documentType: '',
+      documentNumber: '',
+      documentFront: '',
+      documentBack: '',
+      selfie: '',
+    });
+    setDocumentFrontName('');
+    setDocumentBackName('');
+    setSelfieName('');
+    setShowKycForm(true);
+  };
+
+  // ─── Document type label ─────────────────────────
+  const getDocTypeLabel = (type: string) => {
+    const found = DOCUMENT_TYPES.find((d) => d.value === type);
+    return found?.label || type;
+  };
+
+  // ═══════════════════════════════════════════════════════════
+  //  LOADING SKELETON
+  // ═══════════════════════════════════════════════════════════
   if (loading) {
     return (
       <div className="p-4 md:p-6 lg:p-8 space-y-6">
-        <PageHeader title="অ্যাকাউন্ট সেটিংস" icon={<Settings className="h-5 w-5 text-primary" />} backTo="dashboard" />
+        <PageHeader
+          title="অ্যাকাউন্ট সেটিংস"
+          icon={<Settings className="h-5 w-5 text-primary" />}
+          backTo="dashboard"
+        />
         <div className="space-y-4">
           <div className="animate-pulse h-10 bg-muted rounded-lg w-64" />
           <div className="animate-pulse h-64 bg-muted rounded-xl" />
@@ -479,50 +462,54 @@ export default function AccountSettingsPage() {
     );
   }
 
-  const memberBadge = reputation?.memberSinceBadge || 'new';
-  const memberBadgeInfo = MEMBER_BADGE_MAP[memberBadge] || MEMBER_BADGE_MAP.new;
-
+  // ═══════════════════════════════════════════════════════════
+  //  RENDER
+  // ═══════════════════════════════════════════════════════════
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-5xl mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-4xl mx-auto">
       <PageHeader
         title="অ্যাকাউন্ট সেটিংস"
-        subtitle="আপনার প্রোফাইল, নিরাপত্তা ও সুনাম পরিচালনা করুন"
+        subtitle="আপনার প্রোফাইল, নিরাপত্তা ও ভেরিফিকেশন পরিচালনা করুন"
         icon={<Settings className="h-5 w-5 text-primary" />}
         backTo="dashboard"
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="w-full sm:w-auto grid grid-cols-4 sm:inline-flex h-10 p-1 bg-muted/60 rounded-xl">
-          <TabsTrigger value="profile" className="gap-1.5 rounded-lg text-xs sm:text-sm data-[state=active]:shadow-sm">
+        <TabsList className="w-full sm:w-auto grid grid-cols-3 sm:inline-flex h-11 p-1 bg-muted/60 rounded-xl">
+          <TabsTrigger
+            value="profile"
+            className="gap-1.5 rounded-lg text-xs sm:text-sm data-[state=active]:shadow-sm"
+          >
             <User className="w-3.5 h-3.5" />
             প্রোফাইল
           </TabsTrigger>
-          <TabsTrigger value="security" className="gap-1.5 rounded-lg text-xs sm:text-sm data-[state=active]:shadow-sm">
+          <TabsTrigger
+            value="security"
+            className="gap-1.5 rounded-lg text-xs sm:text-sm data-[state=active]:shadow-sm"
+          >
             <Shield className="w-3.5 h-3.5" />
             নিরাপত্তা
           </TabsTrigger>
-          <TabsTrigger value="reputation" className="gap-1.5 rounded-lg text-xs sm:text-sm data-[state=active]:shadow-sm">
-            <Award className="w-3.5 h-3.5" />
-            সুনাম
-          </TabsTrigger>
-          <TabsTrigger value="privacy" className="gap-1.5 rounded-lg text-xs sm:text-sm data-[state=active]:shadow-sm">
-            <Eye className="w-3.5 h-3.5" />
-            গোপনীয়তা
+          <TabsTrigger
+            value="verification"
+            className="gap-1.5 rounded-lg text-xs sm:text-sm data-[state=active]:shadow-sm"
+          >
+            <BadgeCheck className="w-3.5 h-3.5" />
+            ভেরিফিকেশন
           </TabsTrigger>
         </TabsList>
 
         {/* ═══════════════════════════════════════════════════════
-            TAB 1: প্রোফাইল (Profile Information)
+            TAB 1: প্রোফাইল (Profile)
             ═══════════════════════════════════════════════════════ */}
         <TabsContent value="profile" className="space-y-6">
-          {/* Profile Header Card */}
-          <Card className="overflow-hidden border-0 shadow-md bg-gradient-to-br from-card via-card to-primary/5">
-            <div className="h-24 sm:h-32 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
-            <CardContent className="relative px-4 sm:px-6 pb-6 -mt-12 sm:-mt-16">
-              <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4">
+          {/* Avatar Card */}
+          <Card className="border-0 shadow-md bg-gradient-to-br from-card via-card to-primary/5">
+            <CardContent className="p-6">
+              <div className="flex flex-col sm:flex-row items-center gap-5">
                 {/* Avatar */}
-                <div className="relative group">
-                  <Avatar className="h-20 w-20 sm:h-28 sm:w-28 border-4 border-background shadow-xl ring-2 ring-primary/20">
+                <div className="relative group shrink-0">
+                  <Avatar className="h-20 w-20 sm:h-24 sm:w-24 border-4 border-background shadow-xl ring-2 ring-primary/20">
                     {avatarPreview ? (
                       <AvatarImage src={avatarPreview} alt={profile.name} />
                     ) : (
@@ -547,18 +534,15 @@ export default function AccountSettingsPage() {
                   />
                 </div>
 
-                {/* Name & Info */}
-                <div className="flex-1 text-center sm:text-left min-w-0">
-                  <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2">
-                    <h2 className="text-xl sm:text-2xl font-bold text-foreground truncate">
+                {/* User Info */}
+                <div className="text-center sm:text-left min-w-0 flex-1">
+                  <div className="flex items-center justify-center sm:justify-start gap-2">
+                    <h2 className="text-xl font-bold text-foreground truncate">
                       {profile.name || 'নামহীন ব্যবহারকারী'}
                     </h2>
-                    <div className="flex items-center gap-1.5">
-                      {user?.isVerified && (
-                        <BadgeCheck className="w-5 h-5 text-blue-500 shrink-0" />
-                      )}
-                      <BadgeDisplay plan={currentPlan} size="sm" showLabel={true} />
-                    </div>
+                    {user?.isVerified && (
+                      <BadgeCheck className="w-5 h-5 text-emerald-500 shrink-0" />
+                    )}
                   </div>
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 gap-y-1 mt-1 text-sm text-muted-foreground">
                     {profile.username && (
@@ -571,13 +555,10 @@ export default function AccountSettingsPage() {
                       <Mail className="w-3.5 h-3.5" />
                       {profile.email}
                     </span>
-                    {user?.createdAt && (
-                      <span className="flex items-center gap-1">
-                        <Sprout className="w-3.5 h-3.5" />
-                        সদস্য: {formatDate(user.createdAt)}
-                      </span>
-                    )}
                   </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    ছবি পরিবর্তন করতে ক্যামেরা আইকনে ক্লিক করুন • সর্বোচ্চ ২MB
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -590,9 +571,8 @@ export default function AccountSettingsPage() {
                 <User className="w-5 h-5 text-primary" />
                 প্রোফাইল তথ্য সম্পাদনা
               </CardTitle>
-              <CardDescription>আপনার ব্যক্তিগত তথ্য আপডেট করুন</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* পুরো নাম */}
                 <div className="space-y-2">
@@ -617,16 +597,22 @@ export default function AccountSettingsPage() {
                     ইউজারনেম
                   </Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">@</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium text-sm">
+                      @
+                    </span>
                     <Input
                       id="username"
                       value={profile.username}
-                      onChange={(e) => setProfile((p) => ({ ...p, username: e.target.value.replace(/[^a-zA-Z0-9_]/g, '') }))}
+                      onChange={(e) =>
+                        setProfile((p) => ({ ...p, username: e.target.value.replace(/[^a-zA-Z0-9_]/g, '') }))
+                      }
                       className="pl-8 h-10"
                       placeholder="username"
                     />
                   </div>
-                  <p className="text-[11px] text-muted-foreground">শুধুমাত্র ইংরেজি অক্ষর, সংখ্যা ও আন্ডারস্কোর</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    শুধুমাত্র ইংরেজি অক্ষর, সংখ্যা ও আন্ডারস্কোর
+                  </p>
                 </div>
 
                 {/* ইমেইল */}
@@ -750,90 +736,6 @@ export default function AccountSettingsPage() {
                     </Dialog>
                   </div>
                 </div>
-
-                {/* দেশ */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">দেশ</Label>
-                  <Select
-                    value={profile.country}
-                    onValueChange={(v) => setProfile((p) => ({ ...p, country: v }))}
-                  >
-                    <SelectTrigger className="w-full h-10">
-                      <Globe className="w-4 h-4 mr-1 text-muted-foreground" />
-                      <SelectValue placeholder="দেশ নির্বাচন করুন" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {COUNTRIES.map((c) => (
-                        <SelectItem key={c.value} value={c.value}>
-                          {c.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* ভাষা */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">ভাষা</Label>
-                  <Select
-                    value={profile.languagePreference}
-                    onValueChange={(v) => setProfile((p) => ({ ...p, languagePreference: v }))}
-                  >
-                    <SelectTrigger className="w-full h-10">
-                      <Languages className="w-4 h-4 mr-1 text-muted-foreground" />
-                      <SelectValue placeholder="ভাষা নির্বাচন করুন" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LANGUAGES.map((l) => (
-                        <SelectItem key={l.value} value={l.value}>
-                          {l.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* প্রোফাইল ছবি আপলোড */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">প্রোফাইল ছবি</Label>
-                <div
-                  className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/40 transition-colors cursor-pointer bg-muted/20"
-                  onClick={() => fileInputRef.current?.click()}
-                  onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const file = e.dataTransfer.files?.[0];
-                    if (file && file.type.startsWith('image/')) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        const result = reader.result as string;
-                        setAvatarPreview(result);
-                        setProfile((p) => ({ ...p, avatar: result }));
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                >
-                  <Avatar className="h-16 w-16 border-2 border-muted">
-                    {avatarPreview ? (
-                      <AvatarImage src={avatarPreview} alt="Preview" />
-                    ) : (
-                      <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                        {getInitials(profile.name)}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div className="text-center sm:text-left">
-                    <p className="text-sm font-medium text-foreground">ছবি আপলোড করতে ক্লিক করুন অথবা টেনে আনুন</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">PNG, JPG, WebP — সর্বোচ্চ ২MB</p>
-                  </div>
-                  <Button variant="outline" size="sm" className="shrink-0">
-                    <Camera className="w-4 h-4 mr-1.5" />
-                    ছবি নির্বাচন
-                  </Button>
-                </div>
               </div>
 
               <Separator />
@@ -848,7 +750,7 @@ export default function AccountSettingsPage() {
                   {saving ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   ) : (
-                    <Save className="w-4 h-4 mr-2" />
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
                   )}
                   সংরক্ষণ করুন
                 </Button>
@@ -858,17 +760,16 @@ export default function AccountSettingsPage() {
         </TabsContent>
 
         {/* ═══════════════════════════════════════════════════════
-            TAB 2: নিরাপত্তা (Security Settings)
+            TAB 2: নিরাপত্তা (Security)
             ═══════════════════════════════════════════════════════ */}
         <TabsContent value="security" className="space-y-6">
-          {/* পাসওয়ার্ড পরিবর্তন */}
+          {/* Password Change Card */}
           <Card className="border-0 shadow-md">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Lock className="w-5 h-5 text-primary" />
                 পাসওয়ার্ড পরিবর্তন
               </CardTitle>
-              <CardDescription>নিয়মিত পাসওয়ার্ড পরিবর্তন আপনার অ্যাকাউন্ট নিরাপদ রাখে</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* বর্তমান পাসওয়ার্ড */}
@@ -896,6 +797,8 @@ export default function AccountSettingsPage() {
                 </div>
               </div>
 
+              <Separator />
+
               {/* নতুন পাসওয়ার্ড */}
               <div className="space-y-2">
                 <Label htmlFor="newPassword" className="text-sm font-medium">
@@ -919,12 +822,16 @@ export default function AccountSettingsPage() {
                     {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                {/* Password Strength Indicator */}
                 {newPassword && (
                   <div className="space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <Progress value={pwdStrength.score} className="h-1.5 flex-1" />
-                      <span className="text-xs text-muted-foreground min-w-[80px]">{pwdStrength.label}</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">পাসওয়ার্ড শক্তি</span>
+                      <span className={`text-xs font-medium ${pwdStrength.textColor}`}>
+                        {pwdStrength.label}
+                      </span>
                     </div>
+                    <Progress value={pwdStrength.score} className="h-1.5" />
                   </div>
                 )}
               </div>
@@ -954,12 +861,12 @@ export default function AccountSettingsPage() {
                 </div>
                 {confirmPassword && newPassword !== confirmPassword && (
                   <p className="text-xs text-red-500 flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3" />
+                    <XCircle className="w-3 h-3" />
                     পাসওয়ার্ড মিলছে না
                   </p>
                 )}
                 {confirmPassword && newPassword === confirmPassword && newPassword.length > 0 && (
-                  <p className="text-xs text-green-600 flex items-center gap-1">
+                  <p className="text-xs text-emerald-500 flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3" />
                     পাসওয়ার্ড মিলেছে
                   </p>
@@ -969,7 +876,7 @@ export default function AccountSettingsPage() {
               <Button
                 onClick={handleChangePassword}
                 disabled={changingPassword}
-                className="min-w-[160px] h-10 shadow-md hover:shadow-lg transition-all"
+                className="w-full sm:w-auto min-w-[160px] h-10"
               >
                 {changingPassword ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -981,764 +888,364 @@ export default function AccountSettingsPage() {
             </CardContent>
           </Card>
 
-          {/* ইমেইল পরিবর্তন */}
-          <Card className="border-0 shadow-md">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Mail className="w-5 h-5 text-primary" />
-                ইমেইল পরিবর্তন
-              </CardTitle>
-              <CardDescription>আপনার লগইন ইমেইল পরিবর্তন করুন</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl bg-muted/30">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
-                    <Mail className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">বর্তমান ইমেইল</p>
-                    <p className="text-sm font-medium text-foreground truncate">{profile.email}</p>
-                  </div>
-                </div>
-                <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="shrink-0">
-                      <ChevronRight className="w-4 h-4 mr-1" />
-                      ইমেইল পরিবর্তন
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-2">
-                        <Mail className="w-5 h-5 text-primary" />
-                        ইমেইল পরিবর্তন
-                      </DialogTitle>
-                      <DialogDescription>
-                        আপনার নতুন ইমেইল এড্রেস এবং পাসওয়ার্ড দিন
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-2">
-                      <div className="space-y-2">
-                        <Label>বর্তমান ইমেইল</Label>
-                        <Input value={profile.email} readOnly className="bg-muted/50" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="secNewEmail">নতুন ইমেইল</Label>
-                        <Input
-                          id="secNewEmail"
-                          type="email"
-                          value={newEmail}
-                          onChange={(e) => setNewEmail(e.target.value)}
-                          placeholder="new@email.com"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="secEmailPassword">পাসওয়ার্ড নিশ্চিত করুন</Label>
-                        <Input
-                          id="secEmailPassword"
-                          type="password"
-                          value={emailPassword}
-                          onChange={(e) => setEmailPassword(e.target.value)}
-                          placeholder="••••••"
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setEmailDialogOpen(false)}>
-                        বাতিল
-                      </Button>
-                      <Button onClick={handleChangeEmail} disabled={changingEmail}>
-                        {changingEmail && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                        ইমেইল পরিবর্তন করুন
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* সক্রিয় সেশন */}
+          {/* Active Sessions Card */}
           <Card className="border-0 shadow-md">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Monitor className="w-5 h-5 text-primary" />
                 সক্রিয় সেশন
               </CardTitle>
-              <CardDescription>আপনার বর্তমান লগইন সেশনের তথ্য</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-4 rounded-xl bg-muted/30 border border-border/50">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-950/50 shrink-0">
-                    <Smartphone className="w-5 h-5 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-foreground">বর্তমান ডিভাইস</p>
-                      <Badge variant="secondary" className="text-[10px] bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 border-0">
-                        সক্রিয়
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {typeof navigator !== 'undefined' ? navigator.userAgent.split(' ').slice(-1)[0] : 'ব্রাউজার'} • এই ডিভাইস
-                    </p>
-                  </div>
+              <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/30 border border-border/50">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                  <Smartphone className="w-5 h-5 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">বর্তমান ডিভাইস</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    আপনি এই ডিভাইস থেকে লগইন করেছেন। সেশন পরিচালনার জন্য নিচের বাটন ব্যবহার করুন।
+                  </p>
                 </div>
               </div>
 
-              <Button
-                variant="destructive"
-                onClick={handleLogoutAllDevices}
-                className="w-full sm:w-auto h-10"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                সকল ডিভাইস থেকে লগআউট
-              </Button>
-            </CardContent>
-          </Card>
+              <Separator />
 
-          {/* নিরাপত্তা বিজ্ঞপ্তি */}
-          <Card className="border-0 shadow-md">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Bell className="w-5 h-5 text-primary" />
-                নিরাপত্তা বিজ্ঞপ্তি
-              </CardTitle>
-              <CardDescription>সনাতনী লগইন এবং সুরক্ষা সতর্কতা সম্পর্কে বিজ্ঞপ্তি পান</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/50 shrink-0">
-                    <Bell className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">নিরাপত্তা সতর্কতা</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      অস্বাভাবিক লগইন এবং অ্যাকাউন্ট পরিবর্তনের বিজ্ঞপ্তি
-                    </p>
-                  </div>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium text-foreground">সকল ডিভাইস থেকে লগআউট</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    অন্য সকল ডিভাইসের সেশন বাতিল করুন
+                  </p>
                 </div>
-                <Switch
-                  checked={securityNotifications}
-                  onCheckedChange={setSecurityNotifications}
-                  aria-label="নিরাপত্তা বিজ্ঞপ্তি টগল"
-                />
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleLogoutAllDevices}
+                  disabled={loggingOutAll}
+                  className="shrink-0"
+                >
+                  {loggingOutAll ? (
+                    <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                  ) : (
+                    <LogOut className="w-4 h-4 mr-1.5" />
+                  )}
+                  সকল লগআউট
+                </Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         {/* ═══════════════════════════════════════════════════════
-            TAB 3: সুনাম (Reputation System)
+            TAB 3: ভেরিফিকেশন (Verification Center)
             ═══════════════════════════════════════════════════════ */}
-        <TabsContent value="reputation" className="space-y-6">
-          {/* Trust Score Hero Card */}
-          <Card className="border-0 shadow-md overflow-hidden">
-            <div className="bg-gradient-to-br from-primary/10 via-card to-primary/5 p-6 sm:p-8">
-              <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
-                <CircularProgress
-                  value={reputation?.trustScore ?? user?.trustScore ?? 0}
-                  size={140}
-                  strokeWidth={12}
-                />
-                <div className="flex-1 text-center md:text-left space-y-2">
-                  <h3 className="text-2xl font-bold text-foreground">ট্রাস্ট স্কোর</h3>
-                  <p className="text-sm text-muted-foreground">
-                    আপনার বিশ্বস্ততা স্কোর আপনার রেটিং, লেনদেন এবং বিরোধের ভিত্তিতে গণনা করা হয়।
-                    উচ্চ স্কোর আপনার বিশ্বস্ততা প্রমাণ করে।
-                  </p>
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-2">
-                    <BadgeDisplay plan={currentPlan} size="md" showLabel={true} />
-                    {user?.isVerified && (
-                      <Badge className="bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-400 dark:border-blue-800">
-                        <BadgeCheck className="w-3 h-3 mr-1" />
-                        ভেরিফাইড
-                      </Badge>
-                    )}
-                    <Badge className={`${memberBadgeInfo.bg} ${memberBadgeInfo.color} border-0`}>
-                      {memberBadgeInfo.icon}
-                      <span className="ml-1">{reputation?.memberSinceLabel || memberBadgeInfo.label}</span>
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          {/* Rating Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* ক্রেতা রেটিং */}
-            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950/50 shrink-0">
-                    <Star className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">ক্রেতা রেটিং</p>
-                    <p className="text-sm font-semibold text-foreground">Buyer Rating</p>
-                  </div>
-                </div>
-                <StarRating rating={reputation?.buyerRating ?? user?.buyerRating ?? 0} />
-              </CardContent>
-            </Card>
-
-            {/* বিক্রেতা রেটিং */}
-            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-950/50 shrink-0">
-                    <Star className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">বিক্রেতা রেটিং</p>
-                    <p className="text-sm font-semibold text-foreground">Seller Rating</p>
-                  </div>
-                </div>
-                <StarRating rating={reputation?.sellerRating ?? user?.sellerRating ?? 0} />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {/* মোট রিভিউ */}
-            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-              <CardContent className="p-4 text-center">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100 dark:bg-sky-950/50 mx-auto mb-2">
-                  <BarChart3 className="w-5 h-5 text-sky-600 dark:text-sky-400" />
-                </div>
-                <p className="text-2xl font-bold text-foreground">
-                  {toBanglaNumber(reputation?.totalReviews ?? user?.totalReviews ?? 0)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">মোট রিভিউ</p>
-              </CardContent>
-            </Card>
-
-            {/* সম্পন্ন ডিল */}
-            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-              <CardContent className="p-4 text-center">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 dark:bg-green-950/50 mx-auto mb-2">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
-                </div>
-                <p className="text-2xl font-bold text-foreground">
-                  {toBanglaNumber(reputation?.completedDeals ?? user?.completedDeals ?? 0)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">সম্পন্ন ডিল</p>
-              </CardContent>
-            </Card>
-
-            {/* সফল লেনদেন */}
-            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-              <CardContent className="p-4 text-center">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950/50 mx-auto mb-2">
-                  <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <p className="text-2xl font-bold text-foreground">
-                  {toBanglaNumber(reputation?.successfulTransactions ?? user?.successfulTransactions ?? 0)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">সফল লেনদেন</p>
-              </CardContent>
-            </Card>
-
-            {/* বিরোধ হার */}
-            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-              <CardContent className="p-4 text-center">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100 dark:bg-red-950/50 mx-auto mb-2">
-                  <Target className="w-5 h-5 text-red-600 dark:text-red-400" />
-                </div>
-                <p className="text-2xl font-bold text-foreground">
-                  {toBanglaNumber(parseFloat((reputation?.disputeRate ?? user?.disputeRate ?? 0).toFixed(1)))}%
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">বিরোধ হার</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Detailed Reputation Breakdown */}
+        <TabsContent value="verification" className="space-y-6">
+          {/* Verification Status Card */}
           <Card className="border-0 shadow-md">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
-                <Award className="w-5 h-5 text-primary" />
-                সুনামের বিস্তারিত তথ্য
+                <ShieldCheck className="w-5 h-5 text-primary" />
+                ভেরিফিকেশন স্ট্যাটাস
               </CardTitle>
-              <CardDescription>আপনার সুনাম স্কোরের বিশদ বিশ্লেষণ</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Trust Score Breakdown */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">ক্রেতা রেটিং (৪০%)</span>
-                  <span className="text-sm font-medium text-foreground">
-                    {toBanglaNumber(parseFloat(((reputation?.buyerRating ?? 0) * 20).toFixed(0)))}/১০০
-                  </span>
+            <CardContent>
+              {kycLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
                 </div>
-                <Progress value={(reputation?.buyerRating ?? 0) * 20} className="h-2" />
-              </div>
+              ) : (
+                <>
+                  {/* ─── VERIFIED ─── */}
+                  {verificationStatus === 'verified' && (
+                    <div className="flex flex-col items-center text-center py-6 space-y-3">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-950/50">
+                        <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-foreground flex items-center justify-center gap-2">
+                          ভেরিফিকেশন সম্পন্ন
+                          <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 border-0 text-xs">
+                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                            যাচাইকৃত
+                          </Badge>
+                        </h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          আপনার পরিচয় যাচাইকৃত
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">সম্পন্ন ডিল (৩০%)</span>
-                  <span className="text-sm font-medium text-foreground">
-                    {toBanglaNumber(Math.min(100, (reputation?.completedDeals ?? 0) * 2))}/১০০
-                  </span>
-                </div>
-                <Progress value={Math.min(100, (reputation?.completedDeals ?? 0) * 2)} className="h-2" />
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">নিম্ন বিরোধ হার (৩০%)</span>
-                  <span className="text-sm font-medium text-foreground">
-                    {toBanglaNumber(Math.max(0, 100 - (reputation?.disputeRate ?? 0) * 10).toFixed(0))}/১০০
-                  </span>
-                </div>
-                <Progress value={Math.max(0, 100 - (reputation?.disputeRate ?? 0) * 10)} className="h-2" />
-              </div>
-
-              <Separator />
-
-              {/* Member Badge Explanation */}
-              <div className="p-4 rounded-xl bg-muted/30">
-                <p className="text-sm font-medium text-foreground mb-3">সদস্যতা ব্যাজ স্তর</p>
-                <div className="space-y-2.5">
-                  {Object.entries(MEMBER_BADGE_MAP).map(([key, info]) => (
-                    <div
-                      key={key}
-                      className={`flex items-center gap-2.5 text-sm px-3 py-2 rounded-lg transition-colors ${
-                        memberBadge === key
-                          ? `${info.bg} ${info.color} font-medium`
-                          : 'text-muted-foreground'
-                      }`}
-                    >
-                      {info.icon}
-                      <span>{info.label}</span>
-                      {memberBadge === key && (
-                        <Badge variant="secondary" className="ml-auto text-[10px] border-0 bg-background/50">
-                          বর্তমান
-                        </Badge>
+                  {/* ─── PENDING ─── */}
+                  {verificationStatus === 'pending' && (
+                    <div className="flex flex-col items-center text-center py-6 space-y-3">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/50">
+                        <Clock className="w-8 h-8 text-amber-500 animate-pulse" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-foreground flex items-center justify-center gap-2">
+                          পর্যালোচনাধীন
+                          <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400 border-0 text-xs">
+                            <Clock className="w-3 h-3 mr-1" />
+                            অপেক্ষমাণ
+                          </Badge>
+                        </h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          আপনার নথি যাচাইয়ের জন্য পর্যালোচনাধীন রয়েছে
+                        </p>
+                      </div>
+                      {kycVerification && (
+                        <div className="w-full max-w-sm mt-4 p-4 rounded-xl bg-muted/30 border border-border/50 text-left space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">ডকুমেন্টের ধরন</span>
+                            <span className="text-sm font-medium text-foreground">
+                              {getDocTypeLabel(kycVerification.documentType)}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">জমার তারিখ</span>
+                            <span className="text-sm font-medium text-foreground">
+                              {kycVerification.submittedAt
+                                ? formatDate(kycVerification.submittedAt)
+                                : '—'}
+                            </span>
+                          </div>
+                        </div>
                       )}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  )}
 
-              {/* Additional Stats */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-xl bg-muted/30 text-center">
-                  <p className="text-lg font-bold text-foreground">
-                    {toBanglaNumber(reputation?.totalTransactions ?? 0)}
-                  </p>
-                  <p className="text-[11px] text-muted-foreground">মোট লেনদেন</p>
-                </div>
-                <div className="p-3 rounded-xl bg-muted/30 text-center">
-                  <p className="text-lg font-bold text-foreground">
-                    {toBanglaNumber(reputation?.disputedCount ?? 0)}
-                  </p>
-                  <p className="text-[11px] text-muted-foreground">বিরোধিত লেনদেন</p>
-                </div>
-              </div>
+                  {/* ─── REJECTED ─── */}
+                  {verificationStatus === 'rejected' && (
+                    <div className="flex flex-col items-center text-center py-6 space-y-3">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/50">
+                        <XCircle className="w-8 h-8 text-red-500" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-foreground flex items-center justify-center gap-2">
+                          ভেরিফিকেশন প্রত্যাখ্যাত
+                          <Badge className="bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400 border-0 text-xs">
+                            <XCircle className="w-3 h-3 mr-1" />
+                            প্রত্যাখ্যাত
+                          </Badge>
+                        </h3>
+                      </div>
 
-              {/* Subscription Info */}
-              {subscription && (
-                <>
-                  <Separator />
-                  <div className="p-4 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/10">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
-                        <Award className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground">
-                          সাবস্ক্রিপশন: {currentPlan?.name || 'ফ্রি'}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {subscription.status === 'active'
-                            ? `সক্রিয় — ${subscription.billingCycle === 'monthly' ? 'মাসিক' : 'বার্ষিক'}`
-                            : subscription.status === 'cancelled'
-                              ? 'বাতিল হয়েছে'
-                              : 'মেয়াদোত্তীর্ণ'}
-                          {subscription.endDate && ` • মেয়াদ: ${formatDate(subscription.endDate)}`}
-                        </p>
-                      </div>
-                      <BadgeDisplay plan={currentPlan} size="sm" showLabel={false} />
+                      {kycVerification?.adminNote && (
+                        <div className="w-full max-w-md mt-2 p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50">
+                          <div className="flex items-start gap-2">
+                            <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                            <div className="text-left">
+                              <p className="text-xs font-medium text-red-700 dark:text-red-400">
+                                প্রত্যাখ্যানের কারণ
+                              </p>
+                              <p className="text-sm text-red-600 dark:text-red-300 mt-1">
+                                {kycVerification.adminNote}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <Button
+                        onClick={handleResubmitKYC}
+                        variant="outline"
+                        className="mt-2"
+                      >
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        পুনরায় জমা দিন
+                      </Button>
                     </div>
-                  </div>
+                  )}
+
+                  {/* ─── UNVERIFIED ─── */}
+                  {verificationStatus === 'unverified' && !showKycForm && (
+                    <div className="flex flex-col items-center text-center py-6 space-y-3">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                        <IdCard className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-foreground flex items-center justify-center gap-2">
+                          ভেরিফিকেশন হয়নি
+                          <Badge variant="secondary" className="text-xs">
+                            অযাচাইকৃত
+                          </Badge>
+                        </h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          আপনার পরিচয় যাচাই করতে নিচের বাটনে ক্লিক করুন
+                        </p>
+                      </div>
+                      <Button onClick={() => setShowKycForm(true)}>
+                        <IdCard className="w-4 h-4 mr-2" />
+                        যাচাইকরণ শুরু করুন
+                      </Button>
+                    </div>
+                  )}
                 </>
               )}
             </CardContent>
           </Card>
-        </TabsContent>
 
-        {/* ═══════════════════════════════════════════════════════
-            TAB 4: গোপনীয়তা (Privacy Settings)
-            ═══════════════════════════════════════════════════════ */}
-        <TabsContent value="privacy" className="space-y-6">
-          {/* Rating Visibility */}
-          <Card className="border-0 shadow-md">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Star className="w-5 h-5 text-primary" />
-                রেটিং দৃশ্যমানতা
-              </CardTitle>
-              <CardDescription>আপনার রেটিং তথ্য কারা দেখতে পাবেন তা নিয়ন্ত্রণ করুন</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Select
-                value={privacySettings.ratingVisibility}
-                onValueChange={(v) => setPrivacySettings((p) => ({ ...p, ratingVisibility: v }))}
-              >
-                <SelectTrigger className="w-full h-10">
-                  <Eye className="w-4 h-4 mr-1 text-muted-foreground" />
-                  <SelectValue placeholder="দৃশ্যমানতা নির্বাচন করুন" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="private">
-                    <span className="flex items-center gap-2">
-                      <Lock className="w-3.5 h-3.5" />
-                      ব্যক্তিগত — শুধুমাত্র আপনি এবং প্রশাসক দেখতে পাবেন
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="limited">
-                    <span className="flex items-center gap-2">
-                      <EyeOff className="w-3.5 h-3.5" />
-                      সীমিত — সারসংক্ষেপ সূচক দেখাবে
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="public">
-                    <span className="flex items-center gap-2">
-                      <Globe className="w-3.5 h-3.5" />
-                      সর্বজনীন — সকলে দেখতে পারবেন
-                    </span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="p-3 rounded-xl bg-muted/30 text-sm text-muted-foreground">
-                {privacySettings.ratingVisibility === 'private' && '🔒 শুধুমাত্র আপনি এবং প্রশাসক আপনার রেটিং দেখতে পারবেন'}
-                {privacySettings.ratingVisibility === 'limited' && '👁️ অন্যরা শুধুমাত্র সারসংক্ষেপ সূচক দেখতে পাবেন (যেমন: "ইতিবাচক রেটিং")'}
-                {privacySettings.ratingVisibility === 'public' && '🌐 সকলে আপনার বিস্তারিত রেটিং তথ্য দেখতে পারবেন'}
-              </div>
-            </CardContent>
-          </Card>
+          {/* KYC Submission Form */}
+          {showKycForm && (verificationStatus === 'unverified' || verificationStatus === 'rejected') && (
+            <Card className="border-0 shadow-md">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                  যাচাইকরণ নথি জমা দিন
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                {/* Document Type */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">
+                    ডকুমেন্টের ধরন <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    value={kycForm.documentType}
+                    onValueChange={(v) => setKycForm((p) => ({ ...p, documentType: v }))}
+                  >
+                    <SelectTrigger className="w-full h-10">
+                      <SelectValue placeholder="ডকুমেন্টের ধরন নির্বাচন করুন" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DOCUMENT_TYPES.map((dt) => (
+                        <SelectItem key={dt.value} value={dt.value}>
+                          {dt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-          {/* Review Visibility */}
-          <Card className="border-0 shadow-md">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-primary" />
-                রিভিউ দৃশ্যমানতা
-              </CardTitle>
-              <CardDescription>আপনার রিভিউ তালিকা কারা দেখতে পাবেন তা নিয়ন্ত্রণ করুন</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Select
-                value={privacySettings.reviewVisibility}
-                onValueChange={(v) => setPrivacySettings((p) => ({ ...p, reviewVisibility: v }))}
-              >
-                <SelectTrigger className="w-full h-10">
-                  <Eye className="w-4 h-4 mr-1 text-muted-foreground" />
-                  <SelectValue placeholder="দৃশ্যমানতা নির্বাচন করুন" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="private">
-                    <span className="flex items-center gap-2">
-                      <Lock className="w-3.5 h-3.5" />
-                      ব্যক্তিগত — কেউ রিভিউ দেখতে পারবে না
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="shared">
-                    <span className="flex items-center gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      শেয়ারকৃত — শুধুমাত্র অনুমোদিত ব্যবহারকারীরা
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="public">
-                    <span className="flex items-center gap-2">
-                      <Globe className="w-3.5 h-3.5" />
-                      সর্বজনীন — সকলে দেখতে পারবেন
-                    </span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="p-3 rounded-xl bg-muted/30 text-sm text-muted-foreground">
-                {privacySettings.reviewVisibility === 'private' && '🔒 কেউ আপনার রিভিউ দেখতে পারবে না'}
-                {privacySettings.reviewVisibility === 'shared' && '🤝 শুধুমাত্র অনুমোদিত ব্যবহারকারীরা আপনার রিভিউ দেখতে পারবেন'}
-                {privacySettings.reviewVisibility === 'public' && '🌐 সকলে আপনার রিভিউ তালিকা দেখতে পারবেন'}
-              </div>
-            </CardContent>
-          </Card>
+                {/* Document Number */}
+                <div className="space-y-2">
+                  <Label htmlFor="documentNumber" className="text-sm font-medium">
+                    ডকুমেন্ট নম্বর <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="documentNumber"
+                    value={kycForm.documentNumber}
+                    onChange={(e) => setKycForm((p) => ({ ...p, documentNumber: e.target.value }))}
+                    className="h-10"
+                    placeholder="আপনার ডকুমেন্ট নম্বর লিখুন"
+                  />
+                </div>
 
-          {/* Trust Score Visibility */}
-          <Card className="border-0 shadow-md">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Shield className="w-5 h-5 text-primary" />
-                ট্রাস্ট স্কোর দৃশ্যমানতা
-              </CardTitle>
-              <CardDescription>আপনার ট্রাস্ট স্কোর কারা দেখতে পাবেন তা নিয়ন্ত্রণ করুন</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Select
-                value={privacySettings.trustScoreVisibility}
-                onValueChange={(v) => setPrivacySettings((p) => ({ ...p, trustScoreVisibility: v }))}
-              >
-                <SelectTrigger className="w-full h-10">
-                  <Eye className="w-4 h-4 mr-1 text-muted-foreground" />
-                  <SelectValue placeholder="দৃশ্যমানতা নির্বাচন করুন" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="private">
-                    <span className="flex items-center gap-2">
-                      <Lock className="w-3.5 h-3.5" />
-                      ব্যক্তিগত
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="limited">
-                    <span className="flex items-center gap-2">
-                      <EyeOff className="w-3.5 h-3.5" />
-                      সীমিত
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="public">
-                    <span className="flex items-center gap-2">
-                      <Globe className="w-3.5 h-3.5" />
-                      সর্বজনীন
-                    </span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="p-3 rounded-xl bg-muted/30 text-sm text-muted-foreground">
-                {privacySettings.trustScoreVisibility === 'private' && '🔒 আপনার ট্রাস্ট স্কোর কেউ দেখতে পারবে না'}
-                {privacySettings.trustScoreVisibility === 'limited' && '👁️ অন্যরা শুধুমাত্র সূচক দেখতে পাবেন (যেমন: "বিশ্বস্ত ব্যবহারকারী")'}
-                {privacySettings.trustScoreVisibility === 'public' && '🌐 সকলে আপনার বিস্তারিত ট্রাস্ট স্কোর দেখতে পারবেন'}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Visibility Grants */}
-          <Card className="border-0 shadow-md">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Settings className="w-5 h-5 text-primary" />
-                দৃশ্যমানতা অনুদান
-              </CardTitle>
-              <CardDescription>
-                আপনার রিভিউ দেখার জন্য অনুমোদিত ব্যবহারকারীদের পরিচালনা করুন
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              {/* Grants Given */}
-              <div className="space-y-3">
-                <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
-                  <ChevronRight className="w-4 h-4 text-primary" />
-                  প্রদত্ত অনুদান ({toBanglaNumber(visibilityGrantsGiven.length)})
-                </h4>
-                {visibilityGrantsGiven.length === 0 ? (
-                  <div className="p-4 rounded-xl bg-muted/20 text-center text-sm text-muted-foreground">
-                    কোনো অনুদান দেওয়া হয়নি
+                {/* Document Front Image */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">
+                    ডকুমেন্টের সামনের ছবি <span className="text-red-500">*</span>
+                  </Label>
+                  <div
+                    className="flex items-center gap-3 p-3 rounded-xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/40 transition-colors cursor-pointer bg-muted/10"
+                    onClick={() => documentFrontRef.current?.click()}
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                      <Upload className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {documentFrontName || 'সামনের ছবি আপলোড করুন'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">PNG, JPG, WebP — সর্বোচ্চ ২MB</p>
+                    </div>
+                    {kycForm.documentFront && (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                    )}
                   </div>
-                ) : (
-                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                    {visibilityGrantsGiven.map((grant) => (
-                      <div
-                        key={grant.id}
-                        className="flex items-center justify-between gap-3 p-3 rounded-xl bg-muted/20 hover:bg-muted/30 transition-colors"
-                      >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <Avatar className="h-8 w-8 shrink-0">
-                            {grant.grantee?.avatar ? (
-                              <AvatarImage src={grant.grantee.avatar} alt={grant.grantee.name} />
-                            ) : (
-                              <AvatarFallback className="text-xs font-medium bg-primary/10 text-primary">
-                                {getInitials(grant.grantee?.name || '?')}
-                              </AvatarFallback>
-                            )}
-                          </Avatar>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-foreground truncate">
-                              {grant.grantee?.name || 'অজানা'}
-                            </p>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {grant.review?.reviewType === 'buyer' ? 'ক্রেতা রিভিউ' :
-                               grant.review?.reviewType === 'seller' ? 'বিক্রেতা রিভিউ' : 'রিভিউ'}
-                              {grant.review?.rating ? ` • ⭐ ${grant.review.rating}` : ''}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <Badge
-                            variant={grant.status === 'accepted' ? 'default' : grant.status === 'pending' ? 'secondary' : 'outline'}
-                            className="text-[10px] px-2"
-                          >
-                            {grant.status === 'accepted' ? 'গৃহীত' : grant.status === 'pending' ? 'অপেক্ষমান' : 'বাতিল'}
-                          </Badge>
-                          {grant.status === 'accepted' && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 text-xs px-2"
-                              disabled={grantActionLoading === grant.id}
-                              onClick={async () => {
-                                try {
-                                  setGrantActionLoading(grant.id);
-                                  await api.respondToVisibilityGrant(grant.id, 'revoke');
-                                  toast({ title: 'সফল!', description: 'অনুদান বাতিল করা হয়েছে' });
-                                  loadVisibilityGrants();
-                                } catch (err) {
-                                  const message = err instanceof Error ? err.message : 'বাতিল করতে সমস্যা হয়েছে';
-                                  toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
-                                } finally {
-                                  setGrantActionLoading(null);
-                                }
-                              }}
-                            >
-                              {grantActionLoading === grant.id ? <Loader2 className="w-3 h-3 animate-spin" /> : 'বাতিল'}
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                  <input
+                    ref={documentFrontRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleKYCImageUpload(e, 'documentFront')}
+                  />
+                </div>
+
+                {/* Document Back Image */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">
+                    ডকুমেন্টের পেছনের ছবি <span className="text-muted-foreground text-xs">(ঐচ্ছিক)</span>
+                  </Label>
+                  <div
+                    className="flex items-center gap-3 p-3 rounded-xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/40 transition-colors cursor-pointer bg-muted/10"
+                    onClick={() => documentBackRef.current?.click()}
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted shrink-0">
+                      <Upload className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {documentBackName || 'পেছনের ছবি আপলোড করুন'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">PNG, JPG, WebP — সর্বোচ্চ ২MB</p>
+                    </div>
+                    {kycForm.documentBack && (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                    )}
                   </div>
-                )}
-              </div>
+                  <input
+                    ref={documentBackRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleKYCImageUpload(e, 'documentBack')}
+                  />
+                </div>
 
-              <Separator />
-
-              {/* Grants Received */}
-              <div className="space-y-3">
-                <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
-                  <ChevronRight className="w-4 h-4 text-primary" />
-                  প্রাপ্ত অনুদান ({toBanglaNumber(visibilityGrantsReceived.length)})
-                </h4>
-                {visibilityGrantsReceived.length === 0 ? (
-                  <div className="p-4 rounded-xl bg-muted/20 text-center text-sm text-muted-foreground">
-                    কোনো অনুদান পাওয়া যায়নি
+                {/* Selfie */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">
+                    সেলফি <span className="text-muted-foreground text-xs">(ঐচ্ছিক)</span>
+                  </Label>
+                  <div
+                    className="flex items-center gap-3 p-3 rounded-xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/40 transition-colors cursor-pointer bg-muted/10"
+                    onClick={() => selfieRef.current?.click()}
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted shrink-0">
+                      <Upload className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {selfieName || 'সেলফি আপলোড করুন'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">PNG, JPG, WebP — সর্বোচ্চ ২MB</p>
+                    </div>
+                    {kycForm.selfie && (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                    )}
                   </div>
-                ) : (
-                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                    {visibilityGrantsReceived.map((grant) => (
-                      <div
-                        key={grant.id}
-                        className="flex items-center justify-between gap-3 p-3 rounded-xl bg-muted/20 hover:bg-muted/30 transition-colors"
-                      >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <Avatar className="h-8 w-8 shrink-0">
-                            {grant.grantor?.avatar ? (
-                              <AvatarImage src={grant.grantor.avatar} alt={grant.grantor.name} />
-                            ) : (
-                              <AvatarFallback className="text-xs font-medium bg-primary/10 text-primary">
-                                {getInitials(grant.grantor?.name || '?')}
-                              </AvatarFallback>
-                            )}
-                          </Avatar>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-foreground truncate">
-                              {grant.grantor?.name || 'অজানা'}
-                            </p>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {grant.review?.reviewType === 'buyer' ? 'ক্রেতা রিভিউ' :
-                               grant.review?.reviewType === 'seller' ? 'বিক্রেতা রিভিউ' : 'রিভিউ'}
-                              {grant.review?.rating ? ` • ⭐ ${grant.review.rating}` : ''}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <Badge
-                            variant={grant.status === 'accepted' ? 'default' : grant.status === 'pending' ? 'secondary' : 'outline'}
-                            className="text-[10px] px-2"
-                          >
-                            {grant.status === 'accepted' ? 'গৃহীত' : grant.status === 'pending' ? 'অপেক্ষমান' : 'বাতিল'}
-                          </Badge>
-                          {grant.status === 'pending' && (
-                            <div className="flex gap-1.5">
-                              <Button
-                                variant="default"
-                                size="sm"
-                                className="h-7 text-xs px-2"
-                                disabled={grantActionLoading === grant.id}
-                                onClick={async () => {
-                                  try {
-                                    setGrantActionLoading(grant.id);
-                                    await api.respondToVisibilityGrant(grant.id, 'accept');
-                                    toast({ title: 'সফল!', description: 'অনুদান গ্রহণ করা হয়েছে' });
-                                    loadVisibilityGrants();
-                                  } catch (err) {
-                                    const message = err instanceof Error ? err.message : 'গ্রহণ করতে সমস্যা হয়েছে';
-                                    toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
-                                  } finally {
-                                    setGrantActionLoading(null);
-                                  }
-                                }}
-                              >
-                                {grantActionLoading === grant.id ? <Loader2 className="w-3 h-3 animate-spin" /> : 'গ্রহণ'}
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-7 text-xs px-2"
-                                disabled={grantActionLoading === grant.id}
-                                onClick={async () => {
-                                  try {
-                                    setGrantActionLoading(grant.id);
-                                    await api.respondToVisibilityGrant(grant.id, 'reject');
-                                    toast({ title: 'সফল!', description: 'অনুদান প্রত্যাখ্যান করা হয়েছে' });
-                                    loadVisibilityGrants();
-                                  } catch (err) {
-                                    const message = err instanceof Error ? err.message : 'প্রত্যাখ্যান করতে সমস্যা হয়েছে';
-                                    toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
-                                  } finally {
-                                    setGrantActionLoading(null);
-                                  }
-                                }}
-                              >
-                                প্রত্যাখ্যান
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  <input
+                    ref={selfieRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleKYCImageUpload(e, 'selfie')}
+                  />
+                </div>
 
-          <Separator />
+                <Separator />
 
-          {/* Save Privacy Settings */}
-          <div className="flex justify-end">
-            <Button
-              onClick={async () => {
-                try {
-                  setPrivacySaving(true);
-                  await api.updatePrivacySettings({
-                    ratingVisibility: privacySettings.ratingVisibility,
-                    reviewVisibility: privacySettings.reviewVisibility,
-                    trustScoreVisibility: privacySettings.trustScoreVisibility,
-                  });
-                  toast({ title: 'সফল!', description: 'গোপনীয়তা সেটিংস সফলভাবে আপডেট হয়েছে' });
-                } catch (err) {
-                  const message = err instanceof Error ? err.message : 'আপডেট করতে সমস্যা হয়েছে';
-                  toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
-                } finally {
-                  setPrivacySaving(false);
-                }
-              }}
-              disabled={privacySaving || privacyLoading}
-              className="min-w-[140px] h-10 shadow-md hover:shadow-lg transition-all"
-            >
-              {privacySaving ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4 mr-2" />
-              )}
-              সংরক্ষণ করুন
-            </Button>
-          </div>
+                {/* Submit Button */}
+                <div className="flex justify-end">
+                  <Button
+                    onClick={handleSubmitKYC}
+                    disabled={kycSubmitting}
+                    className="min-w-[160px] h-10 shadow-md hover:shadow-lg transition-all"
+                  >
+                    {kycSubmitting ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                    )}
+                    জমা দিন
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
     </div>

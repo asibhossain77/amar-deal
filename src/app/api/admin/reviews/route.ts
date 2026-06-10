@@ -150,8 +150,8 @@ export async function PUT(request: NextRequest) {
     }
 
     let updatedReview;
-    let logAction: string;
-    let logDetails: string;
+    let logAction = "";
+    let logDetails = "";
 
     switch (action) {
       case "hide": {

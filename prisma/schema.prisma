@@ -25,24 +25,19 @@ model User {
   // Reputation fields
   buyerRating        Float    @default(0)
   sellerRating       Float    @default(0)
+  buyerReviewCount   Int      @default(0)
+  sellerReviewCount  Int      @default(0)
   totalReviews       Int      @default(0)
   completedDeals     Int      @default(0)
   successfulTransactions Int @default(0)
   trustScore         Float    @default(0)
   disputeRate        Float    @default(0)
   isVerified         Boolean  @default(false)
+  verificationStatus String   @default("unverified") // "unverified", "pending", "verified", "rejected"
 
   // Account type & activity
   accountType         String   @default("both") // "buyer", "seller", "both"
   lastActive          DateTime @default(now())
-
-  // Privacy settings for ratings & reviews
-  ratingVisibility    String   @default("private")  // "private", "limited", "public" — controls who can see numeric ratings
-  reviewVisibility    String   @default("private")  // "private", "shared", "public" — controls who can see review list
-  trustScoreVisibility String  @default("private")  // "private", "limited", "public" — controls who can see trust score details
-
-  // Subscription
-  currentSubscriptionId String?
 
   buyerTransactions    Transaction[] @relation("BuyerTransactions")
   sellerTransactions   Transaction[] @relation("SellerTransactions")
@@ -53,13 +48,12 @@ model User {
   disputeMessages      DisputeMessage[]
   adminLogs            AdminLog[]
   gatewayTransactions  GatewayTransaction[]
-  subscriptions        UserSubscription[]
   receivedReviews      Review[] @relation("ReviewRecipient")
   givenReviews         Review[] @relation("ReviewAuthor")
   reports              Report[] @relation("ReportedUser")
   reportsFiled         Report[] @relation("ReportAuthor")
-  visibilityGrantsGiven ReviewVisibilityGrant[] @relation("VisibilityGrantor")
-  visibilityGrantsReceived ReviewVisibilityGrant[] @relation("VisibilityGrantee")
+  kycVerifications     KYCVerification[] @relation("KYCUser")
+  reviewedKYC          KYCVerification[] @relation("KYCReviewer")
 }
 
 model Transaction {
@@ -204,62 +198,6 @@ model GatewayTransaction {
   user            User @relation(fields: [userId], references: [id])
 }
 
-// ─── Subscription & Badge System ─────────────────────────
-
-model SubscriptionPlan {
-  id              String   @id @default(cuid())
-  name            String                        // "Basic", "Premium", "Verified Pro", "Business", "Trusted Elite"
-  slug            String   @unique              // "basic", "premium", "verified-pro", "business", "trusted-elite"
-  description     String                        // Plan description
-  badgeIcon       String                        // Icon identifier for the badge (e.g. 'star', 'diamond', 'crown')
-  badgeColor      String   @default("#6BBF59")  // Badge accent color
-  monthlyPrice    Float    @default(0)          // 0 = free
-  yearlyPrice     Float    @default(0)          // 0 = free
-  isActive        Boolean  @default(true)       // Admin can enable/disable
-  sortOrder       Int      @default(0)          // Display order
-
-  // Feature flags
-  priorityListing       Boolean @default(false)
-  premiumProfile        Boolean @default(false)
-  featuredProfile       Boolean @default(false)
-  higherDealLimits      Boolean @default(false)
-  prioritySupport       Boolean @default(false)
-  advancedAnalytics     Boolean @default(false)
-  customProfileBanner   Boolean @default(false)
-  featuredSellerStatus  Boolean @default(false)
-  featuredBuyerStatus   Boolean @default(false)
-  fasterDisputeResolution Boolean @default(false)
-  profileVerification   Boolean @default(false)
-  vipSupport            Boolean @default(false)
-  maximumVisibility     Boolean @default(false)
-  exclusiveFeatures     Boolean @default(false)
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  subscriptions   UserSubscription[]
-}
-
-model UserSubscription {
-  id              String   @id @default(cuid())
-  userId          String
-  planId          String
-  status          String   @default("active")   // active, expired, cancelled, pending
-  billingCycle    String   @default("monthly")  // monthly, yearly
-  startDate       DateTime @default(now())
-  endDate         DateTime?
-  autoRenew       Boolean  @default(true)
-  paymentMethod   String?
-  transactionRef  String?                         // Payment reference
-  cancelledAt     DateTime?
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  user            User              @relation(fields: [userId], references: [id])
-  plan            SubscriptionPlan  @relation(fields: [planId], references: [id])
-}
-
 // ─── Review & Report System ─────────────────────────
 
 model Review {
@@ -279,24 +217,6 @@ model Review {
   fromUser        User     @relation("ReviewAuthor", fields: [fromUserId], references: [id])
   toUser          User     @relation("ReviewRecipient", fields: [toUserId], references: [id])
   transaction     Transaction? @relation(fields: [transactionId], references: [id])
-  visibilityGrants ReviewVisibilityGrant[]      // Who this review is shared with
-}
-
-// ─── Review Visibility Sharing ─────────────────────────
-// Allows users to grant specific other users access to their reviews/ratings
-
-model ReviewVisibilityGrant {
-  id              String   @id @default(cuid())
-  grantorId       String                        // The user who owns the reviews (granting access)
-  granteeId       String                        // The user being granted access
-  status          String   @default("pending")  // "pending", "accepted", "revoked"
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  grantor         User     @relation("VisibilityGrantor", fields: [grantorId], references: [id])
-  grantee         User     @relation("VisibilityGrantee", fields: [granteeId], references: [id])
-  review          Review   @relation(fields: [reviewId], references: [id])
-  reviewId        String                        // Which review this grant is for
 }
 
 model Report {
@@ -312,4 +232,24 @@ model Report {
 
   reporter        User     @relation("ReportAuthor", fields: [reporterId], references: [id])
   reportedUser    User     @relation("ReportedUser", fields: [reportedUserId], references: [id])
+}
+
+// ─── KYC Verification System ─────────────────────────
+
+model KYCVerification {
+  id              String   @id @default(cuid())
+  userId          String
+  documentType    String                        // "national_id", "passport", "driving_license"
+  documentNumber  String                        // ID/Passport/License number
+  documentFront   String                        // base64 image of document front
+  documentBack    String?                       // base64 image of document back (optional)
+  selfie          String?                       // base64 selfie for verification
+  status          String   @default("pending")  // "pending", "approved", "rejected"
+  adminNote       String?                        // Admin note on review
+  submittedAt     DateTime @default(now())
+  reviewedAt      DateTime?
+  reviewerId      String?                        // Admin who reviewed
+
+  user            User     @relation("KYCUser", fields: [userId], references: [id])
+  reviewer        User?    @relation("KYCReviewer", fields: [reviewerId], references: [id])
 }
