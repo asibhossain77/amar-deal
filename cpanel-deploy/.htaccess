@@ -1,0 +1,50 @@
+# ============================================================
+# Apache .htaccess - Next.js Proxy for kikipanel.top
+# এই ফাইলটি ~/public_html/.htaccess হিসেবে আপলোড করুন
+# ============================================================
+
+# ==========================================
+# Next.js Reverse Proxy Configuration
+# ==========================================
+
+<IfModule mod_proxy.c>
+    ProxyPreserveHost On
+    ProxyRequests Off
+
+    # WebSocket সাপোর্ট
+    <IfModule mod_proxy_wstunnel.c>
+        RewriteEngine On
+        RewriteCond %{HTTP:Upgrade} websocket [NC]
+        RewriteCond %{HTTP:Connection} upgrade [NC]
+        RewriteRule ^/?(.*) ws://127.0.0.1:3000/$1 [P,L]
+    </IfModule>
+
+    # সব রিকোয়েস্ট Node.js সার্ভারে পাঠান
+    ProxyPass / http://127.0.0.1:3000/
+    ProxyPassReverse / http://127.0.0.1:3000/
+
+    # Timeout
+    ProxyTimeout 300
+</IfModule>
+
+# যদি mod_proxy না থাকে
+<IfModule !mod_proxy.c>
+    <IfModule mod_rewrite.c>
+        RewriteEngine On
+        RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+    </IfModule>
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Gzip Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+    AddOutputFilterByType DEFLATE application/javascript application/json
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
