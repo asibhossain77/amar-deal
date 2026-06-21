@@ -1,0 +1,819 @@
+     1→'use client';
+     2→
+     3→import { useEffect, useState, useCallback, useRef } from 'react';
+     4→import { 
+     5→  Settings, Loader2, Save, RotateCcw, Globe, Image as ImageIcon, 
+     6→  Shield, Search, Upload, X, Eye, Info, Trash2, CheckCircle2,
+     7→  Monitor, Smartphone, Palette, FileText, Copyright, Wrench, AlertTriangle,
+     8→  Phone, Mail, MapPin
+     9→} from 'lucide-react';
+    10→import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+    11→import PageHeader from '@/components/shared/PageHeader';
+    12→import { Input } from '@/components/ui/input';
+    13→import { Label } from '@/components/ui/label';
+    14→import { Button } from '@/components/ui/button';
+    15→import { Textarea } from '@/components/ui/textarea';
+    16→import { Separator } from '@/components/ui/separator';
+    17→import { Switch } from '@/components/ui/switch';
+    18→import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+    19→import { Badge } from '@/components/ui/badge';
+    20→import { useToast } from '@/hooks/use-toast';
+    21→import { api } from '@/lib/api';
+    22→import { useAppStore } from '@/lib/store';
+    23→import type { SiteSettings } from '@/lib/store';
+    24→import { DEFAULT_SITE_SETTINGS } from '@/lib/store';
+    25→import { getSiteName, getSiteCopyright, getSeoMetaTitle, getSeoMetaDescription, getContactAddress, getContactPhone, getContactEmail, SITE_DEFAULTS } from '@/lib/site-defaults';
+    26→
+    27→const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+    28→const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp'];
+    29→
+    30→function formatFileSize(bytes: number): string {
+    31→  if (bytes < 1024) return bytes + ' B';
+    32→  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    33→  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    34→}
+    35→
+    36→// Image Upload Component
+    37→function ImageUploadField({ 
+    38→  label, 
+    39→  description, 
+    40→  value, 
+    41→  onChange, 
+    42→  onDelete,
+    43→  previewHeight = 'h-32',
+    44→}: { 
+    45→  label: string; 
+    46→  description: string; 
+    47→  value: string; 
+    48→  onChange: (v: string) => void; 
+    49→  onDelete: () => void;
+    50→  previewHeight?: string;
+    51→}) {
+    52→  const [isDragging, setIsDragging] = useState(false);
+    53→  const [uploadProgress, setUploadProgress] = useState(0);
+    54→  const [isUploading, setIsUploading] = useState(false);
+    55→  const fileInputRef = useRef<HTMLInputElement>(null);
+    56→
+    57→  const processFile = useCallback(async (file: File) => {
+    58→    // Validate type
+    59→    if (!ALLOWED_TYPES.includes(file.type)) {
+    60→      throw new Error('শুধুমাত্র PNG, JPG, JPEG, SVG, WebP ফাইল গ্রহণযোগ্য');
+    61→    }
+    62→    // Validate size
+    63→    if (file.size > MAX_FILE_SIZE) {
+    64→      throw new Error(`ফাইল সাইজ ${formatFileSize(MAX_FILE_SIZE)} এর কম হতে হবে। আপনার ফাইল: ${formatFileSize(file.size)}`);
+    65→    }
+    66→
+    67→    setIsUploading(true);
+    68→    setUploadProgress(10);
+    69→
+    70→    return new Promise<string>((resolve, reject) => {
+    71→      const reader = new FileReader();
+    72→      reader.onprogress = (e) => {
+    73→        if (e.lengthComputable) {
+    74→          setUploadProgress(Math.round((e.loaded / e.total) * 90) + 10);
+    75→        }
+    76→      };
+    77→      reader.onloadend = () => {
+    78→        setUploadProgress(100);
+    79→        setTimeout(() => {
+    80→          setIsUploading(false);
+    81→          setUploadProgress(0);
+    82→          resolve(reader.result as string);
+    83→        }, 300);
+    84→      };
+    85→      reader.onerror = () => {
+    86→        setIsUploading(false);
+    87→        setUploadProgress(0);
+    88→        reject(new Error('ফাইল পড়তে সমস্যা হয়েছে'));
+    89→      };
+    90→      reader.readAsDataURL(file);
+    91→    });
+    92→  }, []);
+    93→
+    94→  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    95→    const file = e.target.files?.[0];
+    96→    if (!file) return;
+    97→    try {
+    98→      const base64 = await processFile(file);
+    99→      onChange(base64);
+   100→    } catch (err) {
+   101→      // Will be caught by parent
+   102→      throw err;
+   103→    }
+   104→  };
+   105→
+   106→  const handleDrop = async (e: React.DragEvent) => {
+   107→    e.preventDefault();
+   108→    setIsDragging(false);
+   109→    const file = e.dataTransfer.files?.[0];
+   110→    if (!file) return;
+   111→    try {
+   112→      const base64 = await processFile(file);
+   113→      onChange(base64);
+   114→    } catch (err) {
+   115→      throw err;
+   116→    }
+   117→  };
+   118→
+   119→  const handleDragOver = (e: React.DragEvent) => {
+   120→    e.preventDefault();
+   121→    setIsDragging(true);
+   122→  };
+   123→
+   124→  const handleDragLeave = () => setIsDragging(false);
+   125→
+   126→  return (
+   127→    <div className="space-y-3">
+   128→      <div>
+   129→        <Label className="text-sm font-semibold">{label}</Label>
+   130→        <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+   131→      </div>
+   132→
+   133→      {/* Image Preview */}
+   134→      {value && (
+   135→        <div className="relative group">
+   136→          <div className={`${previewHeight} rounded-xl border-2 border-border overflow-hidden bg-muted`}>
+   137→            <img 
+   138→              src={value} 
+   139→              alt={label} 
+   140→              className="w-full h-full object-contain p-2"
+   141→            />
+   142→          </div>
+   143→          <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+   144→            <Button
+   145→              type="button"
+   146→              variant="secondary"
+   147→              size="sm"
+   148→              className="h-7 w-7 p-0 rounded-md"
+   149→              onClick={() => {
+   150→                // Open in new tab for full preview
+   151→                const w = window.open('');
+   152→                if (w) {
+   153→                  w.document.write(`<img src="${value}" style="max-width:100%;max-height:100vh;margin:auto;display:block" />`);
+   154→                }
+   155→              }}
+   156→            >
+   157→              <Eye className="h-3.5 w-3.5" />
+   158→            </Button>
+   159→            <Button
+   160→              type="button"
+   161→              variant="destructive"
+   162→              size="sm"
+   163→              className="h-7 w-7 p-0 rounded-md"
+   164→              onClick={onDelete}
+   165→            >
+   166→              <Trash2 className="h-3.5 w-3.5" />
+   167→            </Button>
+   168→          </div>
+   169→        </div>
+   170→      )}
+   171→
+   172→      {/* Upload Area */}
+   173→      <div
+   174→        className={`relative rounded-xl border-2 border-dashed p-4 text-center transition-all cursor-pointer ${
+   175→          isDragging 
+   176→            ? 'border-primary bg-primary/5 scale-[1.02]' 
+   177→            : 'border-border hover:border-primary/50 hover:bg-muted/50'
+   178→        }`}
+   179→        onDrop={handleDrop}
+   180→        onDragOver={handleDragOver}
+   181→        onDragLeave={handleDragLeave}
+   182→        onClick={() => fileInputRef.current?.click()}
+   183→      >
+   184→        <input
+   185→          ref={fileInputRef}
+   186→          type="file"
+   187→          accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp"
+   188→          onChange={handleFileChange}
+   189→          className="hidden"
+   190→        />
+   191→        {isUploading ? (
+   192→          <div className="space-y-2">
+   193→            <Loader2 className="h-6 w-6 mx-auto text-primary animate-spin" />
+   194→            <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+   195→              <div 
+   196→                className="bg-primary h-full rounded-full transition-all duration-300"
+   197→                style={{ width: `${uploadProgress}%` }}
+   198→              />
+   199→            </div>
+   200→            <p className="text-xs text-muted-foreground">আপলোড হচ্ছে... {uploadProgress}%</p>
+   201→          </div>
+   202→        ) : (
+   203→          <div className="space-y-1.5">
+   204→            <Upload className="h-6 w-6 mx-auto text-muted-foreground" />
+   205→            <p className="text-sm font-medium text-foreground">
+   206→              {value ? 'ইমেজ পরিবর্তন করুন' : 'ইমেজ আপলোড করুন'}
+   207→            </p>
+   208→            <p className="text-xs text-muted-foreground">
+   209→              ড্র্যাগ ও ড্রপ অথবা ক্লিক করুন
+   210→            </p>
+   211→            <p className="text-[10px] text-muted-foreground">
+   212→              PNG, JPG, SVG, WebP • সর্বোচ্চ 2MB
+   213→            </p>
+   214→          </div>
+   215→        )}
+   216→      </div>
+   217→    </div>
+   218→  );
+   219→}
+   220→
+   221→export default function AdminSettingsPage() {
+   222→  const { toast } = useToast();
+   223→  const [loading, setLoading] = useState(true);
+   224→  const [saving, setSaving] = useState(false);
+   225→  const [activeTab, setActiveTab] = useState('branding');
+   226→  const { setSiteSettings: setGlobalSiteSettings } = useAppStore();
+   227→  const [settings, setSettings] = useState<SiteSettings>({ ...DEFAULT_SITE_SETTINGS });
+   228→  const [savedSettings, setSavedSettings] = useState<SiteSettings>({ ...DEFAULT_SITE_SETTINGS });
+   229→
+   230→  const hasChanges = JSON.stringify(settings) !== JSON.stringify(savedSettings);
+   231→
+   232→  const fetchSettings = useCallback(async () => {
+   233→    try {
+   234→      setLoading(true);
+   235→      const data = await api.getAdminSiteSettings();
+   236→      const s = data.settings || data;
+   237→      setSettings({ ...DEFAULT_SITE_SETTINGS, ...s });
+   238→      setSavedSettings({ ...DEFAULT_SITE_SETTINGS, ...s });
+   239→    } catch {
+   240→      toast({ title: 'ত্রুটি', description: 'সেটিংস লোড করতে সমস্যা হয়েছে', variant: 'destructive' });
+   241→    } finally {
+   242→      setLoading(false);
+   243→    }
+   244→  }, [toast]);
+   245→
+   246→  useEffect(() => {
+   247→    fetchSettings();
+   248→  }, [fetchSettings]);
+   249→
+   250→  const updateField = (key: keyof SiteSettings, value: string) => {
+   251→    setSettings(prev => ({ ...prev, [key]: value }));
+   252→  };
+   253→
+   254→  const handleSave = async () => {
+   255→    try {
+   256→      setSaving(true);
+   257→      await api.updateAdminSiteSettings(settings as unknown as Record<string, string>);
+   258→      setSavedSettings({ ...settings });
+   259→      // Update global store so all pages reflect changes immediately
+   260→      setGlobalSiteSettings(settings);
+   261→      toast({
+   262→        title: 'সফল!',
+   263→        description: 'ওয়েবসাইট সেটিংস সফলভাবে আপডেট হয়েছে',
+   264→      });
+   265→    } catch (err: unknown) {
+   266→      const message = err instanceof Error ? err.message : 'সেটিংস আপডেট করতে সমস্যা হয়েছে';
+   267→      toast({ title: 'ত্রুটি', description: message, variant: 'destructive' });
+   268→    } finally {
+   269→      setSaving(false);
+   270→    }
+   271→  };
+   272→
+   273→  const handleReset = () => {
+   274→    setSettings({ ...savedSettings });
+   275→    toast({ title: 'রিসেট', description: 'পরিবর্তনগুলো বাতিল করা হয়েছে' });
+   276→  };
+   277→
+   278→  const handleImageDelete = async (key: keyof SiteSettings) => {
+   279→    try {
+   280→      await api.deleteSiteImage(key);
+   281→      setSettings(prev => ({ ...prev, [key]: '' }));
+   282→      setSavedSettings(prev => ({ ...prev, [key]: '' }));
+   283→      toast({ title: 'সফল!', description: 'ইমেজ সফলভাবে মুছে ফেলা হয়েছে' });
+   284→    } catch {
+   285→      toast({ title: 'ত্রুটি', description: 'ইমেজ মুছতে সমস্যা হয়েছে', variant: 'destructive' });
+   286→    }
+   287→  };
+   288→
+   289→  if (loading) {
+   290→    return (
+   291→      <div className="page-container space-y-6">
+   292→        <PageHeader
+   293→          title="ওয়েবসাইট সেটিংস"
+   294→          subtitle="লোড হচ্ছে..."
+   295→          icon={<Settings className="h-5 w-5 text-primary animate-spin" />}
+   296→        />
+   297→        <div className="space-y-4">
+   298→          {[1, 2, 3].map((i) => (
+   299→            <Card key={i} className="card-modern animate-pulse">
+   300→              <CardContent className="p-6">
+   301→                <div className="space-y-3">
+   302→                  <div className="h-5 w-40 rounded bg-muted" />
+   303→                  <div className="h-10 w-full rounded bg-muted" />
+   304→                </div>
+   305→              </CardContent>
+   306→            </Card>
+   307→          ))}
+   308→        </div>
+   309→      </div>
+   310→    );
+   311→  }
+   312→
+   313→  return (
+   314→    <div className="page-container space-y-4 sm:space-y-6">
+   315→      <PageHeader
+   316→        title="ওয়েবসাইট সেটিংস"
+   317→        subtitle="ওয়েবসাইটের ব্র্যান্ডিং ও কনফিগারেশন পরিচালনা করুন"
+   318→        icon={<Settings className="h-5 w-5 text-primary" />}
+   319→        actions={
+   320→          <div className="flex gap-2">
+   321→            <Button
+   322→              variant="outline"
+   323→              onClick={handleReset}
+   324→              disabled={saving || !hasChanges}
+   325→              className="gap-1.5 min-h-[40px]"
+   326→              size="sm"
+   327→            >
+   328→              <RotateCcw className="h-4 w-4" />
+   329→              <span className="hidden sm:inline">বাতিল</span>
+   330→            </Button>
+   331→            <Button
+   332→              onClick={handleSave}
+   333→              disabled={saving || !hasChanges}
+   334→              className="gap-1.5 min-h-[40px]"
+   335→              size="sm"
+   336→            >
+   337→              {saving ? (
+   338→                <>
+   339→                  <Loader2 className="h-4 w-4 animate-spin" />
+   340→                  সংরক্ষণ...
+   341→                </>
+   342→              ) : (
+   343→                <>
+   344→                  <Save className="h-4 w-4" />
+   345→                  সংরক্ষণ করুন
+   346→                </>
+   347→              )}
+   348→            </Button>
+   349→          </div>
+   350→        }
+   351→      />
+   352→
+   353→      {/* Unsaved Changes Warning */}
+   354→      {hasChanges && (
+   355→        <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800 flex items-center gap-2 animate-fade-in">
+   356→          <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+   357→          <p className="text-xs text-amber-700 dark:text-amber-400">
+   358→            আপনি অসংরক্ষিত পরিবর্তন করেছেন। সংরক্ষণ করতে &quot;সংরক্ষণ করুন&quot; বাটনে ক্লিক করুন।
+   359→          </p>
+   360→        </div>
+   361→      )}
+   362→
+   363→      <Tabs value={activeTab} onValueChange={setActiveTab}>
+   364→        <TabsList className="w-full grid grid-cols-3 sm:grid-cols-5 gap-1">
+   365→          <TabsTrigger value="branding" className="gap-1.5 text-xs sm:text-sm">
+   366→            <Globe className="h-3.5 w-3.5" />
+   367→            <span className="hidden sm:inline">ব্র্যান্ডিং</span>
+   368→            <span className="sm:hidden">ব্র্যান্ড</span>
+   369→          </TabsTrigger>
+   370→          <TabsTrigger value="images" className="gap-1.5 text-xs sm:text-sm">
+   371→            <ImageIcon className="h-3.5 w-3.5" />
+   372→            <span className="hidden sm:inline">ইমেজ</span>
+   373→            <span className="sm:hidden">ইমেজ</span>
+   374→          </TabsTrigger>
+   375→          <TabsTrigger value="seo" className="gap-1.5 text-xs sm:text-sm">
+   376→            <Search className="h-3.5 w-3.5" />
+   377→            <span className="hidden sm:inline">SEO</span>
+   378→            <span className="sm:hidden">SEO</span>
+   379→          </TabsTrigger>
+   380→          <TabsTrigger value="contact" className="gap-1.5 text-xs sm:text-sm">
+   381→            <Phone className="h-3.5 w-3.5" />
+   382→            <span className="hidden sm:inline">যোগাযোগ</span>
+   383→            <span className="sm:hidden">যোগাযোগ</span>
+   384→          </TabsTrigger>
+   385→          <TabsTrigger value="advanced" className="gap-1.5 text-xs sm:text-sm">
+   386→            <Wrench className="h-3.5 w-3.5" />
+   387→            <span className="hidden sm:inline">অ্যাডভান্সড</span>
+   388→            <span className="sm:hidden">অ্যাডভান্স</span>
+   389→          </TabsTrigger>
+   390→        </TabsList>
+   391→
+   392→        {/* ═══ TAB 1: Branding ═══ */}
+   393→        <TabsContent value="branding" className="space-y-4 mt-4">
+   394→          <Card className="card-modern">
+   395→            <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
+   396→              <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+   397→                <Globe className="h-4 w-4 text-primary" />
+   398→                ওয়েবসাইট তথ্য
+   399→              </CardTitle>
+   400→              <CardDescription className="text-xs">ওয়েবসাইটের নাম ও বিবরণ পরিবর্তন করুন</CardDescription>
+   401→            </CardHeader>
+   402→            <CardContent className="space-y-4 p-3 sm:p-4 pt-0">
+   403→              <div className="space-y-2">
+   404→                <Label htmlFor="site_name" className="text-sm font-semibold">ওয়েবসাইটের নাম</Label>
+   405→                <Input
+   406→                  id="site_name"
+   407→                  placeholder={`যেমন: ${SITE_DEFAULTS.site_name}`}
+   408→                  value={settings.site_name}
+   409→                  onChange={(e) => updateField('site_name', e.target.value)}
+   410→                  className="min-h-[44px]"
+   411→                />
+   412→                <p className="text-[10px] text-muted-foreground">এই নাম ব্রাউজার টাইটেল, নেভিগেশন, ফুটার ও লগইন পেজে দেখাবে</p>
+   413→              </div>
+   414→
+   415→              <div className="space-y-2">
+   416→                <Label htmlFor="site_tagline" className="text-sm font-semibold">ট্যাগলাইন / সংক্ষিপ্ত বিবরণ</Label>
+   417→                <Textarea
+   418→                  id="site_tagline"
+   419→                  placeholder="আপনার ওয়েবসাইটের সংক্ষিপ্ত বিবরণ লিখুন"
+   420→                  value={settings.site_tagline}
+   421→                  onChange={(e) => updateField('site_tagline', e.target.value)}
+   422→                  rows={3}
+   423→                  className="resize-none"
+   424→                />
+   425→              </div>
+   426→
+   427→              <div className="space-y-2">
+   428→                <Label htmlFor="site_copyright" className="text-sm font-semibold flex items-center gap-1.5">
+   429→                  <Copyright className="h-3.5 w-3.5" />
+   430→                  কপিরাইট টেক্সট
+   431→                </Label>
+   432→                <Input
+   433→                  id="site_copyright"
+   434→                  placeholder={`যেমন: ${SITE_DEFAULTS.site_copyright}`}
+   435→                  value={settings.site_copyright}
+   436→                  onChange={(e) => updateField('site_copyright', e.target.value)}
+   437→                  className="min-h-[44px]"
+   438→                />
+   439→              </div>
+   440→            </CardContent>
+   441→          </Card>
+   442→
+   443→          {/* Live Preview */}
+   444→          <Card className="card-modern border-primary/20">
+   445→            <CardHeader className="p-3 sm:p-4 pb-2">
+   446→              <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
+   447→                <Eye className="h-4 w-4" />
+   448→                লাইভ প্রিভিউ
+   449→              </CardTitle>
+   450→            </CardHeader>
+   451→            <CardContent className="p-3 sm:p-4 pt-0">
+   452→              <div className="border rounded-xl overflow-hidden bg-background">
+   453→                {/* Preview Header */}
+   454→                <div className="flex items-center gap-2.5 p-3 border-b bg-muted/30">
+   455→                  {settings.site_logo ? (
+   456→                    <img src={settings.site_logo} alt="Logo" className="h-7 w-7 object-contain rounded" />
+   457→                  ) : (
+   458→                    <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center">
+   459→                      <Shield className="w-4 h-4 text-primary-foreground" />
+   460→                    </div>
+   461→                  )}
+   462→                  <span className="text-sm font-bold">{getSiteName(settings.site_name)}</span>
+   463→                </div>
+   464→                {/* Preview Body */}
+   465→                <div className="p-3 space-y-2">
+   466→                  <div className="h-3 w-3/4 rounded bg-muted" />
+   467→                  <div className="h-2 w-full rounded bg-muted" />
+   468→                  <div className="h-2 w-2/3 rounded bg-muted" />
+   469→                </div>
+   470→                {/* Preview Footer */}
+   471→                <div className="p-3 border-t bg-muted/30">
+   472→                  <p className="text-[9px] text-muted-foreground truncate">{getSiteCopyright(settings.site_copyright)}</p>
+   473→                </div>
+   474→              </div>
+   475→            </CardContent>
+   476→          </Card>
+   477→        </TabsContent>
+   478→
+   479→        {/* ═══ TAB 2: Images ═══ */}
+   480→        <TabsContent value="images" className="space-y-4 mt-4">
+   481→          {/* Website Logo */}
+   482→          <Card className="card-modern">
+   483→            <CardHeader className="p-3 sm:p-4 pb-2">
+   484→              <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+   485→                <ImageIcon className="h-4 w-4 text-primary" />
+   486→                ওয়েবসাইট লোগো
+   487→              </CardTitle>
+   488→              <CardDescription className="text-xs">নেভিগেশন বার, ফুটার ও ড্যাশবোর্ডে দেখাবে</CardDescription>
+   489→            </CardHeader>
+   490→            <CardContent className="p-3 sm:p-4 pt-0">
+   491→              <ImageUploadField
+   492→                label="লোগো"
+   493→                description="PNG, SVG বা WebP ফরম্যাটে আপলোড করুন (পারদর্শী ব্যাকগ্রাউন্ড সুপারিশ)"
+   494→                value={settings.site_logo}
+   495→                onChange={(v) => updateField('site_logo', v)}
+   496→                onDelete={() => handleImageDelete('site_logo')}
+   497→                previewHeight="h-24"
+   498→              />
+   499→            </CardContent>
+   500→          </Card>
+   501→
+   502→          {/* Favicon */}
+   503→          <Card className="card-modern">
+   504→            <CardHeader className="p-3 sm:p-4 pb-2">
+   505→              <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+   506→                <Monitor className="h-4 w-4 text-primary" />
+   507→                ফেভিকন
+   508→              </CardTitle>
+   509→              <CardDescription className="text-xs">ব্রাউজার ট্যাবে দেখাবে (32x32 বা 64x64 সুপারিশ)</CardDescription>
+   510→            </CardHeader>
+   511→            <CardContent className="p-3 sm:p-4 pt-0">
+   512→              <ImageUploadField
+   513→                label="ফেভিকন"
+   514→                description="ছোট আকারের ICO, PNG বা SVG ফাইল"
+   515→                value={settings.site_favicon}
+   516→                onChange={(v) => updateField('site_favicon', v)}
+   517→                onDelete={() => handleImageDelete('site_favicon')}
+   518→                previewHeight="h-20"
+   519→              />
+   520→            </CardContent>
+   521→          </Card>
+   522→
+   523→          {/* Banner */}
+   524→          <Card className="card-modern">
+   525→            <CardHeader className="p-3 sm:p-4 pb-2">
+   526→              <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+   527→                <Smartphone className="h-4 w-4 text-primary" />
+   528→                ব্যানার / কভার ইমেজ
+   529→              </CardTitle>
+   530→              <CardDescription className="text-xs">হোমপেজ ব্যানার বা কভার ইমেজ</CardDescription>
+   531→            </CardHeader>
+   532→            <CardContent className="p-3 sm:p-4 pt-0">
+   533→              <ImageUploadField
+   534→                label="ব্যানার"
+   535→                description="1200x400 বা তার বেশি রেজোলিউশন সুপারিশ"
+   536→                value={settings.site_banner}
+   537→                onChange={(v) => updateField('site_banner', v)}
+   538→                onDelete={() => handleImageDelete('site_banner')}
+   539→                previewHeight="h-32"
+   540→              />
+   541→            </CardContent>
+   542→          </Card>
+   543→
+   544→          {/* Login Background */}
+   545→          <Card className="card-modern">
+   546→            <CardHeader className="p-3 sm:p-4 pb-2">
+   547→              <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+   548→                <Palette className="h-4 w-4 text-primary" />
+   549→                লগইন পেজ ব্যাকগ্রাউন্ড
+   550→              </CardTitle>
+   551→              <CardDescription className="text-xs">লগইন ও রেজিস্ট্রেশন পেজের ব্যাকগ্রাউন্ড ইমেজ</CardDescription>
+   552→            </CardHeader>
+   553→            <CardContent className="p-3 sm:p-4 pt-0">
+   554→              <ImageUploadField
+   555→                label="লগইন ব্যাকগ্রাউন্ড"
+   556→                description="ফুল-স্ক্রিন ব্যাকগ্রাউন্ড ইমেজ (1920x1080 সুপারিশ)"
+   557→                value={settings.site_login_bg}
+   558→                onChange={(v) => updateField('site_login_bg', v)}
+   559→                onDelete={() => handleImageDelete('site_login_bg')}
+   560→                previewHeight="h-32"
+   561→              />
+   562→            </CardContent>
+   563→          </Card>
+   564→        </TabsContent>
+   565→
+   566→        {/* ═══ TAB 3: SEO ═══ */}
+   567→        <TabsContent value="seo" className="space-y-4 mt-4">
+   568→          <Card className="card-modern">
+   569→            <CardHeader className="p-3 sm:p-4 pb-2">
+   570→              <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+   571→                <Search className="h-4 w-4 text-primary" />
+   572→                SEO সেটিংস
+   573→              </CardTitle>
+   574→              <CardDescription className="text-xs">সার্চ ইঞ্জিন অপটিমাইজেশন</CardDescription>
+   575→            </CardHeader>
+   576→            <CardContent className="space-y-4 p-3 sm:p-4 pt-0">
+   577→              <div className="space-y-2">
+   578→                <Label htmlFor="seo_meta_title" className="text-sm font-semibold">Meta Title</Label>
+   579→                <Input
+   580→                  id="seo_meta_title"
+   581→                  placeholder={`যেমন: ${SITE_DEFAULTS.seo_meta_title}`}
+   582→                  value={settings.seo_meta_title}
+   583→                  onChange={(e) => updateField('seo_meta_title', e.target.value)}
+   584→                  className="min-h-[44px]"
+   585→                  maxLength={70}
+   586→                />
+   587→                <div className="flex justify-between">
+   588→                  <p className="text-[10px] text-muted-foreground">ব্রাউজার ট্যাব ও সার্চ রেজাল্টে দেখাবে</p>
+   589→                  <p className="text-[10px] text-muted-foreground">{settings.seo_meta_title.length}/70</p>
+   590→                </div>
+   591→              </div>
+   592→
+   593→              <div className="space-y-2">
+   594→                <Label htmlFor="seo_meta_description" className="text-sm font-semibold">Meta Description</Label>
+   595→                <Textarea
+   596→                  id="seo_meta_description"
+   597→                  placeholder="সার্চ ইঞ্জিনে দেখানোর জন্য সংক্ষিপ্ত বিবরণ"
+   598→                  value={settings.seo_meta_description}
+   599→                  onChange={(e) => updateField('seo_meta_description', e.target.value)}
+   600→                  rows={3}
+   601→                  maxLength={160}
+   602→                  className="resize-none"
+   603→                />
+   604→                <div className="flex justify-between">
+   605→                  <p className="text-[10px] text-muted-foreground">সার্চ রেজাল্টে বিবরণ হিসেবে দেখাবে</p>
+   606→                  <p className="text-[10px] text-muted-foreground">{settings.seo_meta_description.length}/160</p>
+   607→                </div>
+   608→              </div>
+   609→
+   610→              {/* SEO Preview */}
+   611→              <div className="space-y-1.5">
+   612→                <Label className="text-xs text-muted-foreground">Google সার্চ প্রিভিউ</Label>
+   613→                <div className="p-3 rounded-lg border bg-white dark:bg-card">
+   614→                  <p className="text-sm text-blue-700 dark:text-blue-400 font-medium truncate">
+   615→                    {getSeoMetaTitle(settings.seo_meta_title)}
+   616→                  </p>
+   617→                  <p className="text-xs text-green-700 dark:text-green-400 truncate mt-0.5">
+   618→                    yourdomain.com
+   619→                  </p>
+   620→                  <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+   621→                    {getSeoMetaDescription(settings.seo_meta_description)}
+   622→                  </p>
+   623→                </div>
+   624→              </div>
+   625→            </CardContent>
+   626→          </Card>
+   627→        </TabsContent>
+   628→
+   629→        {/* ═══ TAB 4: Contact ═══ */}
+   630→        <TabsContent value="contact" className="space-y-4 mt-4">
+   631→          <Card className="card-modern">
+   632→            <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
+   633→              <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+   634→                <Phone className="h-4 w-4 text-primary" />
+   635→                যোগাযোগ তথ্য
+   636→              </CardTitle>
+   637→              <CardDescription className="text-xs">কন্টাক্ট পেজে প্রদর্শিত ঠিকানা, ফোন ও ইমেইল পরিচালনা করুন</CardDescription>
+   638→            </CardHeader>
+   639→            <CardContent className="space-y-4 p-3 sm:p-4 pt-0">
+   640→              <div className="space-y-2">
+   641→                <Label htmlFor="contact_address" className="text-sm font-semibold flex items-center gap-1.5">
+   642→                  <MapPin className="h-3.5 w-3.5" />
+   643→                  ঠিকানা
+   644→                </Label>
+   645→                <Textarea
+   646→                  id="contact_address"
+   647→                  placeholder="যেমন: ১২৩, গুলশান এভিনিউ&#10;ঢাকা-১২১২, বাংলাদেশ"
+   648→                  value={settings.contact_address}
+   649→                  onChange={(e) => updateField('contact_address', e.target.value)}
+   650→                  rows={3}
+   651→                  className="resize-none"
+   652→                />
+   653→                <p className="text-[10px] text-muted-foreground">কন্টাক্ট পেজে ঠিকানা হিসেবে দেখাবে</p>
+   654→              </div>
+   655→
+   656→              <div className="space-y-2">
+   657→                <Label htmlFor="contact_phone" className="text-sm font-semibold flex items-center gap-1.5">
+   658→                  <Phone className="h-3.5 w-3.5" />
+   659→                  ফোন নম্বর
+   660→                </Label>
+   661→                <Input
+   662→                  id="contact_phone"
+   663→                  placeholder="যেমন: +৮৮০ ১৭০০-০০০০০০"
+   664→                  value={settings.contact_phone}
+   665→                  onChange={(e) => updateField('contact_phone', e.target.value)}
+   666→                  className="min-h-[44px]"
+   667→                />
+   668→                <p className="text-[10px] text-muted-foreground">কন্টাক্ট পেজে ফোন নম্বর হিসেবে দেখাবে</p>
+   669→              </div>
+   670→
+   671→              <div className="space-y-2">
+   672→                <Label htmlFor="contact_email" className="text-sm font-semibold flex items-center gap-1.5">
+   673→                  <Mail className="h-3.5 w-3.5" />
+   674→                  ইমেইল ঠিকানা
+   675→                </Label>
+   676→                <Input
+   677→                  id="contact_email"
+   678→                  type="email"
+   679→                  placeholder="যেমন: support@amardeal.com"
+   680→                  value={settings.contact_email}
+   681→                  onChange={(e) => updateField('contact_email', e.target.value)}
+   682→                  className="min-h-[44px]"
+   683→                />
+   684→                <p className="text-[10px] text-muted-foreground">কন্টাক্ট পেজে ইমেইল হিসেবে দেখাবে</p>
+   685→              </div>
+   686→            </CardContent>
+   687→          </Card>
+   688→
+   689→          {/* Contact Preview */}
+   690→          <Card className="card-modern border-primary/20">
+   691→            <CardHeader className="p-3 sm:p-4 pb-2">
+   692→              <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
+   693→                <Eye className="h-4 w-4" />
+   694→                কন্টাক্ট প্রিভিউ
+   695→              </CardTitle>
+   696→            </CardHeader>
+   697→            <CardContent className="p-3 sm:p-4 pt-0">
+   698→              <div className="border rounded-xl overflow-hidden bg-background">
+   699→                <div className="p-4 space-y-3">
+   700→                  <div className="flex items-start gap-3">
+   701→                    <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+   702→                      <MapPin className="w-4 h-4 text-primary" />
+   703→                    </div>
+   704→                    <div>
+   705→                      <p className="text-xs font-semibold text-foreground">ঠিকানা</p>
+   706→                      <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">
+   707→                        {getContactAddress(settings.contact_address)}
+   708→                      </p>
+   709→                    </div>
+   710→                  </div>
+   711→                  <div className="flex items-start gap-3">
+   712→                    <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+   713→                      <Phone className="w-4 h-4 text-primary" />
+   714→                    </div>
+   715→                    <div>
+   716→                      <p className="text-xs font-semibold text-foreground">ফোন</p>
+   717→                      <p className="text-xs text-muted-foreground">{getContactPhone(settings.contact_phone)}</p>
+   718→                    </div>
+   719→                  </div>
+   720→                  <div className="flex items-start gap-3">
+   721→                    <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+   722→                      <Mail className="w-4 h-4 text-primary" />
+   723→                    </div>
+   724→                    <div>
+   725→                      <p className="text-xs font-semibold text-foreground">ইমেইল</p>
+   726→                      <p className="text-xs text-muted-foreground">{getContactEmail(settings.contact_email)}</p>
+   727→                    </div>
+   728→                  </div>
+   729→                </div>
+   730→              </div>
+   731→            </CardContent>
+   732→          </Card>
+   733→        </TabsContent>
+   734→
+   735→        {/* ═══ TAB 5: Advanced ═══ */}
+   736→        <TabsContent value="advanced" className="space-y-4 mt-4">
+   737→          {/* Maintenance Mode */}
+   738→          <Card className="card-modern">
+   739→            <CardHeader className="p-3 sm:p-4 pb-2">
+   740→              <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+   741→                <Wrench className="h-4 w-4 text-primary" />
+   742→                মেইনটেন্যান্স মোড
+   743→              </CardTitle>
+   744→              <CardDescription className="text-xs">ওয়েবসাইট সাময়িকভাবে রক্ষণাবেক্ষণের জন্য বন্ধ করুন</CardDescription>
+   745→            </CardHeader>
+   746→            <CardContent className="p-3 sm:p-4 pt-0">
+   747→              <div className="flex items-center justify-between p-3 rounded-xl border bg-muted/30">
+   748→                <div className="flex-1">
+   749→                  <p className="text-sm font-medium">মেইনটেন্যান্স মোড সক্রিয় করুন</p>
+   750→                  <p className="text-xs text-muted-foreground mt-0.5">
+   751→                    সক্রিয় করলে সাধারণ ব্যবহারকারীরা ওয়েবসাইট দেখতে পারবেন না। অ্যাডমিন প্যানেল সচল থাকবে।
+   752→                  </p>
+   753→                </div>
+   754→                <Switch
+   755→                  checked={settings.maintenance_mode === 'true'}
+   756→                  onCheckedChange={(checked) => updateField('maintenance_mode', checked ? 'true' : 'false')}
+   757→                />
+   758→              </div>
+   759→              {settings.maintenance_mode === 'true' && (
+   760→                <div className="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800 flex items-center gap-2">
+   761→                  <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+   762→                  <p className="text-xs text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+   763→                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+   764→                    মেইনটেন্যান্স মোড সক্রিয় আছে। সাধারণ ব্যবহারকারীরা সাইট অ্যাক্সেস করতে পারবেন না।
+   765→                  </p>
+   766→                </div>
+   767→              )}
+   768→            </CardContent>
+   769→          </Card>
+   770→
+   771→          {/* Current Settings Summary */}
+   772→          <Card className="card-modern">
+   773→            <CardHeader className="p-3 sm:p-4 pb-2">
+   774→              <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
+   775→                <FileText className="h-4 w-4" />
+   776→                সেটিংস সারাংশ
+   777→              </CardTitle>
+   778→            </CardHeader>
+   779→            <CardContent className="p-3 sm:p-4 pt-0">
+   780→              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+   781→                <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
+   782→                  <Globe className="h-3.5 w-3.5 text-primary shrink-0" />
+   783→                  <div className="min-w-0">
+   784→                    <p className="text-muted-foreground">সাইটের নাম</p>
+   785→                    <p className="font-medium truncate">{settings.site_name || '—'}</p>
+   786→                  </div>
+   787→                </div>
+   788→                <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
+   789→                  <ImageIcon className="h-3.5 w-3.5 text-primary shrink-0" />
+   790→                  <div className="min-w-0">
+   791→                    <p className="text-muted-foreground">লোগো</p>
+   792→                    <p className="font-medium flex items-center gap-1">{settings.site_logo ? <><CheckCircle2 className="w-3 h-3 text-green-600" /> আপলোড করা হয়েছে</> : <><X className="w-3 h-3 text-red-500" /> নেই</>}</p>
+   793→                  </div>
+   794→                </div>
+   795→                <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
+   796→                  <Monitor className="h-3.5 w-3.5 text-primary shrink-0" />
+   797→                  <div className="min-w-0">
+   798→                    <p className="text-muted-foreground">ফেভিকন</p>
+   799→                    <p className="font-medium flex items-center gap-1">{settings.site_favicon ? <><CheckCircle2 className="w-3 h-3 text-green-600" /> আপলোড করা হয়েছে</> : <><X className="w-3 h-3 text-red-500" /> নেই</>}</p>
+   800→                  </div>
+   801→                </div>
+   802→                <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
+   803→                  <Wrench className="h-3.5 w-3.5 text-primary shrink-0" />
+   804→                  <div className="min-w-0">
+   805→                    <p className="text-muted-foreground">মেইনটেন্যান্স</p>
+   806→                    <Badge variant={settings.maintenance_mode === 'true' ? 'destructive' : 'secondary'} className="text-[9px] px-1.5 py-0">
+   807→                      {settings.maintenance_mode === 'true' ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
+   808→                    </Badge>
+   809→                  </div>
+   810→                </div>
+   811→              </div>
+   812→            </CardContent>
+   813→          </Card>
+   814→        </TabsContent>
+   815→      </Tabs>
+   816→    </div>
+   817→  );
+   818→}
+   819→

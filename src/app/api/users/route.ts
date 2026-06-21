@@ -85,6 +85,8 @@ export async function GET() {
         isVerified: true,
         createdAt: true,
         updatedAt: true,
+        isGoogleUser: true,
+        lastLogin: true,
         buyerRating: true,
         sellerRating: true,
         totalReviews: true,

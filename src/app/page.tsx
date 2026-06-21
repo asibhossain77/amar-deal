@@ -29,6 +29,7 @@ import AdminGatewayPaymentsPage from '@/components/admin/AdminGatewayPaymentsPag
 import AdminGatewayThemePage from '@/components/admin/AdminGatewayThemePage';
 import AdminKYCPage from '@/components/admin/AdminKYCPage';
 import AdminReviewsPage from '@/components/admin/AdminReviewsPage';
+import AdminGoogleLoginPage from '@/components/admin/AdminGoogleLoginPage';
 import AccountSettingsPage from '@/components/account/AccountSettingsPage';
 import PublicProfilePage from '@/components/profile/PublicProfilePage';
 import AboutPage from '@/components/pages/AboutPage';
@@ -239,6 +240,8 @@ function DashboardRouter() {
       return <ErrorBoundary><AdminKYCPage /></ErrorBoundary>;
     case 'admin-reviews':
       return <ErrorBoundary><AdminReviewsPage /></ErrorBoundary>;
+    case 'admin-google-login':
+      return <ErrorBoundary><AdminGoogleLoginPage /></ErrorBoundary>;
     default:
       return <ErrorBoundary><DashboardPage /></ErrorBoundary>;
   }
