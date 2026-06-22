@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-helper";
+import { invalidateGoogleConfigCache } from "@/lib/auth";
 
 /**
  * GET /api/admin/google-login
@@ -45,19 +46,12 @@ export async function GET() {
     else if (isConfigured && !enabled) status = "disabled";
     else if (hasClientId || hasClientSecret) status = "incomplete";
 
-    // Mask the client secret for security (show only last 4 chars)
-    const secret = map.google_client_secret || "";
-    const maskedSecret = secret
-      ? secret.length > 4
-        ? "•".repeat(secret.length - 4) + secret.slice(-4)
-        : "•".repeat(secret.length)
-      : "";
-
     return NextResponse.json({
       enabled,
       clientId: map.google_client_id || "",
-      clientSecret: maskedSecret,
-      clientSecretSet: !!map.google_client_secret,
+      // Don't send the actual secret to the client; just whether it's set
+      clientSecret: "",
+      clientSecretSet: hasClientSecret,
       redirectUrl: `${process.env.NEXTAUTH_URL || ""}/api/auth/callback/google`,
       status,
       isConfigured,
@@ -74,7 +68,7 @@ export async function GET() {
 /**
  * PUT /api/admin/google-login
  * Update Google Login configuration.
- * Body: { enabled, clientId, clientSecret?, redirectUrl? }
+ * Body: { enabled, clientId, clientSecret? }
  */
 export async function PUT(request: NextRequest) {
   try {
@@ -97,19 +91,28 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // If enabling, require clientId & clientSecret
+    // Fetch existing credentials to check if they're already stored
+    const existingSecretRow = await db.siteSetting.findUnique({
+      where: { key: "google_client_secret" },
+    });
+    const existingSecret = existingSecretRow?.value || "";
+
+    const existingClientIdRow = await db.siteSetting.findUnique({
+      where: { key: "google_client_id" },
+    });
+    const existingClientId = existingClientIdRow?.value || "";
+
+    // If enabling, require clientId & clientSecret (new or existing in DB)
     if (enabled) {
-      if (!clientId?.trim()) {
+      const effectiveClientId = clientId?.trim() || existingClientId.trim();
+      if (!effectiveClientId) {
         return NextResponse.json(
           { error: "Google Client ID আবশ্যক" },
           { status: 400 }
         );
       }
-      // Check if secret is set (either new or existing)
-      const existing = await db.siteSetting.findUnique({
-        where: { key: "google_client_secret" },
-      });
-      if (!clientSecret?.trim() && !existing?.value) {
+      const effectiveSecret = clientSecret?.trim() || existingSecret.trim();
+      if (!effectiveSecret) {
         return NextResponse.json(
           { error: "Google Client Secret আবশ্যক" },
           { status: 400 }
@@ -117,7 +120,7 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // Update settings in DB
+    // Build the list of settings to upsert
     const updates: Array<{ key: string; value: string }> = [
       { key: "google_login_enabled", value: enabled ? "true" : "false" },
     ];
@@ -126,8 +129,8 @@ export async function PUT(request: NextRequest) {
       updates.push({ key: "google_client_id", value: clientId.trim() });
     }
 
-    // Only update secret if a new value is provided (not the masked version)
-    if (clientSecret !== undefined && clientSecret.trim() && !clientSecret.includes("•")) {
+    // Only update secret if a new non-empty value is provided
+    if (clientSecret !== undefined && clientSecret.trim()) {
       updates.push({ key: "google_client_secret", value: clientSecret.trim() });
     }
 
@@ -139,25 +142,32 @@ export async function PUT(request: NextRequest) {
       });
     }
 
-    // Log admin action
-    await db.adminLog.create({
-      data: {
-        userId: (session.user as { id: string }).id,
-        action: "google_login_settings_update",
-        details: `Google Login ${enabled ? "চালু" : "বন্ধ"} করা হয়েছে`,
-      },
-    });
+    // Invalidate the Google config cache so the new credentials take effect immediately
+    invalidateGoogleConfigCache();
 
-    // Compute new status
-    const hasClientId = !!clientId?.trim();
-    const hasSecret =
-      !!clientSecret?.trim() && !clientSecret.includes("•") ||
-      (await db.siteSetting.findUnique({ where: { key: "google_client_secret" } })) !== null;
-    const isConfigured = hasClientId && hasSecret;
+    // Log admin action (non-critical)
+    try {
+      await db.adminLog.create({
+        data: {
+          userId: (session.user as { id: string }).id,
+          action: "google_login_settings_update",
+          details: `Google Login ${enabled ? "চালু" : "বন্ধ"} করা হয়েছে`,
+        },
+      });
+    } catch (logErr) {
+      console.error("Admin log error (non-critical):", logErr);
+    }
+
+    // Compute new status using effective values (new or existing)
+    const finalClientId = clientId?.trim() || existingClientId.trim();
+    const finalHasSecret =
+      (clientSecret !== undefined && clientSecret.trim()) || !!existingSecret;
+    const isConfigured = !!finalClientId && finalHasSecret;
+
     let status = "not_configured";
     if (isConfigured && enabled) status = "active";
     else if (isConfigured && !enabled) status = "disabled";
-    else if (hasClientId || hasSecret) status = "incomplete";
+    else if (finalClientId || finalHasSecret) status = "incomplete";
 
     return NextResponse.json({
       success: true,

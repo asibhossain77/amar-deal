@@ -12,7 +12,15 @@ let googleConfigCache: {
   expiresAt: number;
 } | null = null;
 
-const GOOGLE_CONFIG_CACHE_TTL = 30_000; // 30 seconds
+const GOOGLE_CONFIG_CACHE_TTL = 5_000; // 5 seconds (shorter for faster admin updates)
+
+/**
+ * Invalidate the Google config cache.
+ * Call this after admin updates Google Login settings.
+ */
+export function invalidateGoogleConfigCache() {
+  googleConfigCache = null;
+}
 
 async function getGoogleConfig(): Promise<{
   clientId: string;
@@ -124,22 +132,26 @@ export async function getAuthOptions(): Promise<NextAuthOptions> {
   ];
 
   // Dynamically add Google provider if configured
-  const googleConfig = await getGoogleConfig();
-  if (googleConfig) {
-    const GoogleProvider = (await import("next-auth/providers/google")).default;
-    providers.push(
-      GoogleProvider({
-        clientId: googleConfig.clientId,
-        clientSecret: googleConfig.clientSecret,
-        authorization: {
-          params: {
-            prompt: "consent",
-            access_type: "offline",
-            response_type: "code",
+  try {
+    const googleConfig = await getGoogleConfig();
+    if (googleConfig) {
+      const GoogleProvider = (await import("next-auth/providers/google")).default;
+      providers.push(
+        GoogleProvider({
+          clientId: googleConfig.clientId,
+          clientSecret: googleConfig.clientSecret,
+          authorization: {
+            params: {
+              prompt: "consent",
+              access_type: "offline",
+              response_type: "code",
+            },
           },
-        },
-      })
-    );
+        })
+      );
+    }
+  } catch (error) {
+    console.error("Failed to load Google provider:", error);
   }
 
   return {

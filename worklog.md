@@ -187,3 +187,48 @@ Stage Summary:
 - Sidebar duplicate key warnings fixed by using unique label-based keys
 - All test user passwords reset to 'password123'
 - Application now works end-to-end: home page → login → dashboard
+
+---
+Task ID: 2
+Agent: Main Agent
+Task: Fix Google Login admin settings not working ("admin setting kaj korche na")
+
+Work Log:
+- Diagnosed the issue: Google Login admin settings page was not working properly
+- Found missing NEXTAUTH_SECRET and NEXTAUTH_URL in .env file - added them
+- Added cache invalidation function (invalidateGoogleConfigCache) to auth.ts
+- Reduced Google config cache TTL from 30s to 5s for faster admin updates
+- Updated PUT /api/admin/google-login to call invalidateGoogleConfigCache() after saving
+- Fixed critical bug: When toggling Google Login back ON without re-entering clientId, the API rejected the request with "Google Client ID আবশ্যক"
+  - Root cause: Validation only checked the request body, not the existing DB value
+  - Fix: Now checks effectiveClientId = clientId?.trim() || existingClientId from DB
+  - Same fix applied for clientSecret validation (was already partially handled)
+- Cleaned up PUT handler: better error handling, non-critical admin log, clearer status computation
+- Removed masked secret from API response (more secure - client only sees clientSecretSet boolean)
+- Kept dynamic import for GoogleProvider (static import caused Turbopack compilation crashes)
+- Ran comprehensive end-to-end tests via curl:
+  - Login as admin: 200 ✓
+  - GET settings: 200 ✓ (returns enabled, clientId, clientSecretSet, redirectUrl, status)
+  - PUT save new credentials: 200 ✓ (status: active)
+  - PUT disable: 200 ✓ (status: disabled)
+  - PUT re-enable without credentials: 200 ✓ (status: active) - BUG FIXED
+  - POST test connection: 200 ✓ (success: true)
+  - Public google-status reflects changes immediately ✓
+  - Cache invalidation works ✓
+- Lint check: no errors
+
+Stage Summary:
+- Root causes of "admin setting not working":
+  1. Missing NEXTAUTH_URL → redirect URL was incomplete (no host)
+  2. No cache invalidation → settings changes took 30 seconds to take effect
+  3. Toggle bug → couldn't re-enable without re-entering all credentials
+- Key files modified:
+  - .env (added NEXTAUTH_SECRET, NEXTAUTH_URL)
+  - src/lib/auth.ts (added invalidateGoogleConfigCache export, reduced TTL to 5s)
+  - src/app/api/admin/google-login/route.ts (cache invalidation, fixed toggle bug, better validation)
+- All Google Login admin settings now work correctly:
+  - Load settings ✓
+  - Save new credentials ✓
+  - Toggle on/off without re-entering credentials ✓
+  - Test connection ✓
+  - Changes take effect immediately (cache invalidated) ✓
