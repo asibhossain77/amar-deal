@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Mail, Lock, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
-import GoogleSignInButton from './GoogleSignInButton';
 
 export default function LoginPage() {
   const { setUser, setPage, siteSettings } = useAppStore();
@@ -187,10 +186,6 @@ export default function LoginPage() {
                 )}
               </Button>
             </form>
-
-            {/* Google Login Divider + Button */}
-            <GoogleSignInButton />
-
 
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">

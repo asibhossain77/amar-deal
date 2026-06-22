@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { User, Mail, Lock, Phone, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
-import GoogleSignInButton from './GoogleSignInButton';
 
 export default function RegisterPage() {
   const { setUser, setPage, siteSettings } = useAppStore();
@@ -275,10 +274,6 @@ export default function RegisterPage() {
                 )}
               </Button>
             </form>
-
-            {/* Google Register Button */}
-            <GoogleSignInButton label="Google দিয়ে নিবন্ধন করুন" />
-
 
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">

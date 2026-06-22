@@ -27,7 +27,6 @@ import {
   Wallet,
   LifeBuoy,
   PlusCircle,
-  KeyRound,
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import type { PageName } from '@/lib/types';
@@ -126,7 +125,6 @@ const adminNavGroups: NavGroup[] = [
       { label: 'গেটওয়ে থিম', icon: Palette, page: 'admin-gateway-theme' },
       { label: 'কার্যক্রম লগ', icon: FileText, page: 'admin-logs' },
       { label: 'ওয়েবসাইট সেটিংস', icon: Settings, page: 'admin-settings' },
-      { label: 'Google লগইন', icon: KeyRound, page: 'admin-google-login' },
     ],
   },
 ];

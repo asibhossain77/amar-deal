@@ -51,8 +51,7 @@ export type PageName =
   | 'admin-gateway-payments'
   | 'admin-gateway-theme'
   | 'admin-kyc'
-  | 'admin-reviews'
-  | 'admin-google-login';
+  | 'admin-reviews';
 
 export interface AppUser {
   id: string;
@@ -68,8 +67,6 @@ export interface AppUser {
   isVerified?: boolean;
   verificationStatus?: VerificationStatus;
   createdAt: string;
-  // Google OAuth
-  isGoogleUser?: boolean;
   lastLogin?: string;
   // Reputation
   buyerRating?: number;

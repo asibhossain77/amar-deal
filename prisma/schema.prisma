@@ -22,10 +22,6 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  // Google OAuth fields
-  googleId      String?  @unique
-  googleEmail   String?
-  isGoogleUser  Boolean  @default(false)
   lastLogin     DateTime?
 
   // Reputation fields
