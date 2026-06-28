@@ -110,92 +110,94 @@ export default function AdminLogsPage() {
           </CardContent>
         </Card>
       ) : (
-        {/* Desktop Table */}
-        <Card className="card-modern hidden md:block">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              সর্বশেষ কার্যক্রম
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="max-h-[500px] overflow-y-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>প্রশাসক</TableHead>
-                    <TableHead>কার্যক্রম</TableHead>
-                    <TableHead>বিবরণ</TableHead>
-                    <TableHead>সময়</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {logs.map((log) => (
-                    <TableRow key={log.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10">
-                            <User className="h-3.5 w-3.5 text-primary" />
-                          </div>
-                          <span className="font-medium text-foreground">
-                            {log.user?.name || 'অজানা'}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getActionBadge(log.action)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-start gap-1.5 max-w-xs">
-                          <FileText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground truncate">
-                            {log.details}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <div className="text-foreground">{formatDate(log.createdAt)}</div>
-                          <div className="text-xs text-muted-foreground">{timeAgo(log.createdAt)}</div>
-                        </div>
-                      </TableCell>
+        <>
+          {/* Desktop Table */}
+          <Card className="card-modern hidden md:block">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                সর্বশেষ কার্যক্রম
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="max-h-[500px] overflow-y-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>প্রশাসক</TableHead>
+                      <TableHead>কার্যক্রম</TableHead>
+                      <TableHead>বিবরণ</TableHead>
+                      <TableHead>সময়</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {logs.map((log) => (
+                      <TableRow key={log.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10">
+                              <User className="h-3.5 w-3.5 text-primary" />
+                            </div>
+                            <span className="font-medium text-foreground">
+                              {log.user?.name || 'অজানা'}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{getActionBadge(log.action)}</TableCell>
+                        <TableCell>
+                          <div className="flex items-start gap-1.5 max-w-xs">
+                            <FileText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground truncate">
+                              {log.details}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div className="text-foreground">{formatDate(log.createdAt)}</div>
+                            <div className="text-xs text-muted-foreground">{timeAgo(log.createdAt)}</div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Mobile Cards */}
-        <div className="md:hidden space-y-3">
-          <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5 px-1">
-            <Clock className="h-3.5 w-3.5" />
-            সর্বশেষ কার্যক্রম
-          </p>
-          {logs.map((log) => (
-            <Card key={log.id} className="card-modern">
-              <CardContent className="p-4 space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
-                      <User className="h-3.5 w-3.5 text-primary" />
+          {/* Mobile Cards */}
+          <div className="md:hidden space-y-3">
+            <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5 px-1">
+              <Clock className="h-3.5 w-3.5" />
+              সর্বশেষ কার্যক্রম
+            </p>
+            {logs.map((log) => (
+              <Card key={log.id} className="card-modern">
+                <CardContent className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                        <User className="h-3.5 w-3.5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{log.user?.name || 'অজানা'}</p>
+                        <p className="text-xs text-muted-foreground">{timeAgo(log.createdAt)}</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{log.user?.name || 'অজানা'}</p>
-                      <p className="text-xs text-muted-foreground">{timeAgo(log.createdAt)}</p>
+                    <div className="shrink-0">
+                      {getActionBadge(log.action)}
                     </div>
                   </div>
-                  <div className="shrink-0">
-                    {getActionBadge(log.action)}
+                  <div className="flex items-start gap-1.5">
+                    <FileText className="mt-0.5 h-3 w-3 shrink-0 text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground line-clamp-2">{log.details}</p>
                   </div>
-                </div>
-                <div className="flex items-start gap-1.5">
-                  <FileText className="mt-0.5 h-3 w-3 shrink-0 text-muted-foreground" />
-                  <p className="text-xs text-muted-foreground line-clamp-2">{log.details}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
