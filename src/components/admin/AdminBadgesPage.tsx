@@ -584,7 +584,7 @@ export default function AdminBadgesPage() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
+        <TabsList className="w-full overflow-x-auto">
           <TabsTrigger value="overview" className="gap-1.5">
             <Award className="h-4 w-4" />
             ব্যাজ ওভারভিউ

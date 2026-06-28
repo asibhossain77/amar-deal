@@ -88,7 +88,7 @@ export default function AdminDisputesPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className="w-full overflow-x-auto">
           <TabsTrigger value="open">খোলা</TabsTrigger>
           <TabsTrigger value="under_review">পর্যালোচনাধীন</TabsTrigger>
           <TabsTrigger value="resolved_buyer">সমাধিত</TabsTrigger>

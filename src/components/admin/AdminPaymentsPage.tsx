@@ -144,7 +144,7 @@ export default function AdminPaymentsPage() {
 
       {/* Tabs & Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className="w-full overflow-x-auto">
           <TabsTrigger value="pending">অপেক্ষমাণ</TabsTrigger>
           <TabsTrigger value="approved">অনুমোদিত</TabsTrigger>
           <TabsTrigger value="rejected">প্রত্যাখ্যাত</TabsTrigger>

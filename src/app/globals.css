@@ -220,3 +220,13 @@
   outline-offset: 2px;
   border-radius: var(--radius);
 }
+
+/* ─── Safe Table Overflow (Mobile) ────────────────────── */
+@layer base {
+  table {
+    display: table;
+    width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}

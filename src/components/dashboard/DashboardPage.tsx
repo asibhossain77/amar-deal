@@ -151,15 +151,15 @@ export default function DashboardPage() {
           : statCards.map((stat) => {
               const Icon = stat.icon;
               return (
-                <Card key={stat.title} className={`card-modern border ${stat.borderColor}`}>
+                <Card key={stat.title} className={`card-modern border ${stat.borderColor} min-w-0`}>
                   <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`flex items-center justify-center h-10 w-10 rounded-lg ${stat.bgColor}`}>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`flex items-center justify-center h-10 w-10 rounded-lg shrink-0 ${stat.bgColor}`}>
                         <Icon className={`h-5 w-5 ${stat.color}`} />
                       </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground font-medium">{stat.title}</p>
-                        <p className="text-xl font-bold text-foreground">{stat.value}</p>
+                      <div className="min-w-0">
+                        <p className="text-xs text-muted-foreground font-medium truncate">{stat.title}</p>
+                        <p className="text-lg sm:text-xl font-bold text-foreground">{stat.value}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -210,7 +210,8 @@ export default function DashboardPage() {
               </Button>
             </div>
           ) : (
-            <Table>
+            <div className="overflow-x-auto -mx-6 px-6">
+            <Table className="min-w-[500px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>শিরোনাম</TableHead>
@@ -273,6 +274,7 @@ export default function DashboardPage() {
                 ))}
               </TableBody>
             </Table>
+            </div>
           )}
         </CardContent>
       </Card>

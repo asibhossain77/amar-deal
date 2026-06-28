@@ -515,7 +515,7 @@ export default function AdminSubscriptionsPage() {
       />
 
       <Tabs defaultValue="plans" className="space-y-4">
-        <TabsList>
+        <TabsList className="w-full overflow-x-auto">
           <TabsTrigger value="plans" className="gap-1.5">
             <Crown className="h-4 w-4" />
             প্ল্যান ব্যবস্থাপনা

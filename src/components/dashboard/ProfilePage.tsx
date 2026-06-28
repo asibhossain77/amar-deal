@@ -127,7 +127,7 @@ export default function ProfilePage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="আপনার নাম লিখুন"
-              className="max-w-md"
+              className="w-full max-w-md"
             />
           </div>
 
@@ -143,7 +143,7 @@ export default function ProfilePage() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="আপনার ফোন নম্বর লিখুন"
-              className="max-w-md"
+              className="w-full max-w-md"
             />
           </div>
 

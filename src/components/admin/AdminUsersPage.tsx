@@ -137,82 +137,150 @@ export default function AdminUsersPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card className="card-modern">
-          <CardHeader>
-            <CardTitle className="text-base">
-              মোট ব্যবহারকারী: {filteredUsers.length}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="max-h-[500px] overflow-y-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>নাম</TableHead>
-                    <TableHead>ইমেইল</TableHead>
-                    <TableHead>ভূমিকা</TableHead>
-                    <TableHead>অবস্থা</TableHead>
-                    <TableHead>নিবন্ধন তারিখ</TableHead>
-                    <TableHead>প্রোফাইল</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.name}</TableCell>
-                      <TableCell className="text-muted-foreground">{user.email}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={user.role === 'admin' ? 'default' : 'secondary'}
-                          className={user.role === 'admin' ? 'bg-primary' : ''}
-                        >
-                          {user.role === 'admin' ? 'প্রশাসক' : 'ব্যবহারকারী'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={user.isActive}
-                            onCheckedChange={() => handleToggleStatus(user)}
-                            disabled={togglingId === user.id}
-                          />
-                          <Badge
-                            variant="outline"
-                            className={
-                              user.isActive
-                                ? 'border-green-300 bg-green-50 text-green-700'
-                                : 'border-red-300 bg-red-50 text-red-700'
-                            }
-                          >
-                            {user.isActive ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
-                          </Badge>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {formatDate(user.createdAt)}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="gap-1 text-primary hover:bg-primary/10"
-                          onClick={() => {
-                            setSelectedUserId(user.id);
-                            setPage('public-profile');
-                          }}
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                          দেখুন
-                        </Button>
-                      </TableCell>
+        <>
+          {/* Desktop Table */}
+          <Card className="card-modern hidden md:block">
+            <CardHeader>
+              <CardTitle className="text-base">
+                মোট ব্যবহারকারী: {filteredUsers.length}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="max-h-[500px] overflow-y-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>নাম</TableHead>
+                      <TableHead>ইমেইল</TableHead>
+                      <TableHead>ভূমিকা</TableHead>
+                      <TableHead>অবস্থা</TableHead>
+                      <TableHead>নিবন্ধন তারিখ</TableHead>
+                      <TableHead>প্রোফাইল</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">{user.name}</TableCell>
+                        <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={user.role === 'admin' ? 'default' : 'secondary'}
+                            className={user.role === 'admin' ? 'bg-primary' : ''}
+                          >
+                            {user.role === 'admin' ? 'প্রশাসক' : 'ব্যবহারকারী'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={user.isActive}
+                              onCheckedChange={() => handleToggleStatus(user)}
+                              disabled={togglingId === user.id}
+                            />
+                            <Badge
+                              variant="outline"
+                              className={
+                                user.isActive
+                                  ? 'border-green-300 bg-green-50 text-green-700'
+                                  : 'border-red-300 bg-red-50 text-red-700'
+                              }
+                            >
+                              {user.isActive ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
+                            </Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDate(user.createdAt)}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-1 text-primary hover:bg-primary/10"
+                            onClick={() => {
+                              setSelectedUserId(user.id);
+                              setPage('public-profile');
+                            }}
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                            দেখুন
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden space-y-3">
+            <p className="text-sm text-muted-foreground px-1">
+              মোট ব্যবহারকারী: {filteredUsers.length}
+            </p>
+            {filteredUsers.map((userItem) => (
+              <Card key={userItem.id} className="card-modern">
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold shrink-0">
+                        {userItem.name.charAt(0)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm text-foreground truncate">{userItem.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{userItem.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Badge
+                        variant={userItem.role === 'admin' ? 'default' : 'secondary'}
+                        className={userItem.role === 'admin' ? 'bg-primary text-[10px]' : 'text-[10px]'}
+                      >
+                        {userItem.role === 'admin' ? 'প্রশাসক' : 'ব্যবহারকারী'}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={userItem.isActive}
+                        onCheckedChange={() => handleToggleStatus(userItem)}
+                        disabled={togglingId === userItem.id}
+                      />
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] ${
+                          userItem.isActive
+                            ? 'border-green-300 bg-green-50 text-green-700'
+                            : 'border-red-300 bg-red-50 text-red-700'
+                        }`}
+                      >
+                        {userItem.isActive ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">{formatDate(userItem.createdAt)}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-primary hover:bg-primary/10"
+                        onClick={() => {
+                          setSelectedUserId(userItem.id);
+                          setPage('public-profile');
+                        }}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )
     </div>
   );
 }
