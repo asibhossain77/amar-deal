@@ -79,7 +79,10 @@ export const api = {
   },
 
   // Transactions
-  getTransactions: () => fetchAPI('/transactions'),
+  getTransactions: (params?: { page?: number; limit?: number; status?: string }) => {
+    const query = params ? `?${new URLSearchParams(Object.entries(params).filter(([_, v]) => v !== undefined).map(([k, v]) => [k, String(v)])).toString()}` : '';
+    return fetchAPI(`/transactions${query}`);
+  },
   getTransaction: (id: string) => fetchAPI(`/transactions/${id}`),
   createTransaction: (data: { title: string; description: string; amount: number; buyerId?: string; sellerId?: string; terms: string; counterpartyEmail?: string; userRole?: string }) => 
     fetchAPI('/transactions', { method: 'POST', body: JSON.stringify(data) }),

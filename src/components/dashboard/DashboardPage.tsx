@@ -90,7 +90,7 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      title: 'মোট লেনদেন',
+      title: 'মোট ডিল',
       value: stats.total,
       icon: ArrowLeftRight,
       color: 'text-primary dark:text-primary',
@@ -98,7 +98,7 @@ export default function DashboardPage() {
       borderColor: 'border-primary/20 dark:border-primary/25',
     },
     {
-      title: 'চলমান লেনদেন',
+      title: 'চলমান ডিল',
       value: stats.active,
       icon: Clock,
       color: 'text-amber-600 dark:text-amber-400',
@@ -106,7 +106,7 @@ export default function DashboardPage() {
       borderColor: 'border-amber-100 dark:border-amber-800/40',
     },
     {
-      title: 'সম্পন্ন লেনদেন',
+      title: 'সম্পন্ন ডিল',
       value: stats.completed,
       icon: CheckCircle,
       color: 'text-green-600 dark:text-green-400',
@@ -114,7 +114,7 @@ export default function DashboardPage() {
       borderColor: 'border-green-100 dark:border-green-800/40',
     },
     {
-      title: 'বিরোধিত লেনদেন',
+      title: 'বিরোধিত ডিল',
       value: stats.disputed,
       icon: AlertTriangle,
       color: 'text-red-600 dark:text-red-400',
@@ -172,7 +172,7 @@ export default function DashboardPage() {
       <Card className="card-modern">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-semibold">সাম্প্রতিক লেনদেন</CardTitle>
+            <CardTitle className="text-base font-semibold">আমার ডিলসমূহ</CardTitle>
             <Button
               variant="ghost"
               size="sm"
@@ -199,14 +199,15 @@ export default function DashboardPage() {
           ) : recentTransactions.length === 0 ? (
             <div className="text-center py-8">
               <ArrowLeftRight className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">কোনো লেনদেন নেই</p>
+              <p className="text-sm text-muted-foreground mb-1">কোনো ডিল নেই</p>
+              <p className="text-xs text-muted-foreground">এখনো কোনো লেনদেন তৈরি হয়নি</p>
               <Button
                 variant="outline"
                 size="sm"
                 className="mt-3"
                 onClick={() => setPage('create-transaction')}
               >
-                নতুন লেনদেন তৈরি করুন
+                নতুন ডিল তৈরি করুন
               </Button>
             </div>
           ) : (

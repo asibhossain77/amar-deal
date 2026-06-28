@@ -100,7 +100,7 @@ const adminNavGroups: NavGroup[] = [
     title: 'প্রশাসন',
     items: [
       { label: 'ড্যাশবোর্ড', icon: LayoutDashboard, page: 'admin-dashboard' },
-      { label: 'ডিল ম্যানেজমেন্ট', icon: ArrowLeftRight, page: 'admin-transactions' },
+      { label: 'সকল এসক্রো ডিল', icon: ArrowLeftRight, page: 'admin-escrow-deals' },
       { label: 'লেনদেন', icon: CreditCard, page: 'admin-gateway-payments' },
       { label: 'ব্যবহারকারী', icon: Users, page: 'admin-users' },
     ],

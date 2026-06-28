@@ -29,6 +29,7 @@ import AdminGatewayPaymentsPage from '@/components/admin/AdminGatewayPaymentsPag
 import AdminGatewayThemePage from '@/components/admin/AdminGatewayThemePage';
 import AdminKYCPage from '@/components/admin/AdminKYCPage';
 import AdminReviewsPage from '@/components/admin/AdminReviewsPage';
+import AdminEscrowDealsPage from '@/components/admin/AdminEscrowDealsPage';
 import AccountSettingsPage from '@/components/account/AccountSettingsPage';
 import PublicProfilePage from '@/components/profile/PublicProfilePage';
 import AboutPage from '@/components/pages/AboutPage';
@@ -220,7 +221,11 @@ function DashboardRouter() {
     case 'admin-users':
       return <ErrorBoundary><AdminUsersPage /></ErrorBoundary>;
     case 'admin-transactions':
-      return <ErrorBoundary><TransactionsPage /></ErrorBoundary>;
+      return <ErrorBoundary><AdminEscrowDealsPage /></ErrorBoundary>;
+    case 'admin-escrow-deals':
+      return <ErrorBoundary><AdminEscrowDealsPage /></ErrorBoundary>;
+    case 'admin-deal-detail':
+      return <ErrorBoundary><TransactionDetailPage /></ErrorBoundary>;
     case 'admin-payments':
       return <ErrorBoundary><AdminPaymentsPage /></ErrorBoundary>;
     case 'admin-disputes':

@@ -157,13 +157,13 @@ export default function TransactionsPage() {
     <div className="page-container space-y-6">
       {/* Header */}
       <PageHeader
-        title="লেনদেনসমূহ"
-        subtitle="আপনার সকল লেনদেন দেখুন ও পরিচালনা করুন"
+        title="ডিলসমূহ"
+        subtitle="আপনার সকল এসক্রো ডিল দেখুন ও পরিচালনা করুন"
         icon={<FileText className="h-5 w-5 text-primary" />}
         actions={
           <Button onClick={handleCreateClick} className="gap-2">
             <Plus className="h-4 w-4" />
-            নতুন লেনদেন
+            নতুন ডিল
           </Button>
         }
       />
@@ -192,7 +192,7 @@ export default function TransactionsPage() {
                   </p>
                   <Button onClick={handleCreateClick} variant="outline" className="mt-4 gap-2">
                     <Plus className="h-4 w-4" />
-                    নতুন লেনদেন তৈরি করুন
+                    নতুন ডিল তৈরি করুন
                   </Button>
                 </CardContent>
               </Card>
@@ -280,15 +280,22 @@ export default function TransactionsPage() {
                     >
                       <CardContent className="p-4 space-y-3">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-medium text-sm leading-tight line-clamp-2">
+                          <h3 className="font-medium text-sm leading-tight line-clamp-2 flex-1">
                             {transaction.title}
                           </h3>
-                          <Badge
-                            variant="outline"
-                            className={`${transactionStatusColors[transaction.status]} shrink-0 text-[11px]`}
-                          >
-                            {transactionStatusLabels[transaction.status]}
-                          </Badge>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {user && (
+                              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 border-0">
+                                {transaction.buyerId === user.id ? 'ক্রেতা' : 'বিক্রেতা'}
+                              </Badge>
+                            )}
+                            <Badge
+                              variant="outline"
+                              className={`${transactionStatusColors[transaction.status]} shrink-0 text-[11px]`}
+                            >
+                              {transactionStatusLabels[transaction.status]}
+                            </Badge>
+                          </div>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-primary">

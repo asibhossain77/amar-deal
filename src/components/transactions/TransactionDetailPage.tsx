@@ -227,19 +227,19 @@ export default function TransactionDetailPage() {
   return (
     <div className="page-container space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => setPage('transactions')}>
-            <ArrowLeft className="h-5 w-5" />
+      <div className="flex items-start sm:items-center justify-between gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <Button variant="ghost" size="icon" onClick={() => setPage('transactions')} className="shrink-0 h-9 w-9">
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">লেনদেনের বিবরণ</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">{transaction.title}</p>
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold text-foreground truncate">লেনদেনের বিবরণ</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate">{transaction.title}</p>
           </div>
         </div>
         <Badge
           variant="outline"
-          className={`${transactionStatusColors[transaction.status]} text-sm px-3 py-1`}
+          className={`${transactionStatusColors[transaction.status]} text-xs sm:text-sm px-2 sm:px-3 py-0.5 sm:py-1 shrink-0 whitespace-nowrap`}
         >
           {transactionStatusLabels[transaction.status]}
         </Badge>
@@ -256,8 +256,8 @@ export default function TransactionDetailPage() {
         <CardContent className="space-y-4">
           {/* Title & Amount */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <h3 className="text-lg font-semibold">{transaction.title}</h3>
-            <span className="text-2xl font-bold text-primary">
+            <h3 className="text-base sm:text-lg font-semibold leading-snug">{transaction.title}</h3>
+            <span className="text-xl sm:text-2xl font-bold text-primary">
               {formatBDT(transaction.amount)}
             </span>
           </div>
@@ -516,6 +516,9 @@ export default function TransactionDetailPage() {
                 প্রশাসক হিসেবে আপনি এই লেনদেনের অবস্থা পরিবর্তন করতে পারেন।
               </p>
               <div className="flex flex-wrap gap-2">
+                <p className="text-sm text-muted-foreground w-full mb-1">
+                  বর্তমান: <strong className="text-foreground">{transactionStatusLabels[transaction.status]}</strong>
+                </p>
                 {statusTimeline
                   .filter((s) => s !== transaction.status)
                   .map((status) => (
@@ -576,10 +579,10 @@ export default function TransactionDetailPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-3">
               {/* Buyer: Submit Payment */}
               {transaction.status === 'pending_payment' && isBuyer && (
-                <Button onClick={handlePaymentSubmit} disabled={updating} className="gap-2">
+                <Button onClick={handlePaymentSubmit} disabled={updating} className="w-full sm:w-auto h-11 sm:h-auto gap-2">
                   <CreditCard className="h-4 w-4" />
                   পেমেন্ট জমা দিন
                 </Button>
@@ -589,7 +592,7 @@ export default function TransactionDetailPage() {
               {transaction.status === 'pending_payment' && (isBuyer || isSeller) && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive" disabled={updating} className="gap-2">
+                    <Button variant="destructive" disabled={updating} className="w-full sm:w-auto h-11 sm:h-auto gap-2">
                       বাতিল করুন
                     </Button>
                   </AlertDialogTrigger>
@@ -618,7 +621,7 @@ export default function TransactionDetailPage() {
                 <Button
                   onClick={() => handleStatusUpdate('work_in_progress')}
                   disabled={updating}
-                  className="gap-2"
+                  className="w-full sm:w-auto h-11 sm:h-auto gap-2"
                 >
                   {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronRight className="h-4 w-4" />}
                   কাজ শুরু করুন
@@ -630,7 +633,7 @@ export default function TransactionDetailPage() {
                 <Button
                   onClick={() => handleStatusUpdate('delivered')}
                   disabled={updating}
-                  className="gap-2"
+                  className="w-full sm:w-auto h-11 sm:h-auto gap-2"
                 >
                   {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                   কাজ সম্পন্ন
@@ -642,7 +645,7 @@ export default function TransactionDetailPage() {
                 <Button
                   onClick={() => handleStatusUpdate('completed')}
                   disabled={updating}
-                  className="gap-2"
+                  className="w-full sm:w-auto h-11 sm:h-auto gap-2"
                 >
                   {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                   লেনদেন সম্পন্ন করুন
@@ -653,7 +656,7 @@ export default function TransactionDetailPage() {
               {['paid', 'work_in_progress', 'delivered'].includes(transaction.status) && isBuyer && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="outline" disabled={updating} className="gap-2 text-destructive border-destructive hover:bg-destructive/10">
+                    <Button variant="outline" disabled={updating} className="w-full sm:w-auto h-11 sm:h-auto gap-2 text-destructive border-destructive hover:bg-destructive/10">
                       <AlertTriangle className="h-4 w-4" />
                       বিরোধ খুলুন
                     </Button>

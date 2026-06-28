@@ -43,6 +43,8 @@ export type PageName =
   | 'admin-dashboard'
   | 'admin-users'
   | 'admin-transactions'
+  | 'admin-escrow-deals'
+  | 'admin-deal-detail'
   | 'admin-payments'
   | 'admin-disputes'
   | 'admin-logs'
